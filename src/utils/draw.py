@@ -1,8 +1,9 @@
 import cv2
 import numpy as np
+import torch
 
 
-def draw_pred(imgs: np.ndarray, predictions: np.ndarray, labels: np.ndarray):
+def draw_pred(imgs: torch.Tensor, predictions: torch.Tensor, labels: torch.Tensor) -> np.ndarray:
     """
     Draw predictions and labels on the image to help with TensorBoard visualisation.
     Args:
@@ -11,6 +12,12 @@ def draw_pred(imgs: np.ndarray, predictions: np.ndarray, labels: np.ndarray):
         labels: Labels corresponding to the images
     Returns: images with information written on them
     """
+    imgs: np.ndarray = imgs.cpu().detach().numpy()
+    labels: np.ndarray = labels.cpu().detach().numpy()
+    predictions: np.ndarray = predictions.cpu().detach().numpy()
+
+    imgs = imgs.transpose(0, 2, 3, 1)  # Conversion to H x W x C
+
     new_imgs = []
     for img, preds, label in zip(imgs, predictions, labels):
         img = np.asarray(img * 255.0, dtype=np.uint8)

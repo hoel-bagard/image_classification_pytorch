@@ -22,16 +22,20 @@ class Dataset(torch.utils.data.Dataset):
 
         # Build a map between id and names
         self.label_map = {}
-        with open(os.path.join("class.names")) as table_file:
+        with open(os.path.join(data_path, "..", "class.names")) as table_file:
             for key, line in enumerate(table_file):
                 label = line.strip()
                 self.label_map[key] = label
 
         labels = []
         for key in range(len(self.label_map)):
-            for image_path in glob.glob(os.path.join(data_path, self.label_map[key], "*.jpg")):
+            i = 0
+            for image_path in glob.glob(os.path.join(data_path, f"{self.label_map[key]}*.jpg")):
                 print(f"Loading data {image_path}   ", end="\r")
                 labels.append([image_path, key])
+                i += 1
+                if i > 500:
+                    break
 
         self.labels = np.asarray(labels)
 
@@ -44,7 +48,7 @@ class Dataset(torch.utils.data.Dataset):
 
         img = cv2.imread(self.labels[i, 0])
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        label = self.labels[i, 1].astype(np.unit8)
+        label = self.labels[i, 1].astype(np.uint8)
         sample = {'img': img, 'label': label}
 
         if self.transform:

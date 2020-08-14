@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 import torch
 
 
@@ -34,4 +35,4 @@ class ToTensor(object):
 
         img = img.transpose((2, 0, 1))
         return {'img': torch.from_numpy(img),
-                'label': torch.from_numpy(label)}
+                'label': torch.from_numpy(np.asarray(label))}

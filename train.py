@@ -16,7 +16,7 @@ from src.dataset.transforms import (
     Normalize,
     ToTensor
 )
-from src.networks.auto_encoder import AutoEncoder
+from src.networks.small_darknet import SmallDarknet
 from src.train import train
 
 
@@ -61,6 +61,8 @@ def main():
     train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=ModelConfig.BATCH_SIZE,
                                                    shuffle=True, num_workers=8)
 
+    print("Train data loaded" + ' ' * (os.get_terminal_size()[0] - 17))
+
     val_dataset = Dataset(os.path.join(DataConfig.DATA_PATH, "Validation"),
                           transform=torchvision.transforms.Compose([
                               Resize(ModelConfig.IMAGE_SIZE),
@@ -69,13 +71,15 @@ def main():
                           ]))
     val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size=ModelConfig.BATCH_SIZE,
                                                  shuffle=False, num_workers=8)
-    print(f"Loaded {len(train_dataloader.dataset)} train data and",
+    print("Validation data loaded" + ' ' * (os.get_terminal_size()[0] - 22))
+
+    print(f"\nLoaded {len(train_dataloader.dataset)} train data and",
           f"{len(val_dataloader.dataset)} validation data", flush=True)
 
-    model = AutoEncoder()
+    model = SmallDarknet()
     model = model.float()
     model.to(device)
-    summary(model, (3, ModelConfig.SIZE, ModelConfig.SIZE))
+    summary(model, (3, ModelConfig.IMAGE_SIZE, ModelConfig.IMAGE_SIZE))
 
     train(model, train_dataloader, val_dataloader)
 

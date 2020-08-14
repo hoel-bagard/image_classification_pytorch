@@ -10,4 +10,5 @@ class ModelConfig:
 
     # Network part
     CHANNELS   = [16, 32, 64, 128, 256]
+    NB_BLOCKS  = [1, 2, 4, 2, 2]
     IMAGE_SIZE = 256           # All images will be resized to this size

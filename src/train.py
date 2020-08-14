@@ -5,6 +5,7 @@ import torch
 import torch.nn as nn
 from torch.utils.tensorboard import SummaryWriter
 from torch.optim.lr_scheduler import ExponentialLR
+import numpy as np
 
 from config.model_config import ModelConfig
 from config.data_config import DataConfig
@@ -51,21 +52,22 @@ def train(model: nn.Module, train_dataloader: torch.utils.data.DataLoader, val_d
             if DataConfig.USE_TB:
                 tb_writer.add_scalar('Validation loss', epoch_loss, epoch)
 
-                # Metrics for the Train dataset
-                batch = next(iter(train_dataloader)).float()[:4]
-                in_imgs, labels = batch["img"], batch["label"]
-                predictions = model(in_imgs.to(device)).cpu().detach().numpy()
-                out_imgs = draw_pred(in_imgs, predictions, labels)
-                for image_index, out_img in enumerate(out_imgs):
-                    tb_writer.add_image(f"Train/prediction_{image_index}", out_img, global_step=epoch)
+                # # Metrics for the Train dataset
+                # batch = next(iter(train_dataloader))
+                # in_imgs, labels = batch["img"][:4].float(), batch["label"][:4].float()
+                # predictions = model(in_imgs.to(device)).cpu().detach().numpy()
+                # out_imgs = draw_pred(in_imgs, predictions, labels)
+                # for image_index, out_img in enumerate(out_imgs):
+                #     tb_writer.add_image(f"Train/prediction_{image_index}", out_img, global_step=epoch)
 
                 # Metrics for the Validation dataset
-                batch = next(iter(train_dataloader)).float()[:4]
-                in_imgs, labels = batch["img"], batch["label"]
-                predictions = model(in_imgs.to(device)).cpu().detach().numpy()
+                batch = next(iter(val_dataloader))
+                in_imgs, labels = batch["img"][:4].float(), batch["label"][:4]
+                predictions = model(in_imgs.to(device))
                 out_imgs = draw_pred(in_imgs, predictions, labels)
                 for image_index, out_img in enumerate(out_imgs):
-                    tb_writer.add_image(f"Train/prediction_{image_index}", out_img, global_step=epoch)
+                    out_img = np.transpose(out_img, (2, 0, 1))  # HWC -> CHW
+                    tb_writer.add_image(f"Validation/prediction_{image_index}", out_img, global_step=epoch)
 
             print(f"\nValidation loss: {epoch_loss:.5e}  -  Took {time.time() - validation_start_time:.5f}s", flush=1)
         scheduler.step()

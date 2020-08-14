@@ -21,14 +21,11 @@ class Trainer:
         self.train_steps_per_epoch = (len(train_dataloader.dataset) + (batch_size - 1)) // batch_size
         self.val_steps_per_epoch = (len(val_dataloader.dataset) + (batch_size - 1)) // batch_size
 
-
-        print(f"Type of the loss fn in trainer: {type(loss_fn)}")
-
     def train_epoch(self):
         epoch_loss = 0.0
         for step, batch in enumerate(self.train_dataloader, start=1):
             step_start_time = time.time()
-            inputs, labels = batch["img"].to(self.device).float(), batch["label"].to(self.device).float()
+            inputs, labels = batch["img"].to(self.device).float(), batch["label"].to(self.device).long()
 
             # zero the parameter gradients
             self.optimizer.zero_grad()
@@ -51,7 +48,7 @@ class Trainer:
         epoch_loss = 0.0
         for step, batch in enumerate(self.val_dataloader, start=1):
             step_start_time = time.time()
-            inputs, labels = batch["img"].to(self.device).float(), batch["label"].to(self.device).float()
+            inputs, labels = batch["img"].to(self.device).float(), batch["label"].to(self.device).long()
 
             outputs = self.model(inputs)
             loss = self.loss_fn(outputs, labels)
