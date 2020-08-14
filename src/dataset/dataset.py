@@ -29,13 +29,9 @@ class Dataset(torch.utils.data.Dataset):
 
         labels = []
         for key in range(len(self.label_map)):
-            i = 0
             for image_path in glob.glob(os.path.join(data_path, f"{self.label_map[key]}*.jpg")):
                 print(f"Loading data {image_path}   ", end="\r")
                 labels.append([image_path, key])
-                i += 1
-                if i > 500:
-                    break
 
         self.labels = np.asarray(labels)
 
