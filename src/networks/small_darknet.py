@@ -34,6 +34,5 @@ class SmallDarknet(nn.Module):
         for block in self.blocks:
             x = block(x)
         x = self.last_conv(x)
-        x = torch.nn.functional.softmax(x)
         x = torch.flatten(x, start_dim=1)
         return x

@@ -70,7 +70,7 @@ def main():
                               ToTensor()
                           ]))
     val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size=ModelConfig.BATCH_SIZE,
-                                                 shuffle=False, num_workers=8)
+                                                 shuffle=True, num_workers=8)
     print("Validation data loaded" + ' ' * (os.get_terminal_size()[0] - 22))
 
     print(f"\nLoaded {len(train_dataloader.dataset)} train data and",

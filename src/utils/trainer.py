@@ -25,10 +25,10 @@ class Trainer:
         epoch_loss = 0.0
         for step, batch in enumerate(self.train_dataloader, start=1):
             step_start_time = time.time()
-            inputs, labels = batch["img"].to(self.device).float(), batch["label"].to(self.device).long()
-
             # zero the parameter gradients
             self.optimizer.zero_grad()
+
+            inputs, labels = batch["img"].to(self.device).float(), batch["label"].to(self.device).long()
 
             # forward + backward + optimize
             outputs = self.model(inputs)
