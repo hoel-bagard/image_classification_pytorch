@@ -1,9 +1,10 @@
 import os
-import glob
 
 import torch
 import cv2
 import numpy as np
+
+from src.dataset.dataset_utils import top_secret
 
 
 class Dataset(torch.utils.data.Dataset):
@@ -22,18 +23,12 @@ class Dataset(torch.utils.data.Dataset):
 
         # Build a map between id and names
         self.label_map = {}
-        with open(os.path.join(data_path, "..", "class.names")) as table_file:
+        with open(os.path.join(data_path, "..", "classes.names")) as table_file:
             for key, line in enumerate(table_file):
                 label = line.strip()
                 self.label_map[key] = label
 
-        labels = []
-        for key in range(len(self.label_map)):
-            for image_path in glob.glob(os.path.join(data_path, f"{self.label_map[key]}*.jpg")):
-                print(f"Loading data {image_path}   ", end="\r")
-                labels.append([image_path, key])
-
-        self.labels = np.asarray(labels)
+        self.labels = top_secret(data_path, self.label_map)
 
     def __len__(self):
         return len(self.labels)

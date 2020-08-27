@@ -17,6 +17,7 @@ from src.dataset.transforms import (
     ToTensor
 )
 from src.networks.small_darknet import SmallDarknet
+from src.networks.wide_net import WideNet
 from src.train import train
 
 
@@ -76,7 +77,10 @@ def main():
     print(f"\nLoaded {len(train_dataloader.dataset)} train data and",
           f"{len(val_dataloader.dataset)} validation data", flush=True)
 
-    model = SmallDarknet()
+    if ModelConfig.NETWORK == "SmallDarknet":
+        model = SmallDarknet()
+    elif ModelConfig.NETWORK == "WideNet":
+        model = WideNet()
     model = model.float()
     model.to(device)
     summary(model, (3, ModelConfig.IMAGE_SIZE, ModelConfig.IMAGE_SIZE))
