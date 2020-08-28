@@ -8,11 +8,14 @@ from config.model_config import ModelConfig
 
 
 def get_cnn_output_size():
-    width = ModelConfig.IMAGE_SIZE
+    width, height = ModelConfig.IMAGE_SIZES
     for kernel_size, stride in zip(ModelConfig.SIZES, ModelConfig.STRIDES):
         width = ((width - kernel_size) // stride) + 1
 
-    return width*width*ModelConfig.CHANNELS[-1]
+    for kernel_size, stride in zip(ModelConfig.SIZES, ModelConfig.STRIDES):
+        height = ((height - kernel_size) // stride) + 1
+
+    return width*height*ModelConfig.CHANNELS[-1]
 
 
 class WideNet(nn.Module):

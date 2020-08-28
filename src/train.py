@@ -20,7 +20,7 @@ def train(model: nn.Module, train_dataloader: torch.utils.data.DataLoader, val_d
     trainer = Trainer(model, loss_fn, train_dataloader, val_dataloader)
     scheduler = ExponentialLR(trainer.optimizer, gamma=ModelConfig.LR_DECAY)
     tb_writer = SummaryWriter(DataConfig.TB_DIR)
-    tb_writer.add_graph(model, (torch.empty(1, 3, ModelConfig.IMAGE_SIZE, ModelConfig.IMAGE_SIZE, device=device), ))
+    tb_writer.add_graph(model, (torch.empty(1, 3, ModelConfig.IMAGE_SIZES[0], ModelConfig.IMAGE_SIZES[1], device=device), ))
     tb_writer.flush()
 
     best_loss = 1000

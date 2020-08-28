@@ -14,22 +14,16 @@ def main():
     os.makedirs(val_path, exist_ok=True)
 
     img_index: int = 0
-    file_list = glob.glob(os.path.join(args.data_path, "**", "*.bmp"), recursive=True)  # top secret project
+    file_list = glob.glob(os.path.join(args.data_path, "**", "*.jpg"), recursive=True)
     nb_imgs = len(file_list)
     shuffle(file_list)  # Too lazy to split each class individually
     for i, file_path in enumerate(file_list):
         print(f"Processing image {os.path.basename(file_path)} ({i+1}/{nb_imgs})", end='\r')
         if i >= 0.9*nb_imgs:
             # dogs-vs-cats (I think)
-            # new_nb = str(img_index).zfill(5)
-            # new_name = f"{new_nb}.jpg"
-            # shutil.move(file_path, os.path.join(val_path, new_name))
-
-            # top secret project
-            subpath = os.path.join(*os.path.normpath(file_path).split(os.sep)[-4:])
-            dest_path = os.path.join(val_path, subpath)
-            os.makedirs(os.path.dirname(dest_path), exist_ok=True)
-            shutil.move(file_path, dest_path)
+            new_nb = str(img_index).zfill(5)
+            new_name = f"{new_nb}.jpg"
+            shutil.move(file_path, os.path.join(val_path, new_name))
             img_index += 1
     print("\nFinished splitting dataset")
 
