@@ -6,12 +6,13 @@ import torch
 class Resize(object):
     """ Resize the image in a sample to a given size. """
 
-    def __init__(self, output_size: int):
-        self.output_size = output_size
+    def __init__(self, width: int, height: int):
+        self.width = width
+        self.height = height
 
     def __call__(self, sample):
         img, label = sample['img'], sample['label']
-        img = cv2.resize(img, (self.output_size, self.output_size))
+        img = cv2.resize(img, (self.width, self.height))
         return {'img': img, 'label': label}
 
 

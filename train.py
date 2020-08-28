@@ -55,7 +55,7 @@ def main():
 
     train_dataset = Dataset(os.path.join(DataConfig.DATA_PATH, "Train"),
                             transform=torchvision.transforms.Compose([
-                                Resize(ModelConfig.IMAGE_SIZE),
+                                # Resize(ModelConfig.IMAGE_SIZES[0], ModelConfig.IMAGE_SIZES[1]),
                                 Normalize(),
                                 ToTensor()
                             ]))
@@ -66,7 +66,7 @@ def main():
 
     val_dataset = Dataset(os.path.join(DataConfig.DATA_PATH, "Validation"),
                           transform=torchvision.transforms.Compose([
-                              Resize(ModelConfig.IMAGE_SIZE),
+                              # Resize(ModelConfig.IMAGE_SIZES[0], ModelConfig.IMAGE_SIZES[1]),
                               Normalize(),
                               ToTensor()
                           ]))
@@ -83,7 +83,7 @@ def main():
         model = WideNet()
     model = model.float()
     model.to(device)
-    summary(model, (3, ModelConfig.IMAGE_SIZE, ModelConfig.IMAGE_SIZE))
+    summary(model, (3, ModelConfig.IMAGE_SIZES[0], ModelConfig.IMAGE_SIZES[1]))
 
     train(model, train_dataloader, val_dataloader)
 

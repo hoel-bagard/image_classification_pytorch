@@ -32,6 +32,7 @@ class Trainer:
 
             # forward + backward + optimize
             outputs = self.model(inputs)
+
             loss = self.loss_fn(outputs, labels)
             loss.backward()
             self.optimizer.step()
