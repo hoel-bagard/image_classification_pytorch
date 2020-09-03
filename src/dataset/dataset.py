@@ -4,7 +4,7 @@ import torch
 import cv2
 import numpy as np
 
-from src.dataset.dataset_utils import top_secret
+from src.dataset.dataset_utils import chugai
 
 
 class Dataset(torch.utils.data.Dataset):
@@ -28,7 +28,7 @@ class Dataset(torch.utils.data.Dataset):
                 label = line.strip()
                 self.label_map[key] = label
 
-        self.labels = top_secret(data_path, self.label_map)
+        self.labels = chugai(data_path, self.label_map)
 
     def __len__(self):
         return len(self.labels)

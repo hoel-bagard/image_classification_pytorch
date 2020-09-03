@@ -23,9 +23,9 @@ def dogs_vs_cats(data_path: str, label_map: Dict) -> np.ndarray:
     return labels
 
 
-def top_secret(data_path: str, label_map: Dict) -> np.ndarray:
+def chugai(data_path: str, label_map: Dict) -> np.ndarray:
     """
-    client specific loading function
+    chugai specific loading function
     Args:
         data_path: Path to the root folder of the dataset.
                    This folder is expected to contain subfolders for each class, with the images inside.
@@ -35,9 +35,13 @@ def top_secret(data_path: str, label_map: Dict) -> np.ndarray:
     """
     labels = []
     for key in range(len(label_map)):
-        pathname = os.path.join(data_path, f"{label_map[key][0]}*", "**", "Rotator", "*.bmp")
+        pathname = os.path.join(data_path, f"{label_map[key][0]}*", "**", "*.jpg")
+        print(pathname)
         for image_path in glob.glob(pathname, recursive=True):
             print(f"Loading data {image_path}   ", end="\r")
-            labels.append([image_path, key])
+            if "non_visible" in image_path:
+                labels.append([image_path, 0])
+            else:
+                labels.append([image_path, key])
     labels = np.asarray(labels)
     return labels
