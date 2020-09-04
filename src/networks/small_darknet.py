@@ -21,6 +21,10 @@ class SmallDarknet(nn.Module):
                                       for i in range(1, len(channels))])
         self.last_conv = nn.Conv2d(ModelConfig.CHANNELS[-1], self.output_size, 6, bias=False)
 
+        # Used for grad-cam
+        self.gradients: torch.Tensor = None
+        self.activations: torch.Tensor = None
+
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
@@ -33,6 +37,21 @@ class SmallDarknet(nn.Module):
         x = self.first_conv(inputs)
         for block in self.blocks:
             x = block(x)
+
+        # Used for grad-cam
+        x.register_hook(self.activations_hook)
+        self.activations = x
+
         x = self.last_conv(x)
         x = torch.flatten(x, start_dim=1)
         return x
+
+    # hook for the gradients of the activations
+    def activations_hook(self, grad):
+        self.gradients = grad
+
+    def get_gradients(self):
+        return self.gradients
+
+    def get_activations(self):
+        return self.activations
