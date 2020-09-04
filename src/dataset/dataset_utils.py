@@ -21,6 +21,7 @@ def dogs_vs_cats(data_path: str, label_map: Dict) -> np.ndarray:
             labels.append([image_path, key])
     labels = np.asarray(labels)
     return labels
+<<<<<<< HEAD
 
 
 def client(data_path: str, label_map: Dict) -> np.ndarray:
@@ -45,3 +46,5 @@ def client(data_path: str, label_map: Dict) -> np.ndarray:
                 labels.append([image_path, key])
     labels = np.asarray(labels)
     return labels
+=======
+>>>>>>> be606bf (Tried to remove client references)
