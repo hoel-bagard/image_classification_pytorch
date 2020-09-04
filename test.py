@@ -27,7 +27,7 @@ def main():
     print("Weights loaded", flush=True)
 
     label_map = {}
-    with open(os.path.join(args.data_path, "..", "class.names")) as table_file:
+    with open(os.path.join(args.data_path, "..", "classes.names")) as table_file:
         for key, line in enumerate(table_file):
             label = line.strip()
             label_map[key] = label
