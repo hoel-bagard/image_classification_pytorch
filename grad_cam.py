@@ -8,6 +8,7 @@ import numpy as np
 
 from config.model_config import ModelConfig
 from src.networks.small_darknet import SmallDarknet
+from src.networks.wide_net import WideNet
 from src.utils.draw import draw_pred
 
 
@@ -20,9 +21,12 @@ def main():
 
     # Creates and load the model
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    model = SmallDarknet()
+    if ModelConfig.NETWORK == "SmallDarknet":
+        model = SmallDarknet()
+    elif ModelConfig.NETWORK == "WideNet":
+        model = WideNet()
     model.load_state_dict(torch.load(args.model_path))
-    # model.eval()
+    model.eval()
     model.to(device)
     print("Weights loaded", flush=True)
 
@@ -36,6 +40,7 @@ def main():
         for img_path in glob.glob(os.path.join(args.data_path, f"{label_map[key]}*.jpg")):
             # Read and prepare image
             img = cv2.imread(img_path)
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
             img = np.array(img)[:, :, :3]/255.0
             img = cv2.resize(img, ModelConfig.IMAGE_SIZES)
             img = img.transpose((2, 0, 1))
@@ -82,8 +87,11 @@ def main():
             heatmap = np.float32(heatmap)
             cam = heatmap + np.float32(img)
             cam = cam / np.max(cam)
-            cv2.imshow("Image", cam)
-            cv2.waitKey()
+            while True:
+                cv2.imshow("Image", cam)
+                if cv2.waitKey(10) == ord("q"):
+                    break
+
 
 
 if __name__ == "__main__":

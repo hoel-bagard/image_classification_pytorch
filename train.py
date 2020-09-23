@@ -11,11 +11,7 @@ from torchsummary import summary
 from config.data_config import DataConfig
 from config.model_config import ModelConfig
 from src.dataset.dataset import Dataset
-from src.dataset.transforms import (
-    Resize,
-    Normalize,
-    ToTensor
-)
+import src.dataset.transforms as transforms
 from src.networks.small_darknet import SmallDarknet
 from src.networks.wide_net import WideNet
 from src.train import train
@@ -54,10 +50,16 @@ def main():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     train_dataset = Dataset(os.path.join(DataConfig.DATA_PATH, "Train"),
-                            transform=torchvision.transforms.Compose([
-                                Resize(ModelConfig.IMAGE_SIZES[0], ModelConfig.IMAGE_SIZES[1]),
-                                Normalize(),
-                                ToTensor()
+                            transform=transforms.Compose([
+                                transforms.Crop(top=900, bottom=400),
+                                transforms.RandomCrop(0.98),
+                                transforms.Resize(*ModelConfig.IMAGE_SIZES),
+                                transforms.Normalize(),
+                                transforms.VerticalFlip(),
+                                transforms.HorizontalFlip(),
+                                transforms.Rotate180(),
+                                transforms.ToTensor(),
+                                transforms.Noise()
                             ]))
     train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=ModelConfig.BATCH_SIZE,
                                                    shuffle=True, num_workers=8)
@@ -65,10 +67,11 @@ def main():
     print("Train data loaded" + ' ' * (os.get_terminal_size()[0] - 17))
 
     val_dataset = Dataset(os.path.join(DataConfig.DATA_PATH, "Validation"),
-                          transform=torchvision.transforms.Compose([
-                              Resize(ModelConfig.IMAGE_SIZES[0], ModelConfig.IMAGE_SIZES[1]),
-                              Normalize(),
-                              ToTensor()
+                          transform=transforms.Compose([
+                              transforms.Crop(top=900, bottom=400),
+                              transforms.Resize(*ModelConfig.IMAGE_SIZES),
+                              transforms.Normalize(),
+                              transforms.ToTensor()
                           ]))
     val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size=ModelConfig.BATCH_SIZE,
                                                  shuffle=True, num_workers=8)

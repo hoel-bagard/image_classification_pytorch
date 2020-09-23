@@ -13,6 +13,7 @@ class ModelConfig:
     CHANNELS = [3, 8, 16, 32, 32, 16]
     SIZES = [5, 3, 3, 3, 3, 3]   # Kernel sizes
     STRIDES = [5, 3, 3, 2, 2, 2]
+    PADDINGS = [2, 1, 1, 1, 1, 1]
     NB_BLOCKS = [1, 2, 2, 1, 1, 1]
     IMAGE_SIZES = (2448, 2048)  # All images will be resized to this size
     OUTPUT_CLASSES = 5

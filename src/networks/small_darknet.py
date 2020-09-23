@@ -39,8 +39,9 @@ class SmallDarknet(nn.Module):
             x = block(x)
 
         # Used for grad-cam
-        x.register_hook(self.activations_hook)
-        self.activations = x
+        if self.train and x.requires_grad:
+            x.register_hook(self.activations_hook)
+            self.activations = x
 
         x = self.last_conv(x)
         x = torch.flatten(x, start_dim=1)
