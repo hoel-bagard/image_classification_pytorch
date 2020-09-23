@@ -20,7 +20,7 @@ def train(model: nn.Module, train_dataloader: torch.utils.data.DataLoader, val_d
     trainer = Trainer(model, loss_fn, train_dataloader, val_dataloader)
     scheduler = ExponentialLR(trainer.optimizer, gamma=ModelConfig.LR_DECAY)
     tb_writer = SummaryWriter(DataConfig.TB_DIR)
-    tb_writer.add_graph(model, (torch.empty(1, 3, ModelConfig.IMAGE_SIZES[0], ModelConfig.IMAGE_SIZES[1], device=device), ))
+    tb_writer.add_graph(model, (torch.empty(1, 3, *ModelConfig.IMAGE_SIZES, device=device), ))
     tb_writer.flush()
 
     best_loss = 1000
@@ -58,24 +58,26 @@ def train(model: nn.Module, train_dataloader: torch.utils.data.DataLoader, val_d
                 in_imgs, labels = batch["img"][:4].float(), batch["label"][:4]
                 predictions = model(in_imgs.to(device))
                 predictions = torch.nn.functional.softmax(predictions, dim=-1)
-                train_acc = get_accuracy(model, train_dataloader)
-                tb_writer.add_scalar("Training Accuracy", train_acc, epoch)
                 out_imgs = draw_pred(in_imgs, predictions, labels)
                 for image_index, out_img in enumerate(out_imgs):
                     out_img = np.transpose(out_img, (2, 0, 1))  # HWC -> CHW
                     tb_writer.add_image(f"Train/prediction_{image_index}", out_img, global_step=epoch)
+                train_acc = get_accuracy(model, train_dataloader)
+                tb_writer.add_scalar("Training Accuracy", train_acc, epoch)
 
                 # Metrics for the Validation dataset
                 batch = next(iter(val_dataloader))
                 in_imgs, labels = batch["img"][:4].float(), batch["label"][:4]
                 predictions = model(in_imgs.to(device))
                 predictions = torch.nn.functional.softmax(predictions, dim=-1)
-                val_acc = get_accuracy(model, val_dataloader)
-                tb_writer.add_scalar("Validation Accuracy", val_acc, epoch)
                 out_imgs = draw_pred(in_imgs, predictions, labels)
                 for image_index, out_img in enumerate(out_imgs):
                     out_img = np.transpose(out_img, (2, 0, 1))  # HWC -> CHW
                     tb_writer.add_image(f"Validation/prediction_{image_index}", out_img, global_step=epoch)
+                val_acc = get_accuracy(model, val_dataloader)
+                tb_writer.add_scalar("Validation Accuracy", val_acc, epoch)
+                print(f"\nTrain accuracy: {train_acc:.3f}  -  Validation accuracy: {val_acc:.3f}", end='\r', flush=True)
+
 
             print(f"\nValidation loss: {epoch_loss:.5e}  -  Took {time.time() - validation_start_time:.5f}s", flush=1)
         scheduler.step()

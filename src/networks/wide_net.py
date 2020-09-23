@@ -9,11 +9,11 @@ from config.model_config import ModelConfig
 
 def get_cnn_output_size():
     width, height = ModelConfig.IMAGE_SIZES
-    for kernel_size, stride in zip(ModelConfig.SIZES, ModelConfig.STRIDES):
-        width = ((width - kernel_size) // stride) + 1
+    for kernel_size, stride, padding in zip(ModelConfig.SIZES, ModelConfig.STRIDES, ModelConfig.PADDINGS):
+        width = ((width - kernel_size + 2*padding) // stride) + 1
 
-    for kernel_size, stride in zip(ModelConfig.SIZES, ModelConfig.STRIDES):
-        height = ((height - kernel_size) // stride) + 1
+    for kernel_size, stride, padding in zip(ModelConfig.SIZES, ModelConfig.STRIDES, ModelConfig.PADDINGS):
+        height = ((height - kernel_size + 2*padding) // stride) + 1
 
     return width*height*ModelConfig.CHANNELS[-1]
 
@@ -28,9 +28,14 @@ class WideNet(nn.Module):
         cnn_output_size = get_cnn_output_size()
 
         self.first_conv = DarknetConv(3, channels[0], sizes[0], stride=strides[0])
-        self.blocks = nn.Sequential(*[DarknetConv(channels[i-1], channels[i], sizes[i], stride=strides[i])
+        self.blocks = nn.Sequential(*[DarknetConv(channels[i-1], channels[i], sizes[i], stride=strides[i],
+                                                  padding=ModelConfig.PADDINGS[i])
                                       for i in range(1, len(channels))])
         self.dense = nn.Linear(cnn_output_size, self.output_size)
+
+        # Used for grad-cam
+        self.gradients: torch.Tensor = None
+        self.activations: torch.Tensor = None
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
@@ -43,7 +48,22 @@ class WideNet(nn.Module):
     def forward(self, inputs):
         x = self.first_conv(inputs)
         for block in self.blocks:
+            # Used for grad-cam
+            if self.train and x.requires_grad:
+                x.register_hook(self.activations_hook)
+                self.activations = x
+
             x = block(x)
         x = torch.flatten(x, start_dim=1)
         x = self.dense(x)
         return x
+
+    # hook for the gradients of the activations
+    def activations_hook(self, grad):
+        self.gradients = grad
+
+    def get_gradients(self):
+        return self.gradients
+
+    def get_activations(self):
+        return self.activations
