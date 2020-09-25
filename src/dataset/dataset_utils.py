@@ -26,7 +26,6 @@ def dogs_vs_cats(data_path: str, label_map: Dict) -> np.ndarray:
 
 def default_loader(data_path: str, label_map: Dict, load_images: bool = False) -> np.ndarray:
     """
-    chugai specific loading function
     Args:
         data_path: Path to the root folder of the dataset.
                    This folder is expected to contain subfolders for each class, with the images inside.
