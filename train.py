@@ -51,7 +51,7 @@ def main():
 
     train_dataset = Dataset(os.path.join(DataConfig.DATA_PATH, "Train"),
                             transform=Compose([
-                                transforms.Crop(top=900, bottom=400),
+                                transforms.Crop(top=600, bottom=500, left=800, right=200),
                                 transforms.RandomCrop(0.98),
                                 transforms.Resize(*ModelConfig.IMAGE_SIZES),
                                 transforms.Normalize(),
@@ -68,7 +68,7 @@ def main():
 
     val_dataset = Dataset(os.path.join(DataConfig.DATA_PATH, "Validation"),
                           transform=Compose([
-                              transforms.Crop(top=900, bottom=400),
+                              transforms.Crop(top=600, bottom=500, left=800, right=200),
                               transforms.Resize(*ModelConfig.IMAGE_SIZES),
                               transforms.Normalize(),
                               transforms.ToTensor()

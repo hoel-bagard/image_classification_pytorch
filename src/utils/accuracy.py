@@ -29,7 +29,6 @@ def get_class_accuracy(model: nn.Module, dataloader: torch.utils.data.DataLoader
 
         correct_pred = torch.eq(labels.to(device), torch.argmax(predictions, dim=-1)).float().cpu().detach().numpy()
         labels = labels.cpu().detach().numpy()
-        acc[labels] += correct_pred
 
         for (label, p) in zip(labels, correct_pred):
             acc[label] += p
