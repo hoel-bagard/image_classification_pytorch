@@ -37,7 +37,7 @@ def default_loader(data_path: str, label_map: Dict, load_images: bool = False) -
     labels = []
     for key in range(len(label_map)):
         img_types = ("*.jpg", "*.bmp")
-        pathname = os.path.join(data_path, label_map[key], "**")
+        pathname = os.path.join(data_path, label_map[key][0]+"*", "**")  # [0]+"*"   is for a specific dataset
         image_paths = []
         [image_paths.extend(glob.glob(os.path.join(pathname, ext), recursive=True)) for ext in img_types]
         for image_path in image_paths:

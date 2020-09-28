@@ -77,7 +77,6 @@ class HorizontalFlip(object):
         return {"img": img, "label": label}
 
 
-
 class Rotate180(object):
     """ Randomly rotate the image by 180 degrees """
 
