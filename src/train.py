@@ -3,7 +3,6 @@ import os
 
 import torch
 import torch.nn as nn
-from torch.optim.lr_scheduler import ExponentialLR
 
 from config.model_config import ModelConfig
 from config.data_config import DataConfig
@@ -14,7 +13,8 @@ from src.utils.tensorboard import TensorBoard
 def train(model: nn.Module, train_dataloader: torch.utils.data.DataLoader, val_dataloader: torch.utils.data.DataLoader):
     loss_fn = nn.CrossEntropyLoss()
     trainer = Trainer(model, loss_fn, train_dataloader, val_dataloader)
-    scheduler = ExponentialLR(trainer.optimizer, gamma=ModelConfig.LR_DECAY)
+    scheduler = torch.optim.lr_scheduler.ExponentialLR(trainer.optimizer, gamma=ModelConfig.LR_DECAY)
+
     if DataConfig.USE_TB:
         tensorboard = TensorBoard(model)
 
@@ -37,7 +37,8 @@ def train(model: nn.Module, train_dataloader: torch.utils.data.DataLoader, val_d
             best_loss, last_checkpoint_epoch = epoch_loss, epoch
             torch.save(model.state_dict(), save_path)
 
-        print(f"\nEpoch loss: {epoch_loss:.5e}  -  Took {time.time() - epoch_start_time:.5f}s")
+        print(f"\nEpoch loss: {epoch_loss:.5e}, Learning rate: {scheduler.get_last_lr()[0]}"
+              + f"  -  Took {time.time() - epoch_start_time:.5f}s")
 
         # Validation and other metrics
         if epoch % DataConfig.VAL_FREQ == 0 and epoch >= DataConfig.RECORD_START:

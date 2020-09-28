@@ -8,11 +8,11 @@ import torch
 class Crop(object):
     """ Crop the image """
 
-    def __init__(self, left: int = 0, right: int = 1, top: int = 0, bottom: int = 1):
-        self.left = left
-        self.right = right
+    def __init__(self, top: int = 0, bottom: int = 1, left: int = 0, right: int = 1):
         self.top = top
         self.bottom = bottom
+        self.left = left
+        self.right = right
 
     def __call__(self, sample):
         img, label = sample["img"], sample["label"]

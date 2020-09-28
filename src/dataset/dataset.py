@@ -23,7 +23,6 @@ class Dataset(torch.utils.data.Dataset):
         self.load_images = load_images
 
         self.labels = default_loader(data_path, DataConfig.LABEL_MAP, load_images=load_images)
-        # self.labels = dogs_vs_cats(data_path, DataConfig.LABEL_MAP)
 
     def __len__(self):
         return len(self.labels)

@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import torch
 import torch.nn as nn
@@ -24,9 +26,10 @@ class TensorBoard():
         self.model = model
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-        self.tb_writer = SummaryWriter(DataConfig.TB_DIR)
-        self.tb_writer.add_graph(model, (torch.empty(1, 3, *ModelConfig.IMAGE_SIZES, device=self.device), ))
-        self.tb_writer.flush()
+        self.train_tb_writer = SummaryWriter(os.path.join(DataConfig.TB_DIR, "Train"))
+        self.val_tb_writer = SummaryWriter(os.path.join(DataConfig.TB_DIR, "Validation"))
+        self.train_tb_writer.add_graph(model, (torch.empty(1, 3, *ModelConfig.IMAGE_SIZES, device=self.device), ))
+        self.train_tb_writer.flush()
 
     def write_images(self, epoch: int, dataloader: torch.utils.data.DataLoader, mode: str = "Train"):
         """
@@ -43,7 +46,10 @@ class TensorBoard():
         out_imgs = draw_pred(in_imgs, predictions, labels)
         for image_index, out_img in enumerate(out_imgs):
             out_img = np.transpose(out_img, (2, 0, 1))  # HWC -> CHW
-            self.tb_writer.add_image(f"{mode}/prediction_{image_index}", out_img, global_step=epoch)
+            if mode == "Train":
+                self.train_tb_writer.add_image(f"{mode}/prediction_{image_index}", out_img, global_step=epoch)
+            elif mode == "Validation":
+                self.val_tb_writer.add_image(f"{mode}/prediction_{image_index}", out_img, global_step=epoch)
 
     def write_metrics(self, epoch: int, dataloader: torch.utils.data.DataLoader, mode: str = "Train") -> float:
         """
@@ -56,10 +62,16 @@ class TensorBoard():
             avg_acc: Average accuracy
         """
         avg_acc = get_accuracy(self.model, dataloader)
-        self.tb_writer.add_scalar(f"Average Accuracy/{mode}", avg_acc, epoch)
+        if mode == "Train":
+            self.train_tb_writer.add_scalar("Average Accuracy", avg_acc, epoch)
+        elif mode == "Validation":
+            self.val_tb_writer.add_scalar("Average Accuracy", avg_acc, epoch)
         per_class_acc = get_class_accuracy(self.model, dataloader)
         for key, acc in enumerate(per_class_acc):
-            self.tb_writer.add_scalar(f"Per Class Accuracy/{mode} {DataConfig.LABEL_MAP[key]}", acc, epoch)
+            if mode == "Train":
+                self.train_tb_writer.add_scalar(f"Per Class Accuracy/{DataConfig.LABEL_MAP[key]}", acc, epoch)
+            elif mode == "Validation":
+                self.val_tb_writer.add_scalar(f"Per Class Accuracy/{DataConfig.LABEL_MAP[key]}", acc, epoch)
 
         return avg_acc
 
@@ -71,8 +83,11 @@ class TensorBoard():
             loss: Epoch loss that will be added to the TensorBoard
             mode: Either "Train" or "Validation"
         """
-        self.tb_writer.add_scalar(f"Loss/{mode}", loss, epoch)
-        self.tb_writer.flush()
+        if mode == "Train":
+            self.train_tb_writer.add_scalar("Loss", loss, epoch)
+        elif mode == "Validation":
+            self.val_tb_writer.add_scalar("Loss", loss, epoch)
+        self.train_tb_writer.flush()
 
     def write_lr(self, epoch: int, lr: float):
         """
@@ -81,4 +96,4 @@ class TensorBoard():
             epoch: Current epoch
             lr: Learning rate for the given epoch
         """
-        self.tb_writer.add_scalar("Learning Rate", lr, epoch)
+        self.train_tb_writer.add_scalar("Learning Rate", lr, epoch)
