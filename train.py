@@ -5,7 +5,7 @@ import shutil
 import time
 
 import torch
-import torchvision
+from torchvision.transforms import Compose
 from torchsummary import summary
 
 from config.data_config import DataConfig
@@ -50,7 +50,7 @@ def main():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     train_dataset = Dataset(os.path.join(DataConfig.DATA_PATH, "Train"),
-                            transform=transforms.Compose([
+                            transform=Compose([
                                 transforms.Crop(top=900, bottom=400),
                                 transforms.RandomCrop(0.98),
                                 transforms.Resize(*ModelConfig.IMAGE_SIZES),
@@ -67,7 +67,7 @@ def main():
     print("Train data loaded" + ' ' * (os.get_terminal_size()[0] - 17))
 
     val_dataset = Dataset(os.path.join(DataConfig.DATA_PATH, "Validation"),
-                          transform=transforms.Compose([
+                          transform=Compose([
                               transforms.Crop(top=900, bottom=400),
                               transforms.Resize(*ModelConfig.IMAGE_SIZES),
                               transforms.Normalize(),
