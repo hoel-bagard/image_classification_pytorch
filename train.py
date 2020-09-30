@@ -13,8 +13,7 @@ from config.data_config import DataConfig
 from config.model_config import ModelConfig
 from src.dataset.dataset import Dataset
 import src.dataset.transforms as transforms
-from src.networks.small_darknet import SmallDarknet
-from src.networks.wide_net import WideNet
+from src.networks.build_network import build_model
 from src.train import train
 
 
@@ -52,8 +51,6 @@ def main():
             shutil.copy(misc_file, os.path.join(output_folder, misc_file))
         print("Finished copying files")
 
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
     train_dataset = Dataset(os.path.join(DataConfig.DATA_PATH, "Train"),
                             limit=args.limit,
                             transform=Compose([
@@ -87,12 +84,7 @@ def main():
     print(f"\nLoaded {len(train_dataloader.dataset)} train data and",
           f"{len(val_dataloader.dataset)} validation data", flush=True)
 
-    if ModelConfig.NETWORK == "SmallDarknet":
-        model = SmallDarknet()
-    elif ModelConfig.NETWORK == "WideNet":
-        model = WideNet()
-    model = model.float()
-    model.to(device)
+    model = build_model(ModelConfig.NETWORK)
     summary(model, (3, ModelConfig.IMAGE_SIZES[0], ModelConfig.IMAGE_SIZES[1]))
 
     train(model, train_dataloader, val_dataloader)

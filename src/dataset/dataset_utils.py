@@ -38,8 +38,8 @@ def default_loader(data_path: str, label_map: Dict, limit: int = None, load_imag
         numpy array containing the images' paths and the associated label
     """
     labels = []
+    img_types = ("*.jpg", "*.bmp")
     for key in range(len(label_map)):
-        img_types = ("*.jpg", "*.bmp")
         pathname = os.path.join(data_path, label_map[key], "**")
         image_paths = []
         [image_paths.extend(glob.glob(os.path.join(pathname, ext), recursive=True)) for ext in img_types]
