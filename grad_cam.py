@@ -4,19 +4,21 @@ import os
 
 import cv2
 import torch
+from torchvision.transforms import Compose
 import numpy as np
 
+from config.data_config import DataConfig
 from config.model_config import ModelConfig
 from src.networks.small_darknet import SmallDarknet
 from src.networks.wide_net import WideNet
 from src.utils.draw import draw_pred
+import src.dataset.transforms as transforms
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("model_path", help="Path to the checkpoint to use")
     parser.add_argument("data_path", help="Path to the test dataset")
-    parser.add_argument("--show", action="store_true", help="Show the bad images")
     args = parser.parse_args()
 
     # Creates and load the model
@@ -30,22 +32,26 @@ def main():
     model.to(device)
     print("Weights loaded", flush=True)
 
-    label_map = {}
-    with open(os.path.join(args.data_path, "..", "classes.names")) as table_file:
-        for key, line in enumerate(table_file):
-            label = line.strip()
-            label_map[key] = label
+    label_map = DataConfig.LABEL_MAP
+    transform = Compose([
+        transforms.Crop(top=600, bottom=500, left=800, right=200),
+        transforms.Resize(*ModelConfig.IMAGE_SIZES),
+        transforms.Normalize(),
+        transforms.ToTensor()
+    ])
 
+    img_types = ("*.jpg", "*.bmp")
     for key in range(len(label_map)):
-        for img_path in glob.glob(os.path.join(args.data_path, f"{label_map[key]}*.jpg")):
-            # Read and prepare image
+        pathname = os.path.join(args.data_path, label_map[key], "**")
+        image_paths = []
+        [image_paths.extend(glob.glob(os.path.join(pathname, ext), recursive=True)) for ext in img_types]
+        for img_path in image_paths:
+            msg = f"Loading data {img_path}"
+            print(msg + ' ' * (os.get_terminal_size()[0] - len(msg)), end="\r")
             img = cv2.imread(img_path)
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-            img = np.array(img)[:, :, :3]/255.0
-            img = cv2.resize(img, ModelConfig.IMAGE_SIZES)
-            img = img.transpose((2, 0, 1))
-            img = torch.from_numpy(img).unsqueeze(0)
-            img = img.to(device).float()
+            img = transform({"img": img, "label": 0})["img"]   # The 0 is ignored
+            img = img.unsqueeze(0).to(device).float()
 
             # Feed it to the model
             output = model(img)

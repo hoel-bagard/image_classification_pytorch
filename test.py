@@ -3,12 +3,16 @@ import glob
 import os
 
 import torch
+from torchvision.transforms import Compose
 import numpy as np
 import cv2
 
 from config.data_config import DataConfig
+from config.model_config import ModelConfig
 from src.networks.small_darknet import SmallDarknet
+from src.networks.wide_net import WideNet
 from src.utils.draw import draw_pred
+import src.dataset.transforms as transforms
 
 
 def main():
@@ -20,30 +24,39 @@ def main():
 
     # Creates and load the model
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    model = SmallDarknet()
+    if ModelConfig.NETWORK == "SmallDarknet":
+        model = SmallDarknet()
+    elif ModelConfig.NETWORK == "WideNet":
+        model = WideNet()
     model.load_state_dict(torch.load(args.model_path))
     model.eval()
     model.to(device)
     print("Weights loaded", flush=True)
 
-    label_map = {}
-    with open(os.path.join(args.data_path, "..", "classes.names")) as table_file:
-        for key, line in enumerate(table_file):
-            label = line.strip()
-            label_map[key] = label
+    label_map = DataConfig.LABEL_MAP
+    transform = Compose([
+        transforms.Crop(top=600, bottom=500, left=800, right=200),
+        transforms.Resize(*ModelConfig.IMAGE_SIZES),
+        transforms.Normalize(),
+        transforms.ToTensor()
+    ])
 
     results = []
+    img_types = ("*.jpg", "*.bmp")
     for key in range(len(label_map)):
-        for img_path in glob.glob(os.path.join(args.data_path, f"{label_map[key]}*.jpg")):
+        pathname = os.path.join(args.data_path, label_map[key], "**")
+        image_paths = []
+        [image_paths.extend(glob.glob(os.path.join(pathname, ext), recursive=True)) for ext in img_types]
+        for img_path in image_paths:
+            msg = f"Loading data {img_path}"
+            print(msg + ' ' * (os.get_terminal_size()[0] - len(msg)), end="\r")
             img = cv2.imread(img_path)
-
-            img = np.array(img)[:, :, :3]/255
-            img = cv2.resize(img, (DataConfig.SIZE, DataConfig.SIZE))
-            img = img.transpose((2, 0, 1))
-            img = torch.from_numpy(img).unsqueeze(0)
-            img = img.to(device).float()
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            img = transform({"img": img, "label": 0})["img"]   # The 0 is ignored
+            img = img.unsqueeze(0).to(device).float()
 
             output = model(img)
+            output = torch.nn.functional.softmax(output, dim=-1)
             prediction = np.argmax(output.cpu().detach().numpy())
             if key == prediction:
                 results.append(1)
@@ -51,12 +64,20 @@ def main():
                 results.append(0)
 
             if args.show and key != prediction:
-                out_img = draw_pred(torch.Tensor([img]), torch.Tensor([output]), torch.Tensor([key]))[0]
-                cv2.imshow("Image", out_img[0])
-                cv2.waitKey()
+                out_img = draw_pred(img, output, torch.Tensor([key]),
+                                    size=ModelConfig.IMAGE_SIZES, data_path=os.path.join(args.data_path, ".."))[0]
+                out_img = cv2.cvtColor(out_img, cv2.COLOR_RGB2BGR)
+                while True:
+                    cv2.imshow("Image", out_img)
+                    if cv2.waitKey(10) == ord("q"):
+                        break
+
+                # out_img = draw_pred(torch.Tensor([img]), torch.Tensor([output]), torch.Tensor([key]))[0]
+                # cv2.imshow("Image", out_img[0])
+                # cv2.waitKey()
 
     results = np.asarray(results)
-    print(f"Precision: {np.mean(results)}")
+    print(f"\nPrecision: {np.mean(results)}")
 
 
 if __name__ == "__main__":
