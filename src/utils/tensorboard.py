@@ -8,14 +8,11 @@ from torch.utils.tensorboard import SummaryWriter
 from config.data_config import DataConfig
 from config.model_config import ModelConfig
 from src.utils.draw import draw_pred
-from src.utils.accuracy import (
-    get_accuracy,
-    get_class_accuracy
-)
+from src.utils.metrics import Metrics
 
 
 class TensorBoard():
-    def __init__(self, model: nn.Module, max_outputs: int = 4):
+    def __init__(self, model: nn.Module, metrics: Metrics, max_outputs: int = 4):
         """
         Args:
             model: Model'whose performance are to be recorded
@@ -23,6 +20,7 @@ class TensorBoard():
         """
         super(TensorBoard, self).__init__()
         self.max_outputs = max_outputs
+        self.metrics: Metrics = metrics
         self.model = model
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -51,33 +49,33 @@ class TensorBoard():
             elif mode == "Validation":
                 self.val_tb_writer.add_image(f"{mode}/prediction_{image_index}", out_img, global_step=epoch)
 
-    def write_metrics(self, epoch: int, dataloader: torch.utils.data.DataLoader, mode: str = "Train") -> float:
+    def write_metrics(self, epoch: int, mode: str = "Train") -> float:
         """
-        Writes accuracy metrics in the TensorBoard
+        Writes accuracy metrics in TensorBoard
         Args:
             epoch: Current epoch
-            dataloader: The accuracy will be calculated using this data.
             mode: Either "Train" or "Validation"
         Returns:
             avg_acc: Average accuracy
         """
-        avg_acc = get_accuracy(self.model, dataloader)
-        if mode == "Train":
-            self.train_tb_writer.add_scalar("Average Accuracy", avg_acc, epoch)
-        elif mode == "Validation":
-            self.val_tb_writer.add_scalar("Average Accuracy", avg_acc, epoch)
-        per_class_acc = get_class_accuracy(self.model, dataloader)
+        tb_writer = self.train_tb_writer if mode == "Train" else self.val_tb_writer
+        self.metrics.compute_confusion_matrix(mode=mode)
+
+        avg_acc = self.metrics.get_avg_acc()
+        tb_writer.add_scalar("Average Accuracy", avg_acc, epoch)
+
+        per_class_acc = self.metrics.get_class_accuracy()
         for key, acc in enumerate(per_class_acc):
-            if mode == "Train":
-                self.train_tb_writer.add_scalar(f"Per Class Accuracy/{DataConfig.LABEL_MAP[key]}", acc, epoch)
-            elif mode == "Validation":
-                self.val_tb_writer.add_scalar(f"Per Class Accuracy/{DataConfig.LABEL_MAP[key]}", acc, epoch)
+            tb_writer.add_scalar(f"Per Class Accuracy/{DataConfig.LABEL_MAP[key]}", acc, epoch)
+
+        confusion_matrix = self.metrics.get_confusion_matrix()
+        tb_writer.add_image("Confusion Matrix", confusion_matrix, global_step=epoch)
 
         return avg_acc
 
     def write_loss(self, epoch: int, loss: float, mode: str = "Train"):
         """
-        Writes loss metric in the TensorBoard
+        Writes loss metric in TensorBoard
         Args:
             epoch: Current epoch
             loss: Epoch loss that will be added to the TensorBoard
