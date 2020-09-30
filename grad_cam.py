@@ -9,8 +9,7 @@ import numpy as np
 
 from config.data_config import DataConfig
 from config.model_config import ModelConfig
-from src.networks.small_darknet import SmallDarknet
-from src.networks.wide_net import WideNet
+from src.networks.build_network import build_model
 from src.utils.draw import draw_pred
 import src.dataset.transforms as transforms
 
@@ -22,16 +21,10 @@ def main():
     args = parser.parse_args()
 
     # Creates and load the model
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    if ModelConfig.NETWORK == "SmallDarknet":
-        model = SmallDarknet()
-    elif ModelConfig.NETWORK == "WideNet":
-        model = WideNet()
-    model.load_state_dict(torch.load(args.model_path))
-    model.eval()
-    model.to(device)
+    model = build_model(ModelConfig.NETWORK, args.model_path, eval=True)
     print("Weights loaded", flush=True)
 
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     label_map = DataConfig.LABEL_MAP
     transform = Compose([
         transforms.Crop(top=600, bottom=500, left=800, right=200),
