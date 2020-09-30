@@ -9,7 +9,7 @@ from config.data_config import DataConfig
 class Dataset(torch.utils.data.Dataset):
     """Classification dataset."""
 
-    def __init__(self, data_path: str, transform=None, load_images: bool = True):
+    def __init__(self, data_path: str, transform=None, limit: int = None, load_images: bool = True):
         """
         Args:
             data_path:
@@ -17,12 +17,14 @@ class Dataset(torch.utils.data.Dataset):
                 This folder is expected to contain subfolders for each class, with the images inside.
                 It should also contain a "class.names" with all the classes
             transform (callable, optional): Optional transform to be applied on a sample.
+            limit (int, optional): If given then the number of elements for each class in the dataset
+                                   will be capped to this number
             load_images: If True then all the images are loaded into ram
         """
         self.transform = transform
         self.load_images = load_images
 
-        self.labels = default_loader(data_path, DataConfig.LABEL_MAP, load_images=load_images)
+        self.labels = default_loader(data_path, DataConfig.LABEL_MAP, limit=limit, load_images=load_images)
 
     def __len__(self):
         return len(self.labels)

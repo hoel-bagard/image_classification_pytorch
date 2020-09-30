@@ -37,6 +37,7 @@ class TensorBoard():
             dataloader: The images will be sampled from this dataset
             mode: Either "Train" or "Validation"
         """
+        print("Writing images" + ' ' * (os.get_terminal_size()[0] - len("Writing images")), end="\r", flush=True)
         batch = next(iter(dataloader))
         in_imgs, labels = batch["img"][:self.max_outputs].float(), batch["label"][:self.max_outputs]
         predictions = self.model(in_imgs.to(self.device))
@@ -58,17 +59,22 @@ class TensorBoard():
         Returns:
             avg_acc: Average accuracy
         """
+        print("Computing confusion matrix" + ' ' * (os.get_terminal_size()[0] - 26), end="\r", flush=True)
         tb_writer = self.train_tb_writer if mode == "Train" else self.val_tb_writer
         self.metrics.compute_confusion_matrix(mode=mode)
 
+        print("Computing average accuracy" + ' ' * (os.get_terminal_size()[0] - 26), end="\r", flush=True)
         avg_acc = self.metrics.get_avg_acc()
         tb_writer.add_scalar("Average Accuracy", avg_acc, epoch)
 
+        print("Computing per class accuracy" + ' ' * (os.get_terminal_size()[0] - 28), end="\r", flush=True)
         per_class_acc = self.metrics.get_class_accuracy()
         for key, acc in enumerate(per_class_acc):
             tb_writer.add_scalar(f"Per Class Accuracy/{DataConfig.LABEL_MAP[key]}", acc, epoch)
 
+        print("Creating confusion matrix image" + ' ' * (os.get_terminal_size()[0] - 31), end="\r", flush=True)
         confusion_matrix = self.metrics.get_confusion_matrix()
+        confusion_matrix = np.transpose(confusion_matrix, (2, 0, 1))  # HWC -> CHW
         tb_writer.add_image("Confusion Matrix", confusion_matrix, global_step=epoch)
 
         return avg_acc
