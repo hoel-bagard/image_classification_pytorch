@@ -1,4 +1,5 @@
 from torch.utils.tensorboard import SummaryWriter  # noqa: F401  # Needs to be there to avoid segfaults
+import argparse
 import os
 import glob
 import shutil
@@ -18,6 +19,10 @@ from src.train import train
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--limit", default=None, type=int, help="Limits the number of apparition of each class")
+    args = parser.parse_args()
+
     if not DataConfig.KEEP_TB:
         while os.path.exists(DataConfig.TB_DIR):
             shutil.rmtree(DataConfig.TB_DIR, ignore_errors=True)
@@ -50,6 +55,7 @@ def main():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     train_dataset = Dataset(os.path.join(DataConfig.DATA_PATH, "Train"),
+                            limit=args.limit,
                             transform=Compose([
                                 transforms.Crop(top=600, bottom=500, left=800, right=200),
                                 transforms.RandomCrop(0.98),
@@ -67,6 +73,7 @@ def main():
     print("Train data loaded" + ' ' * (os.get_terminal_size()[0] - 17))
 
     val_dataset = Dataset(os.path.join(DataConfig.DATA_PATH, "Validation"),
+                          limit=args.limit,
                           transform=Compose([
                               transforms.Crop(top=600, bottom=500, left=800, right=200),
                               transforms.Resize(*ModelConfig.IMAGE_SIZES),

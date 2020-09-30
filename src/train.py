@@ -51,6 +51,7 @@ def train(model: nn.Module, train_dataloader: torch.utils.data.DataLoader, val_d
             epoch_loss = trainer.val_epoch()
 
             if DataConfig.USE_TB:
+                print("\nStarting to compute TensorBoard metrics", end="\r", flush=True)
                 tensorboard.write_loss(epoch, epoch_loss, mode="Validation")
 
                 # Metrics for the Train dataset
@@ -61,7 +62,7 @@ def train(model: nn.Module, train_dataloader: torch.utils.data.DataLoader, val_d
                 tensorboard.write_images(epoch, val_dataloader, mode="Validation")
                 val_acc = tensorboard.write_metrics(epoch, mode="Validation")
 
-                print(f"\nTrain accuracy: {train_acc:.3f}  -  Validation accuracy: {val_acc:.3f}", end='\r', flush=True)
+                print(f"Train accuracy: {train_acc:.3f}  -  Validation accuracy: {val_acc:.3f}", end='\r', flush=True)
 
             print(f"\nValidation loss: {epoch_loss:.5e}  -  Took {time.time() - validation_start_time:.5f}s", flush=1)
         scheduler.step()

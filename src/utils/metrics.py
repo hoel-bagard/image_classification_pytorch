@@ -31,7 +31,7 @@ class Metrics:
             imgs, labels = batch["img"].float(), batch["label"].cpu().detach().numpy()
             predictions = self.model(imgs.to(self.device))
             predictions = torch.nn.functional.softmax(predictions, dim=-1)
-            predictions = torch.argmax(predictions, dim=-1).float().cpu().detach().numpy()
+            predictions = torch.argmax(predictions, dim=-1).int().cpu().detach().numpy()
 
             for (label, pred) in zip(labels, predictions):
                 self.cm[label, pred] += 1
@@ -94,4 +94,5 @@ class Metrics:
         # Convert matplotlib plot to normal image
         img = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8, sep='')
         img = img.reshape(fig.canvas.get_width_height()[::-1] + (3,))
+
         return img
