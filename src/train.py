@@ -4,8 +4,8 @@ import os
 import torch
 import torch.nn as nn
 
-from config.model_config import ModelConfig
 from config.data_config import DataConfig
+from config.model_config import ModelConfig
 from src.utils.trainer import Trainer
 from src.utils.tensorboard import TensorBoard
 from src.utils.metrics import Metrics

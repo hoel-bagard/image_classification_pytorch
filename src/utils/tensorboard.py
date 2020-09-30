@@ -38,6 +38,7 @@ class TensorBoard():
             mode: Either "Train" or "Validation"
         """
         print("Writing images" + ' ' * (os.get_terminal_size()[0] - len("Writing images")), end="\r", flush=True)
+        tb_writer = self.train_tb_writer if mode == "Train" else self.val_tb_writer
         batch = next(iter(dataloader))
         in_imgs, labels = batch["img"][:self.max_outputs].float(), batch["label"][:self.max_outputs]
         predictions = self.model(in_imgs.to(self.device))
@@ -45,10 +46,7 @@ class TensorBoard():
         out_imgs = draw_pred(in_imgs, predictions, labels)
         for image_index, out_img in enumerate(out_imgs):
             out_img = np.transpose(out_img, (2, 0, 1))  # HWC -> CHW
-            if mode == "Train":
-                self.train_tb_writer.add_image(f"{mode}/prediction_{image_index}", out_img, global_step=epoch)
-            elif mode == "Validation":
-                self.val_tb_writer.add_image(f"{mode}/prediction_{image_index}", out_img, global_step=epoch)
+            tb_writer.add_image(f"{mode}/prediction_{image_index}", out_img, global_step=epoch)
 
     def write_metrics(self, epoch: int, mode: str = "Train") -> float:
         """
@@ -87,10 +85,8 @@ class TensorBoard():
             loss: Epoch loss that will be added to the TensorBoard
             mode: Either "Train" or "Validation"
         """
-        if mode == "Train":
-            self.train_tb_writer.add_scalar("Loss", loss, epoch)
-        elif mode == "Validation":
-            self.val_tb_writer.add_scalar("Loss", loss, epoch)
+        tb_writer = self.train_tb_writer if mode == "Train" else self.val_tb_writer
+        tb_writer.add_scalar("Loss", loss, epoch)
         self.train_tb_writer.flush()
 
     def write_lr(self, epoch: int, lr: float):
