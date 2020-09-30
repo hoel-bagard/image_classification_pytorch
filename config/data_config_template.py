@@ -1,3 +1,6 @@
+import os
+
+
 class DataConfig:
     # Recording part
     DATA_PATH          = 'path/to/dataset'  # Path to the dataset folder
@@ -10,3 +13,10 @@ class DataConfig:
     KEEP_TB            = True                # Whether to remove the TensorBoard dir
     VAL_FREQ           = 20                  # How often to compute accuracy and images (also used for validation freq)
     RECORD_START       = 10                  # Checkpoints and TensorBoard are not recorded before this epoch
+
+    # Build a map between id and names
+    LABEL_MAP = {}
+    with open(os.path.join(DATA_PATH, "classes.names")) as table_file:
+        for key, line in enumerate(table_file):
+            label = line.strip()
+            LABEL_MAP[key] = label

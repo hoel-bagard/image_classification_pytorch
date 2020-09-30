@@ -8,6 +8,7 @@ from config.model_config import ModelConfig
 from config.data_config import DataConfig
 from src.utils.trainer import Trainer
 from src.utils.tensorboard import TensorBoard
+from src.utils.metrics import Metrics
 
 
 def train(model: nn.Module, train_dataloader: torch.utils.data.DataLoader, val_dataloader: torch.utils.data.DataLoader):
@@ -16,7 +17,8 @@ def train(model: nn.Module, train_dataloader: torch.utils.data.DataLoader, val_d
     scheduler = torch.optim.lr_scheduler.ExponentialLR(trainer.optimizer, gamma=ModelConfig.LR_DECAY)
 
     if DataConfig.USE_TB:
-        tensorboard = TensorBoard(model)
+        metrics = Metrics(model, loss_fn, train_dataloader, val_dataloader)
+        tensorboard = TensorBoard(model, metrics)
 
     best_loss = 1000
     last_checkpoint_epoch = 0
@@ -50,11 +52,11 @@ def train(model: nn.Module, train_dataloader: torch.utils.data.DataLoader, val_d
 
                 # Metrics for the Train dataset
                 tensorboard.write_images(epoch, train_dataloader)
-                train_acc = tensorboard.write_metrics(epoch, train_dataloader)
+                train_acc = tensorboard.write_metrics(epoch)
 
                 # Metrics for the Validation dataset
                 tensorboard.write_images(epoch, val_dataloader, mode="Validation")
-                val_acc = tensorboard.write_metrics(epoch, val_dataloader, mode="Validation")
+                val_acc = tensorboard.write_metrics(epoch, mode="Validation")
 
                 print(f"\nTrain accuracy: {train_acc:.3f}  -  Validation accuracy: {val_acc:.3f}", end='\r', flush=True)
 
