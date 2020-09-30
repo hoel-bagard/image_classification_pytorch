@@ -14,6 +14,9 @@ def train(model: nn.Module, train_dataloader: torch.utils.data.DataLoader, val_d
     loss_fn = nn.CrossEntropyLoss()
     trainer = Trainer(model, loss_fn, train_dataloader, val_dataloader)
     scheduler = torch.optim.lr_scheduler.ExponentialLR(trainer.optimizer, gamma=ModelConfig.LR_DECAY)
+    # scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(trainer.optimizer, 10, T_mult=2)
+    # I forgot to use the gamma for the annealing
+    # https://github.com/katsura-jp/pytorch-cosine-annealing-with-warmup
 
     if DataConfig.USE_TB:
         tensorboard = TensorBoard(model)
@@ -37,7 +40,7 @@ def train(model: nn.Module, train_dataloader: torch.utils.data.DataLoader, val_d
             best_loss, last_checkpoint_epoch = epoch_loss, epoch
             torch.save(model.state_dict(), save_path)
 
-        print(f"\nEpoch loss: {epoch_loss:.5e}, Learning rate: {scheduler.get_last_lr()[0]}"
+        print(f"\nEpoch loss: {epoch_loss:.5e}, Learning rate: {scheduler.get_last_lr()[0]:.3e}"
               + f"  -  Took {time.time() - epoch_start_time:.5f}s")
 
         # Validation and other metrics
