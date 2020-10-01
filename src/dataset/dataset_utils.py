@@ -44,7 +44,7 @@ def default_loader(data_path: str, label_map: Dict, limit: int = None, load_imag
         image_paths = []
         [image_paths.extend(glob.glob(os.path.join(pathname, ext), recursive=True)) for ext in img_types]
         for i, image_path in enumerate(image_paths):
-            msg = f"Loading data {image_path}"
+            msg = f"Loading data {image_path}    ({i}/{len(image_paths)})"
             print(msg + ' ' * (os.get_terminal_size()[0] - len(msg)), end="\r")
             if load_images:
                 img = cv2.imread(image_path)

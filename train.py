@@ -20,6 +20,7 @@ import src.dataset.transforms as transforms
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--limit", default=None, type=int, help="Limits the number of apparition of each class")
+    parser.add_argument("--load_data", action="store_true", help="Loads all the videos into RAM")
     args = parser.parse_args()
 
     if not DataConfig.KEEP_TB:
@@ -53,6 +54,7 @@ def main():
 
     train_dataset = Dataset(os.path.join(DataConfig.DATA_PATH, "Train"),
                             limit=args.limit,
+                            load_images=args.load_data,
                             transform=Compose([
                                 transforms.Crop(top=600, bottom=500, left=800, right=200),
                                 transforms.RandomCrop(0.98),
@@ -71,6 +73,7 @@ def main():
 
     val_dataset = Dataset(os.path.join(DataConfig.DATA_PATH, "Validation"),
                           limit=args.limit,
+                          load_images=args.load_data,
                           transform=Compose([
                               transforms.Crop(top=600, bottom=500, left=800, right=200),
                               transforms.Resize(*ModelConfig.IMAGE_SIZES),
