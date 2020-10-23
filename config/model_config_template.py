@@ -2,7 +2,6 @@ class ModelConfig:
     # Training parameters
     BATCH_SIZE         = 16            # Batch size
     MAX_EPOCHS         = 2000          # Number of Epochs
-    BUFFER_SIZE        = 256           # Buffer Size, used for the shuffling
     LR                 = 1e-3          # Learning Rate
     LR_DECAY           = 0.998
     DECAY_START        = 20
