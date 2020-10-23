@@ -1,4 +1,3 @@
-import math
 from collections import OrderedDict
 
 import torch
@@ -8,6 +7,7 @@ from src.networks.layers import (
     DarknetConv,
     DarknetBlock
 )
+from .network_utils import layer_init
 from config.model_config import ModelConfig
 
 
@@ -26,13 +26,7 @@ class SmallDarknet(nn.Module):
         self.gradients: torch.Tensor = None
         self.activations: torch.Tensor = None
 
-        for m in self.modules():
-            if isinstance(m, nn.Conv2d):
-                n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
-                m.weight.data.normal_(0, math.sqrt(2. / n))
-            elif isinstance(m, nn.BatchNorm2d):
-                m.weight.data.fill_(1)
-                m.bias.data.zero_()
+        self.apply(layer_init)
 
     def forward(self, inputs):
         x = self.first_conv(inputs)

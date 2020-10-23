@@ -52,7 +52,8 @@ def train(model: nn.Module, train_dataloader: torch.utils.data.DataLoader, val_d
 
             if DataConfig.USE_TB:
                 print("\nStarting to compute TensorBoard metrics", end="\r", flush=True)
-                tensorboard.write_weights_grad(epoch)
+                # TODO: uncomment this after finishing the lambda network
+                # tensorboard.write_weights_grad(epoch)
                 tensorboard.write_loss(epoch, epoch_loss, mode="Validation")
 
                 # Metrics for the Train dataset

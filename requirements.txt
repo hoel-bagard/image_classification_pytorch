@@ -5,3 +5,4 @@ tensorboard
 opencv-python
 numpy
 matplotlib
+lambda-networks
