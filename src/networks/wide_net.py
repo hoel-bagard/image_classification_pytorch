@@ -1,4 +1,5 @@
 import math
+from collections import OrderedDict
 
 import torch
 import torch.nn as nn
@@ -67,3 +68,11 @@ class WideNet(nn.Module):
 
     def get_activations(self):
         return self.activations
+
+    def get_weight_and_grads(self):
+        weight_grads = OrderedDict()
+        weight_grads["first_conv"] = self.first_conv.conv.weight, self.first_conv.conv.weight.grad
+        for ind, block in enumerate(self.blocks):
+            weight_grads[f"block_{ind}"] = block.conv.weight, block.conv.weight.grad
+        weight_grads["dense"] = self.dense.weight, self.dense.weight.grad
+        return weight_grads
