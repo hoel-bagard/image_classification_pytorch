@@ -13,7 +13,9 @@ def main():
     parser.add_argument("--resize", nargs=2, default=[1080, 720], type=int, help="Resizes the images to given size")
     args = parser.parse_args()
 
-    os.makedirs(args.output_path, exist_ok=True)
+    os.makedirs(os.path.join(args.output_path, "good"), exist_ok=True)
+    os.makedirs(os.path.join(args.output_path, "defect"), exist_ok=True)
+    os.makedirs(os.path.join(args.output_path, "unsure"), exist_ok=True)
 
     file_list = glob.glob(os.path.join(args.data_path, "**", "*.png"), recursive=True)
     nb_imgs = len(file_list)
@@ -37,10 +39,13 @@ def main():
             key = cv2.waitKey(10)
             if key == ord("a"):  # No defect
                 shutil.move(file_path, os.path.join(args.output_path, "good", os.path.basename(file_path)))
+                break
             elif key == ord("d"):  # Defect
                 shutil.move(file_path, os.path.join(args.output_path, "defect", os.path.basename(file_path)))
+                break
             elif key == ord("w"):  # Gray zone
                 shutil.move(file_path, os.path.join(args.output_path, "unsure", os.path.basename(file_path)))
+                break
             elif key == ord("q"):  # quit
                 cv2.destroyAllWindows()
                 return -1
