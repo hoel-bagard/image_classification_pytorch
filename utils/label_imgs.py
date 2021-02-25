@@ -6,7 +6,7 @@ import cv2
 
 
 def main():
-    parser = argparse.ArgumentParser("Tool to label images for classification")
+    parser = argparse.ArgumentParser("Tool to label images for (binary) classification")
     parser.add_argument("data_path", type=Path, help="Path to the dataset")
     parser.add_argument("output_path", type=Path, help="Output path")
     parser.add_argument("--resize", nargs=2, default=[1080, 720], type=int, help="Resizes the images to given size")
