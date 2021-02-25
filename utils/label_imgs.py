@@ -1,30 +1,37 @@
 import argparse
-import os
-import glob
 import shutil
+from pathlib import Path
 
 import cv2
 
 
 def main():
     parser = argparse.ArgumentParser("Tool to label images for classification")
-    parser.add_argument('data_path', help='Path to the dataset')
-    parser.add_argument('output_path', help='Output path')
+    parser.add_argument("data_path", type=Path, help="Path to the dataset")
+    parser.add_argument("output_path", type=Path, help="Output path")
     parser.add_argument("--resize", nargs=2, default=[1080, 720], type=int, help="Resizes the images to given size")
     args = parser.parse_args()
 
-    os.makedirs(os.path.join(args.output_path, "good"), exist_ok=True)
-    os.makedirs(os.path.join(args.output_path, "defect"), exist_ok=True)
-    os.makedirs(os.path.join(args.output_path, "unsure"), exist_ok=True)
+    data_path: Path = args.data_path
+    output_path: Path = args.output_path
 
-    file_list = glob.glob(os.path.join(args.data_path, "**", "*.png"), recursive=True)
+    good_output_path = output_path / "good"
+    bad_output_path = output_path / "bad"
+    unsure_output_path = output_path / "unsure"
+    good_output_path.mkdir(parents=True, exist_ok=True)
+    bad_output_path.mkdir(parents=True, exist_ok=True)
+    unsure_output_path.mkdir(parents=True, exist_ok=True)
+
+    file_list = data_path.rglob("*.png")
     nb_imgs = len(file_list)
     for i, file_path in enumerate(file_list):
-        msg = f"Processing image {os.path.basename(file_path)} ({i+1}/{nb_imgs})"
-        print(msg + ' ' * (os.get_terminal_size()[0] - len(msg)), end='\r')
+        msg = f"Processing image {file_path.name} ({i+1}/{nb_imgs})"
+        print(msg + ' ' * (shutil.get_terminal_size(fallback=(156, 38)).columns - len(msg)), end='\r')
         img = cv2.imread(file_path)
 
-        # Image too small =(
+        if args.resize:
+            img = cv2.resize(img, args.resize)
+
         text = ("Press \"d\" if there is a defect, \"a\" if there are none, \"w\" if you are unsure"
                 "and \"q\" to quit")
         img = cv2.copyMakeBorder(img, 40, 0, 0, 0, cv2.BORDER_CONSTANT, None, 0)
@@ -32,19 +39,16 @@ def main():
                           cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1, cv2.LINE_AA)
 
         while True:
-            # if any([size > 1080 for size in resize]):
-            #     cv2.namedWindow("Image", cv2.WND_PROP_FULLSCREEN)
-            #     cv2.setWindowProperty("Image", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
             cv2.imshow("Image", img)
             key = cv2.waitKey(10)
             if key == ord("a"):  # No defect
-                shutil.move(file_path, os.path.join(args.output_path, "good", os.path.basename(file_path)))
+                shutil.move(file_path, good_output_path / file_path.name)
                 break
             elif key == ord("d"):  # Defect
-                shutil.move(file_path, os.path.join(args.output_path, "defect", os.path.basename(file_path)))
+                shutil.move(file_path, bad_output_path / file_path.name)
                 break
             elif key == ord("w"):  # Gray zone
-                shutil.move(file_path, os.path.join(args.output_path, "unsure", os.path.basename(file_path)))
+                shutil.move(file_path, unsure_output_path / file_path.name)
                 break
             elif key == ord("q"):  # quit
                 cv2.destroyAllWindows()
