@@ -10,7 +10,7 @@ import cv2
 from config.data_config import DataConfig
 from config.model_config import ModelConfig
 from src.networks.build_network import build_model
-from src.utils.draw import draw_pred
+from src.torch_utils.utils.draw import draw_pred_img
 import src.dataset.transforms as transforms
 
 
@@ -46,28 +46,28 @@ def main():
             img = cv2.imread(img_path)
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
             img = transform({"img": img, "label": 0})["img"]   # The 0 is ignored
-            img = img.unsqueeze(0).to(device).float()
+            with torch.no_grad():
+                img = img.unsqueeze(0).to(device).float()
 
-            output = model(img)
-            output = torch.nn.functional.softmax(output, dim=-1)
-            prediction = np.argmax(output.cpu().detach().numpy())
-            if key == prediction:
-                results.append(1)
-            else:
-                results.append(0)
+                output = model(img)
+                output = torch.nn.functional.softmax(output, dim=-1)
+                prediction = np.argmax(output.cpu().detach().numpy())
+                if key == prediction:
+                    results.append(1)
+                else:
+                    results.append(0)
 
-            if args.show and key != prediction:
-                out_img = draw_pred(img, output, torch.Tensor([key]),
-                                    size=ModelConfig.IMAGE_SIZES, data_path=os.path.join(args.data_path, ".."))[0]
-                out_img = cv2.cvtColor(out_img, cv2.COLOR_RGB2BGR)
-                while True:
-                    cv2.imshow("Image", out_img)
-                    if cv2.waitKey(10) == ord("q"):
-                        break
+                if args.show and key != prediction:
+                    out_img = draw_pred_img(img, output, torch.Tensor([key]), label_map, size=ModelConfig.IMAGE_SIZES)
+                    out_img = cv2.cvtColor(out_img[0], cv2.COLOR_RGB2BGR)
+                    while True:
+                        cv2.imshow("Image", out_img)
+                        if cv2.waitKey(10) == ord("q"):
+                            break
 
-                # out_img = draw_pred(torch.Tensor([img]), torch.Tensor([output]), torch.Tensor([key]))[0]
-                # cv2.imshow("Image", out_img[0])
-                # cv2.waitKey()
+                    # out_img = draw_pred(torch.Tensor([img]), torch.Tensor([output]), torch.Tensor([key]))[0]
+                    # cv2.imshow("Image", out_img[0])
+                    # cv2.waitKey()
 
     results = np.asarray(results)
     print(f"\nPrecision: {np.mean(results)}")

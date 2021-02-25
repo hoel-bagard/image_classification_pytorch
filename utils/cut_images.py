@@ -1,27 +1,29 @@
 import argparse
-import os
-import glob
+from pathlib import Path
+from shutil import get_terminal_size
 
 import cv2
 
 
 def main():
     parser = argparse.ArgumentParser("Cuts images into small tiles")
-    parser.add_argument('data_path', help='Path to the dataset')
-    parser.add_argument('output_path', help='Output path')
+    parser.add_argument("data_path", type=Path, help="Path to the dataset")
+    parser.add_argument("output_path", type=Path, help="Output path")
     parser.add_argument("--tile_size", nargs=2, default=[256, 256], type=int, help="Size of the tiles (w, h)")
     args = parser.parse_args()
 
-    os.makedirs(args.output_path, exist_ok=True)
+    data_path: Path = args.data_path
+    output_path: Path = args.output_path
+
+    output_path.mkdir(parents=True, exist_ok=True)
     tile_width, tile_height = args.tile_size
 
-    file_list = glob.glob(os.path.join(args.data_path, "**", "*.png"), recursive=True)
+    file_list = data_path.rglob("*.png")
     nb_imgs = len(file_list)
     for i, file_path in enumerate(file_list):
-        msg = f"Processing image {os.path.basename(file_path)} ({i+1}/{nb_imgs})"
-        print(msg + ' ' * (os.get_terminal_size()[0] - len(msg)), end='\r')
+        msg = f"Processing image {file_path.name} ({i+1}/{nb_imgs})"
+        print(msg + ' ' * (get_terminal_size(fallback=(156, 38)).columns - len(msg)), end='\r')
         img = cv2.imread(file_path)
-        file_name = os.path.basename(file_path)
         height, width, _ = img.shape
 
         tile_index = 0
@@ -33,9 +35,8 @@ def main():
                     x = width - tile_width
                 tile = img[y:y+tile_height, x:x+tile_width]
 
-                new_tile_name = os.path.splitext(file_name)[0] + '_' + str(tile_index).zfill(5) \
-                    + os.path.splitext(file_name)[1]
-                tile_path = os.path.join(args.output_path, new_tile_name)
+                new_tile_name = file_path.stem + '_' + str(tile_index).zfill(5) + file_path.suffix
+                tile_path = output_path / new_tile_name
                 cv2.imwrite(tile_path, tile)
                 tile_index += 1
 
