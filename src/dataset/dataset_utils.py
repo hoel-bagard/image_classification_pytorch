@@ -1,12 +1,13 @@
-import os
-import glob
-from typing import Dict
+from pathlib import Path
+from typing import Union
 
 import numpy as np
 import cv2
 
+from src.torch_utils.utils.misc import clean_print
 
-def dogs_vs_cats(data_path: str, label_map: Dict) -> np.ndarray:
+
+def dogs_vs_cats(data_path: Path, label_map: dict[int, str]) -> np.ndarray:
     """
     dogs-vs-cats loading function
     Args:
@@ -17,15 +18,15 @@ def dogs_vs_cats(data_path: str, label_map: Dict) -> np.ndarray:
     """
     labels = []
     for key in range(len(label_map)):
-        for image_path in glob.glob(os.path.join(data_path, f"{label_map[key]}*.jpg")):
-            msg = f"Loading data {image_path}"
-            print(msg + ' ' * (os.get_terminal_size()[0]-len(msg)), end="\r")
+        for image_path in data_path.glob(f"{label_map[key]}*.jpg"):
+            clean_print(f"Loading data {image_path}")
             labels.append([image_path, key])
     labels = np.asarray(labels)
     return labels
 
 
-def default_loader(data_path: str, label_map: Dict, limit: int = None, load_images: bool = False) -> np.ndarray:
+def default_loader(data_path: Path, label_map: dict[int, str],
+                   limit: int = None, load_images: bool = False) -> np.ndarray:
     """
     Args:
         data_path: Path to the root folder of the dataset.
@@ -38,17 +39,14 @@ def default_loader(data_path: str, label_map: Dict, limit: int = None, load_imag
         numpy array containing the images' paths and the associated label
     """
     labels = []
-    img_types = ("*.jpg", "*.bmp")
+    exts = ("*.png", "*.jpg", "*.bmp")
     for key in range(len(label_map)):
-        pathname = os.path.join(data_path, label_map[key], "**")
-        image_paths = []
-        [image_paths.extend(glob.glob(os.path.join(pathname, ext), recursive=True)) for ext in img_types]
+        class_dir_path = data_path / label_map[key]
+        image_paths = list([path for path in class_dir_path.rglob('*') if path.suffix in exts])
         for i, image_path in enumerate(image_paths):
-            msg = f"Loading data {image_path}    ({i}/{len(image_paths)})"
-            print(msg + ' ' * (os.get_terminal_size()[0] - len(msg)), end="\r")
+            clean_print(f"Loading data {image_path}    ({i}/{len(image_paths)})")
             if load_images:
-                img = cv2.imread(image_path)
-                img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+                img = default_load_data(image_path)
                 labels.append([img, key])
             else:
                 labels.append([image_path, key])
@@ -56,3 +54,22 @@ def default_loader(data_path: str, label_map: Dict, limit: int = None, load_imag
                 break
 
     return np.asarray(labels)
+
+
+def default_load_data(data: Union[Path, list[Path]]) -> np.ndarray:
+    """
+    Function that loads image(s) from path(s)
+    Args:
+        data: either an image path or a batch of image paths, and return the loaded image(s)
+    """
+    if type(data) == Path:
+        img = cv2.imread(data)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        return img
+    else:
+        imgs = []
+        for image_path in data:
+            img = cv2.imread(image_path)
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            imgs.append(img)
+        return imgs
