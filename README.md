@@ -10,7 +10,7 @@ opencv-python
 
 ### Clone the repository
 ```
-git@github.com:hoel-bagard/Classification-PyTorch.git
+git clone git@github.com:hoel-bagard/Classification-PyTorch.git --recursive
 ```
 
 ### Get some data and format it:
