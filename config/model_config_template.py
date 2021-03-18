@@ -21,7 +21,7 @@ class ModelConfig:
     MODEL = ModelHelper.WideNet
 
     CHANNELS: list[int] = [3, 8, 16, 32, 32, 16]
-    SIZES: list[Union[int, tuple[int, int]]]  = [5, 3, 3, 3, 3, 3]   # Kernel sizes
-    STRIDES: list[Union[int, tuple[int, int]]]  = [5, 3, 3, 2, 2, 2]
-    PADDINGS: list[Union[int, tuple[int, int]]]  = [2, 1, 1, 1, 1, 1]
-    BLOCKS: list[int] = [1, 2, 2, 1, 1, 1]
+    SIZES: list[Union[int, tuple[int, int]]]  = [5, 3, 3, 3, 3]   # Kernel sizes
+    STRIDES: list[Union[int, tuple[int, int]]]  = [5, 3, 3, 2, 2]
+    PADDINGS: list[Union[int, tuple[int, int]]]  = [2, 1, 1, 1, 1]
+    BLOCKS: list[int] = [1, 2, 2, 1, 1]
