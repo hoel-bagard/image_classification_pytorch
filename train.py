@@ -1,7 +1,7 @@
 from torch.utils.tensorboard import SummaryWriter  # noqa: F401  # Needs to be there to avoid segfaults
-import argparse
+from argparse import ArgumentParser
+from pathlib import Path
 import os
-import glob
 import shutil
 import time
 
@@ -11,99 +11,104 @@ from torchsummary import summary
 
 from config.data_config import DataConfig
 from config.model_config import ModelConfig
-from src.dataset.dataset import Dataset
-import src.dataset.transforms as transforms
+from src.torch_utils.utils.batch_generator import BatchGenerator
+from src.dataset.defeault_loader import (
+    default_loader,
+    default_load_data,
+    default_load_labels
+)
+import src.dataset.data_transformations as transforms
+from src.torch_utils.utils.misc import get_config_as_dict
 from src.networks.build_network import build_model
+from src.torch_utils.utils.misc import clean_print
 from src.train import train
 
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = ArgumentParser()
     parser.add_argument("--limit", default=None, type=int, help="Limits the number of apparition of each class")
     parser.add_argument("--load_data", action="store_true", help="Loads all the videos into RAM")
     args = parser.parse_args()
 
     if not DataConfig.KEEP_TB:
-        while os.path.exists(DataConfig.TB_DIR):
+        while DataConfig.TB_DIR.exists():
             shutil.rmtree(DataConfig.TB_DIR, ignore_errors=True)
             time.sleep(0.5)
-    os.makedirs(DataConfig.TB_DIR, exist_ok=True)
+    DataConfig.TB_DIR.mkdir(parents=True, exist_ok=True)
 
     if DataConfig.USE_CHECKPOINT:
         if not DataConfig.KEEP_CHECKPOINTS:
-            while os.path.exists(DataConfig.CHECKPOINT_DIR):
+            while DataConfig.CHECKPOINT_DIR.exists():
                 shutil.rmtree(DataConfig.CHECKPOINT_DIR, ignore_errors=True)
                 time.sleep(0.5)
         try:
-            os.makedirs(DataConfig.CHECKPOINT_DIR, exist_ok=False)
+            DataConfig.CHECKPOINT_DIR.mkdir(parents=True, exist_ok=True)
         except FileExistsError:
             print(f"The checkpoint dir {DataConfig.CHECKPOINT_DIR} already exists")
             return -1
 
         # Makes a copy of all the code (and config) so that the checkpoints are easy to load and use
-        output_folder = os.path.join(DataConfig.CHECKPOINT_DIR, "Classification-PyTorch")
-        for filepath in glob.glob(os.path.join("**", "*.py"), recursive=True):
-            destination_path = os.path.join(output_folder, filepath)
-            os.makedirs(os.path.dirname(destination_path), exist_ok=True)
+        output_folder = DataConfig.CHECKPOINT_DIR / "Segmentation-PyTorch"
+        for filepath in list(Path(".").glob("**/*.py")):
+            destination_path = output_folder / filepath
+            destination_path.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy(filepath, destination_path)
-        # shutil.copytree(".git", os.path.join(output_folder, ".git"))
         misc_files = ["README.md", "requirements.txt", "setup.cfg", ".gitignore"]
         for misc_file in misc_files:
-            shutil.copy(misc_file, os.path.join(output_folder, misc_file))
+            shutil.copy(misc_file, output_folder / misc_file)
         print("Finished copying files")
 
+    torch.backends.cudnn.benchmark = True   # Makes training quite a bit faster
 
+    # Data augmentation done on cpu.
+    augmentation_pipeline = transforms.compose_transformations((
+        transforms.vertical_flip,
+        transforms.horizontal_flip,
+        transforms.rotate180,
+    ))
+    # GPU pipeline used by both validation and train
+    base_gpu_pipeline = (
+        transforms.to_tensor(),
+        transforms.normalize(labels_too=True),
+    )
+    train_gpu_augmentation_pipeline = transforms.compose_transformations((
+        *base_gpu_pipeline,
+        transforms.noise()
+    ))
 
+    train_data, train_labels = default_loader(DataConfig.DATA_PATH / "Train",
+                                              limit=args.limit, load_data=args.load_data,
+                                              data_preprocessing_fn=default_load_data if args.load_data else None,
+                                              labels_preprocessing_fn=default_load_labels if args.load_data else None)
+    clean_print("Train data loaded")
 
-    # TODO: Have nb_workers in the config
-    # TODO: Have a data  loading helper in the condig ?
-    from src.dataset.dice_loader import load_dice
-    from src.torch_utils.utils.batch_generator import BatchGenerator
-    data, labels = load_dice(DataConfig.DATA_PATH / "Train", limit=args.limit, load_data=args.load_data)
+    val_data, val_labels = default_loader(DataConfig.DATA_PATH / "Validation",
+                                          limit=args.limit, load_data=args.load_data,
+                                          data_preprocessing_fn=default_load_data if args.load_data else None,
+                                          labels_preprocessing_fn=default_load_labels if args.load_data else None)
+    clean_print("Validation data loaded")
 
-    data_preprocessing_fn = 1 if args.load_data else 2
-    train_dataloader = BatchGenerator(data, labels, ModelConfig.BATCH_SIZE, nb_workers=4, shuffle=True)
+    with BatchGenerator(train_data, train_labels,
+                        ModelConfig.BATCH_SIZE, nb_workers=DataConfig.NB_WORKERS,
+                        data_preprocessing_fn=default_load_data if not args.load_data else None,
+                        labels_preprocessing_fn=default_load_labels if not args.load_data else None,
+                        aug_pipeline=augmentation_pipeline,
+                        gpu_augmentation_pipeline=train_gpu_augmentation_pipeline,
+                        shuffle=True) as train_dataloader, \
+        BatchGenerator(val_data, val_labels, ModelConfig.BATCH_SIZE, nb_workers=DataConfig.NB_WORKERS,
+                       data_preprocessing_fn=default_load_data if not args.load_data else None,
+                       labels_preprocessing_fn=default_load_labels if not args.load_data else None,
+                       gpu_augmentation_pipeline=transforms.compose_transformations(base_gpu_pipeline),
+                       shuffle=False) as val_dataloader:
 
+        print(f"\nLoaded {len(train_dataloader)} train data and",
+              f"{len(val_dataloader)} validation data", flush=True)
 
-    train_dataset = Dataset(os.path.join(DataConfig.DATA_PATH, "Train"),
-                            limit=args.limit,
-                            load_images=args.load_data,
-                            transform=Compose([
-                                transforms.Crop(top=600, bottom=500, left=800, right=200),
-                                transforms.RandomCrop(0.98),
-                                transforms.Resize(*ModelConfig.IMAGE_SIZES),
-                                transforms.Normalize(),
-                                transforms.VerticalFlip(),
-                                transforms.HorizontalFlip(),
-                                transforms.Rotate180(),
-                                transforms.ToTensor(),
-                                transforms.Noise()
-                            ]))
-    train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=ModelConfig.BATCH_SIZE,
-                                                   shuffle=True, num_workers=8)
+        print("Building model. . .", end="\r")
+        model = build_model(ModelConfig.MODEL, DataConfig.OUTPUT_CLASSES, **get_config_as_dict(ModelConfig))
+        summary(model, train_dataloader.data_shape)
 
-    print("Train data loaded" + ' ' * (os.get_terminal_size()[0] - 17))
-
-    val_dataset = Dataset(os.path.join(DataConfig.DATA_PATH, "Validation"),
-                          limit=args.limit,
-                          load_images=args.load_data,
-                          transform=Compose([
-                              transforms.Crop(top=600, bottom=500, left=800, right=200),
-                              transforms.Resize(*ModelConfig.IMAGE_SIZES),
-                              transforms.Normalize(),
-                              transforms.ToTensor()
-                          ]))
-    val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size=ModelConfig.BATCH_SIZE,
-                                                 shuffle=True, num_workers=8)
-    print("Validation data loaded" + ' ' * (os.get_terminal_size()[0] - 22))
-
-    print(f"\nLoaded {len(train_dataloader.dataset)} train data and",
-          f"{len(val_dataloader.dataset)} validation data", flush=True)
-
-    model = build_model(ModelConfig.NETWORK)
-    summary(model, (3, ModelConfig.IMAGE_SIZES[0], ModelConfig.IMAGE_SIZES[1]))
-
-    train(model, train_dataloader, val_dataloader)
+        train(model, train_dataloader, val_dataloader)
 
 
 if __name__ == '__main__':
