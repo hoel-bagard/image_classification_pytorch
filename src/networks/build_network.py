@@ -1,3 +1,6 @@
+from typing import Optional
+from pathlib import Path
+
 import torch
 
 from .small_darknet import SmallDarknet
@@ -5,31 +8,33 @@ from .wide_net import WideNet
 from .lambda_network import LambdaResnet
 
 
-def build_model(name: str, model_path: str = None, eval: bool = False):
-    """
-    Creates model corresponding to the given name.
+class ModelHelper:
+    SmallDarknet = SmallDarknet
+    WideNet = WideNet
+    LambdaResnet = LambdaResnet
+
+
+def build_model(model_type: type, nb_classes: int, model_path: Optional[Path] = None,
+                eval_mode: bool = False, **kwargs):
+    """ Function that instanciates the given model.
+
     Args:
-        name: Name of the model to create, must be one of the implemented models
-        model_path: If given, then the weights will be load that checkpoint
-        eval: Whether the model will be used for evaluation or not
+        model_type (type): Class of the model to instanciates
+        nb_classes (int): Number of classes in the dataset
+        model_path (Path): If given, then the weights will be loaded from that checkpoint
+        eval (bool): Whether the model will be used for evaluation or not
     Returns:
-        model: PyTorch model
+        torch.nn.Module: Instantiated PyTorch model
     """
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    assert name in ("SmallDarknet", "WideNet", "LambdaResnet")
-    if name == "SmallDarknet":
-        model = SmallDarknet()
-    elif name == "WideNet":
-        model = WideNet()
-    elif name == "LambdaResnet":
-        model = LambdaResnet()
+    kwargs["nb_classes"] = nb_classes
+    model = model_type(**kwargs)
 
     if model_path is not None:
-        model.load_state_dict(torch.load(model_path))
+        model.load_state_dict(torch.load(model_path, map_location=device))
     if eval:
         model.eval()
 
-    model = model.float()
     model.to(device)
     return model
