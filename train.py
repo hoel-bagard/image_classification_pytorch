@@ -105,7 +105,7 @@ def main():
               f"{len(val_dataloader)} validation data", flush=True)
 
         print("Building model. . .", end="\r")
-        model = build_model(ModelConfig.MODEL, DataConfig.OUTPUT_CLASSES, **get_config_as_dict(ModelConfig))
+        model = build_model(ModelConfig.MODEL, DataConfig.NB_CLASSES, **get_config_as_dict(ModelConfig))
         summary(model, train_dataloader.data_shape)
 
         train(model, train_dataloader, val_dataloader)
