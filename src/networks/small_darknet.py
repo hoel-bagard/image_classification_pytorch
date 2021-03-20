@@ -9,7 +9,6 @@ from src.torch_utils.networks.network_utils import (
     layer_init,
     get_cnn_output_size
 )
-from config.model_config import ModelConfig
 
 
 class SmallDarknet(nn.Module):
@@ -33,7 +32,7 @@ class SmallDarknet(nn.Module):
             layer_init: Function used to initialise the layers of the network
         """
         super().__init__()
-        self.feature_extractor = nn.Sequential(*[DarknetBlock(channels[i-1], channels[i], ModelConfig.NB_BLOCKS[i-1])
+        self.feature_extractor = nn.Sequential(*[DarknetBlock(channels[i-1], channels[i], blocks[i-1])
                                                  for i in range(1, len(channels))])
 
         feature_extractor_output_shape: int = get_cnn_output_size(kwargs["images_sizes"], sizes, strides, paddings,

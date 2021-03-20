@@ -6,11 +6,10 @@ from lambda_networks import λLayer
 
 
 from src.networks.layers import DarknetBlock
-from .network_utils import (
-    get_cnn_output_size,
-    layer_init
+from src.torch_utils.networks.network_utils import (
+    layer_init,
+    get_cnn_output_size
 )
-from config.model_config import ModelConfig
 
 
 # r is the receptive field for relative positional encoding (23 x 23)
@@ -29,7 +28,7 @@ class Bottleneck(nn.Module):
     expansion = 2
 
     def __init__(self, inplanes, planes, stride=1, downsample=None):
-        super(Bottleneck, self).__init__()
+        super().__init__()
 
         self.conv1 = conv1x1(inplanes, planes)
         self.bn1 = nn.BatchNorm2d(planes)
@@ -63,7 +62,7 @@ class Bottleneck(nn.Module):
 
 class LambdaResnet(nn.Module):
     def __init__(self, small_input=False):
-        super(LambdaResnet, self).__init__()
+        super().__init__()
         num_classes = ModelConfig.OUTPUT_CLASSES
         layers = [1, 2, 2, 1]
         channels = [16, 32, 48, 64]
