@@ -1,12 +1,10 @@
 from torch.utils.tensorboard import SummaryWriter  # noqa: F401  # Needs to be there to avoid segfaults
 from argparse import ArgumentParser
 from pathlib import Path
-import os
 import shutil
 import time
 
 import torch
-from torchvision.transforms import Compose
 from torchsummary import summary
 
 from config.data_config import DataConfig
@@ -14,8 +12,7 @@ from config.model_config import ModelConfig
 from src.torch_utils.utils.batch_generator import BatchGenerator
 from src.dataset.defeault_loader import (
     default_loader,
-    default_load_data,
-    default_load_labels
+    default_load_data
 )
 import src.dataset.data_transformations as transforms
 from src.torch_utils.utils.misc import get_config_as_dict
@@ -78,26 +75,22 @@ def main():
 
     train_data, train_labels = default_loader(DataConfig.DATA_PATH / "Train",
                                               limit=args.limit, load_data=args.load_data,
-                                              data_preprocessing_fn=default_load_data if args.load_data else None,
-                                              labels_preprocessing_fn=default_load_labels if args.load_data else None)
+                                              data_preprocessing_fn=default_load_data if args.load_data else None)
     clean_print("Train data loaded")
 
     val_data, val_labels = default_loader(DataConfig.DATA_PATH / "Validation",
                                           limit=args.limit, load_data=args.load_data,
-                                          data_preprocessing_fn=default_load_data if args.load_data else None,
-                                          labels_preprocessing_fn=default_load_labels if args.load_data else None)
+                                          data_preprocessing_fn=default_load_data if args.load_data else None)
     clean_print("Validation data loaded")
 
     with BatchGenerator(train_data, train_labels,
                         ModelConfig.BATCH_SIZE, nb_workers=DataConfig.NB_WORKERS,
                         data_preprocessing_fn=default_load_data if not args.load_data else None,
-                        labels_preprocessing_fn=default_load_labels if not args.load_data else None,
                         aug_pipeline=augmentation_pipeline,
                         gpu_augmentation_pipeline=train_gpu_augmentation_pipeline,
                         shuffle=True) as train_dataloader, \
         BatchGenerator(val_data, val_labels, ModelConfig.BATCH_SIZE, nb_workers=DataConfig.NB_WORKERS,
                        data_preprocessing_fn=default_load_data if not args.load_data else None,
-                       labels_preprocessing_fn=default_load_labels if not args.load_data else None,
                        gpu_augmentation_pipeline=transforms.compose_transformations(base_gpu_pipeline),
                        shuffle=False) as val_dataloader:
 
