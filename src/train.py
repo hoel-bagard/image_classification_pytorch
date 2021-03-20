@@ -1,5 +1,6 @@
 import time
 import os
+from subprocess import CalledProcessError
 
 import torch
 import torch.nn as nn
@@ -8,23 +9,30 @@ from config.data_config import DataConfig
 from config.model_config import ModelConfig
 from src.torch_utils.utils.trainer import Trainer
 from src.torch_utils.utils.tensorboard import TensorBoard
-from src.torch_utils.utils.metrics import Metrics
+from src.torch_utils.utils.classification_metrics import ClassificationMetrics
+from src.torch_utils.utils.batch_generator import BatchGenerator
 from src.torch_utils.utils.ressource_usage import resource_usage
 
 
-def train(model: nn.Module, train_dataloader: torch.utils.data.DataLoader, val_dataloader: torch.utils.data.DataLoader):
+def train(model: nn.Module, train_dataloader: BatchGenerator, val_dataloader: BatchGenerator):
+    """ Trains and validate the given model using the datasets.
+    Args:
+        model (nn.Module): Model to train
+        train_dataloader (BatchGenerator): BatchGenerator of the training data
+        val_dataloader (BatchGenerator): BatchGenerator of the validation data
+    """
     loss_fn = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=ModelConfig.LR, weight_decay=ModelConfig.REG_FACTOR)
-    trainer = Trainer(model, loss_fn, train_dataloader, val_dataloader, ModelConfig.BATCH_SIZE, optimizer=optimizer)
+    trainer = Trainer(model, loss_fn, optimizer, train_dataloader, val_dataloader)
     scheduler = torch.optim.lr_scheduler.ExponentialLR(trainer.optimizer, gamma=ModelConfig.LR_DECAY)
     # scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(trainer.optimizer, 10, T_mult=2)
     # I forgot to use the gamma for the annealing
     # https://github.com/katsura-jp/pytorch-cosine-annealing-with-warmup
 
     if DataConfig.USE_TB:
-        metrics = Metrics(model, loss_fn, train_dataloader, val_dataloader, DataConfig.LABEL_MAP, max_batches=None)
-        tensorboard = TensorBoard(model, metrics, DataConfig.LABEL_MAP, DataConfig.TB_DIR,
-                                  ModelConfig.GRAYSCALE, ModelConfig.IMAGE_SIZES)
+        metrics = ClassificationMetrics(model, train_dataloader, val_dataloader, DataConfig.LABEL_MAP, max_batches=None)
+        tensorboard = TensorBoard(model, DataConfig.TB_DIR, ModelConfig.IMAGE_SIZES, metrics, DataConfig.LABEL_MAP,
+                                  ModelConfig.GRAYSCALE)
 
     best_loss = 1000
     last_checkpoint_epoch = 0
@@ -32,7 +40,7 @@ def train(model: nn.Module, train_dataloader: torch.utils.data.DataLoader, val_d
 
     try:
         for epoch in range(ModelConfig.MAX_EPOCHS):
-            epoch_start_time = time.time()
+            epoch_start_time = time.perf_counter()
             print(f"\nEpoch {epoch}/{ModelConfig.MAX_EPOCHS}")
 
             epoch_loss = trainer.train_epoch()
@@ -53,7 +61,7 @@ def train(model: nn.Module, train_dataloader: torch.utils.data.DataLoader, val_d
             # Validation and other metrics
             if epoch % DataConfig.VAL_FREQ == 0 and epoch >= DataConfig.RECORD_START:
                 with torch.no_grad():
-                    validation_start_time = time.time()
+                    validation_start_time = time.perf_counter()
                     epoch_loss = trainer.val_epoch()
 
                     if DataConfig.USE_TB:
@@ -64,11 +72,13 @@ def train(model: nn.Module, train_dataloader: torch.utils.data.DataLoader, val_d
 
                         # Metrics for the Train dataset
                         tensorboard.write_images(epoch, train_dataloader)
-                        train_acc = tensorboard.write_metrics(epoch)
+                        tensorboard.write_metrics(epoch)
+                        train_acc = metrics.get_avg_acc()
 
                         # Metrics for the Validation dataset
                         tensorboard.write_images(epoch, val_dataloader, mode="Validation")
-                        val_acc = tensorboard.write_metrics(epoch, mode="Validation")
+                        tensorboard.write_metrics(epoch, mode="Validation")
+                        val_acc = metrics.get_avg_acc()
 
                         print(f"Train accuracy: {train_acc:.3f}  -  Validation accuracy: {val_acc:.3f}", end='\r')
 
@@ -78,8 +88,11 @@ def train(model: nn.Module, train_dataloader: torch.utils.data.DataLoader, val_d
         print("\n")
 
     train_stop_time = time.time()
-    tensorboard.close_writers()
-    memory_peak, gpu_memory = resource_usage()
     print("Finished Training"
-          f"\n\tTraining time : {train_stop_time - train_start_time:.03f}s"
-          f"\n\tRAM peak : {memory_peak // 1024} MB\n\tVRAM usage : {gpu_memory}")
+          f"\n\tTraining time : {train_stop_time - train_start_time:.03f}s")
+    tensorboard.close_writers()
+    try:
+        memory_peak, gpu_memory = resource_usage()
+        print(f"\n\tRAM peak : {memory_peak // 1024} MB\n\tVRAM usage : {gpu_memory}")
+    except CalledProcessError:
+        pass
