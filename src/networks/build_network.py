@@ -4,13 +4,11 @@ from pathlib import Path
 import torch
 
 from .small_darknet import SmallDarknet
-from .wide_net import WideNet
 from .lambda_network import LambdaResnet
 
 
 class ModelHelper:
     SmallDarknet = SmallDarknet
-    WideNet = WideNet
     LambdaResnet = LambdaResnet
 
 
@@ -36,5 +34,5 @@ def build_model(model_type: type, nb_classes: int, model_path: Optional[Path] = 
     if eval:
         model.eval()
 
-    model.to(device)
+    model.to(device).float()
     return model

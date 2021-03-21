@@ -16,6 +16,23 @@ def compose_transformations(transformations: list[Callable[[np.ndarray, np.ndarr
     return compose_transformations_fn
 
 
+def resize(img_size: tuple[int, int]) -> Callable[[np.ndarray, np.ndarray], tuple[np.ndarray, np.ndarray]]:
+    """ Returns a function that resizes a batch of images.
+
+    Args:
+        img_size (int): The size to which the images should be resized
+
+    Returns:
+        callable: The function doing the resizing
+    """
+    def resize_fn(imgs: np.ndarray, labels: np.ndarray):
+        resized_imgs = np.empty((imgs.shape[0], *img_size, 3))  # Hard-coded last dim, might need to be changed later
+        for i, img in enumerate(imgs):
+            resized_imgs[i] = cv2.resize(img, img_size, interpolation=cv2.INTER_AREA)
+        return resized_imgs, labels
+    return resize_fn
+
+
 def crop(top: int = 0, bottom: int = 1, left: int = 0, right: int = 1):
     """ Returns a function that crops a batch of images.
 
@@ -75,7 +92,7 @@ def to_tensor():
     def to_tensor_fn(imgs: np.ndarray, labels: np.ndarray) -> tuple[torch.Tensor, torch.Tensor]:
         """Convert ndarrays in sample to Tensors."""
         imgs = imgs.transpose((0, 3, 1, 2))
-        return torch.from_numpy(imgs).to(device), torch.from_numpy(labels).to(device)
+        return torch.from_numpy(imgs).to(device).float(), torch.from_numpy(labels).to(device)
     return to_tensor_fn
 
 

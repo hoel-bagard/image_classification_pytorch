@@ -38,8 +38,8 @@ def default_loader(data_path: Path,
     for key in range(len(label_map)):
         class_dir_path = data_path / label_map[key]
         image_paths = list([path for path in class_dir_path.rglob('*') if path.suffix in exts])
-        for i, image_path in enumerate(image_paths):
-            clean_print(f"Loading data {image_path}    ({i}/{len(image_paths)}) for class label_map[key]")
+        for i, image_path in enumerate(image_paths, start=1):
+            clean_print(f"Loading data {image_path}    ({i}/{len(image_paths)}) for class label_map[key]", end="\r")
             if load_data:
                 data.append(data_preprocessing_fn(image_path))
             else:
