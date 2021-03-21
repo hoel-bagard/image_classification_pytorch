@@ -16,9 +16,10 @@ class ModelConfig:
 
     # Data processing
     IMAGE_SIZES: tuple[int, int] = (256, 256)
+    GRAYSCALE = False   # Not fully implemented for the True case
 
     # Network part
-    MODEL = ModelHelper.WideNet
+    MODEL = ModelHelper.SmallDarknet
 
     CHANNELS: list[int] = [3, 8, 16, 32, 32, 16]
     SIZES: list[Union[int, tuple[int, int]]]  = [5, 3, 3, 3, 3]   # Kernel sizes

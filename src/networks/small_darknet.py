@@ -1,6 +1,7 @@
 from collections import OrderedDict
 from typing import Union, Callable
 
+import numpy as np
 import torch
 import torch.nn as nn
 
@@ -18,7 +19,7 @@ class SmallDarknet(nn.Module):
                  strides: list[Union[int, tuple[int, int, int]]],
                  paddings: list[Union[int, tuple[int, int, int]]],
                  blocks: list[int],
-                 output_classes: int,
+                 nb_classes: int,
                  layer_init: Callable[[nn.Module], None] = layer_init, **kwargs):
         """
         Feature extractor
@@ -28,17 +29,20 @@ class SmallDarknet(nn.Module):
             strides: List with the stride for each convolution
             paddings: List with the padding for each convolution
             blocks: List with the number of blocks for the darknet blocks
-            output_class: Number of output classes
+            nb_class: Number of output classes
             layer_init: Function used to initialise the layers of the network
         """
         super().__init__()
         self.feature_extractor = nn.Sequential(*[DarknetBlock(channels[i-1], channels[i], blocks[i-1])
                                                  for i in range(1, len(channels))])
 
-        feature_extractor_output_shape: int = get_cnn_output_size(kwargs["images_sizes"], sizes, strides, paddings,
-                                                                  output_channels=channels[-1], dense=True, **kwargs)
+        # feature_extractor_output_shape: int = get_cnn_output_size(kwargs["image_sizes"], sizes, strides, paddings,
+        #                                                           output_channels=channels[-1], dense=True)
+        fe_output = np.prod(self.feature_extractor(torch.zeros(1, 3,
+                                                               *kwargs["image_sizes"],
+                                                               device="cpu")).shape[1:])
 
-        self.dense = nn.Linear(feature_extractor_output_shape, output_classes)
+        self.dense = nn.Linear(fe_output, nb_classes)
 
         # Used for grad-cam
         self.gradients: torch.Tensor = None

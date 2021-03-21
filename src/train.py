@@ -44,6 +44,7 @@ def train(model: nn.Module, train_dataloader: BatchGenerator, val_dataloader: Ba
             print(f"\nEpoch {epoch}/{ModelConfig.MAX_EPOCHS}")
 
             epoch_loss = trainer.train_epoch()
+
             if DataConfig.USE_TB:
                 tensorboard.write_loss(epoch, epoch_loss)
                 tensorboard.write_lr(epoch, scheduler.get_last_lr()[0])

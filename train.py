@@ -10,10 +10,9 @@ from torchsummary import summary
 from config.data_config import DataConfig
 from config.model_config import ModelConfig
 from src.torch_utils.utils.batch_generator import BatchGenerator
-from src.dataset.defeault_loader import (
-    default_loader,
-    default_load_data
-)
+# from src.dataset.defeault_loader import default_loader as data_loader
+from src.dataset.dataset_loaders import dog_vs_cat_loader as data_loader
+from src.dataset.defeault_loader import default_load_data
 import src.dataset.data_transformations as transforms
 from src.torch_utils.utils.misc import get_config_as_dict
 from src.networks.build_network import build_model
@@ -45,7 +44,7 @@ def main():
             return -1
 
         # Makes a copy of all the code (and config) so that the checkpoints are easy to load and use
-        output_folder = DataConfig.CHECKPOINT_DIR / "Segmentation-PyTorch"
+        output_folder = DataConfig.CHECKPOINT_DIR / "Classification-PyTorch"
         for filepath in list(Path(".").glob("**/*.py")):
             destination_path = output_folder / filepath
             destination_path.parent.mkdir(parents=True, exist_ok=True)
@@ -58,7 +57,11 @@ def main():
     torch.backends.cudnn.benchmark = True   # Makes training quite a bit faster
 
     # Data augmentation done on cpu.
-    augmentation_pipeline = transforms.compose_transformations((
+    base_cpu_pipeline = (
+        transforms.resize(ModelConfig.IMAGE_SIZES),
+    )
+    cpu_augmentation_pipeline = transforms.compose_transformations((
+        *base_cpu_pipeline,
         transforms.vertical_flip,
         transforms.horizontal_flip,
         transforms.rotate180,
@@ -66,32 +69,33 @@ def main():
     # GPU pipeline used by both validation and train
     base_gpu_pipeline = (
         transforms.to_tensor(),
-        transforms.normalize(labels_too=True),
+        transforms.normalize_fn,
     )
-    train_gpu_augmentation_pipeline = transforms.compose_transformations((
+    gpu_augmentation_pipeline = transforms.compose_transformations((
         *base_gpu_pipeline,
         transforms.noise()
     ))
 
-    train_data, train_labels = default_loader(DataConfig.DATA_PATH / "Train",
-                                              limit=args.limit, load_data=args.load_data,
-                                              data_preprocessing_fn=default_load_data if args.load_data else None)
+    train_data, train_labels = data_loader(DataConfig.DATA_PATH / "Train", DataConfig.LABEL_MAP,
+                                           limit=args.limit, load_data=args.load_data,
+                                           data_preprocessing_fn=default_load_data if args.load_data else None)
     clean_print("Train data loaded")
 
-    val_data, val_labels = default_loader(DataConfig.DATA_PATH / "Validation",
-                                          limit=args.limit, load_data=args.load_data,
-                                          data_preprocessing_fn=default_load_data if args.load_data else None)
+    val_data, val_labels = data_loader(DataConfig.DATA_PATH / "Validation", DataConfig.LABEL_MAP,
+                                       limit=args.limit, load_data=args.load_data,
+                                       data_preprocessing_fn=default_load_data if args.load_data else None)
     clean_print("Validation data loaded")
 
     with BatchGenerator(train_data, train_labels,
                         ModelConfig.BATCH_SIZE, nb_workers=DataConfig.NB_WORKERS,
                         data_preprocessing_fn=default_load_data if not args.load_data else None,
-                        aug_pipeline=augmentation_pipeline,
-                        gpu_augmentation_pipeline=train_gpu_augmentation_pipeline,
+                        cpu_pipeline=cpu_augmentation_pipeline,
+                        gpu_pipeline=gpu_augmentation_pipeline,
                         shuffle=True) as train_dataloader, \
         BatchGenerator(val_data, val_labels, ModelConfig.BATCH_SIZE, nb_workers=DataConfig.NB_WORKERS,
                        data_preprocessing_fn=default_load_data if not args.load_data else None,
-                       gpu_augmentation_pipeline=transforms.compose_transformations(base_gpu_pipeline),
+                       cpu_pipeline=transforms.compose_transformations(base_cpu_pipeline),
+                       gpu_pipeline=transforms.compose_transformations(base_gpu_pipeline),
                        shuffle=False) as val_dataloader:
 
         print(f"\nLoaded {len(train_dataloader)} train data and",

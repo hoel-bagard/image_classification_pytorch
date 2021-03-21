@@ -31,8 +31,8 @@ def dog_vs_cat_loader(data_path: Path,
     labels, data = [], []
     for key in range(len(label_map)):
         image_paths = list([path for path in data_path.glob(f"{label_map[key]}*.jpg")])
-        for i, image_path in enumerate(image_paths):
-            clean_print(f"Loading data {image_path}    ({i}/{len(image_paths)}) for class label_map[key]")
+        for i, image_path in enumerate(image_paths, start=1):
+            clean_print(f"Loading data {image_path}    ({i}/{len(image_paths)}) for class label_map[key]", end="\r")
             if load_data:
                 data.append(data_preprocessing_fn(image_path))
             else:
