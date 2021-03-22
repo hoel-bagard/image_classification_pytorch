@@ -1,7 +1,8 @@
 from pathlib import Path
 from typing import (
     Callable,
-    Optional
+    Optional,
+    Union
 )
 
 import numpy as np
@@ -13,8 +14,9 @@ def dog_vs_cat_loader(data_path: Path,
                       label_map: dict[int, str],
                       limit: int = None,
                       load_data: bool = False,
-                      data_preprocessing_fn: Optional[Callable[[Path], np.ndarray]] = None
-                      ) -> tuple[np.ndarray, np.ndarray]:
+                      data_preprocessing_fn: Optional[Callable[[Path], np.ndarray]] = None,
+                      return_img_paths: bool = False,
+                      ) -> Union[tuple[np.ndarray, np.ndarray, list[Path]], tuple[np.ndarray, np.ndarray]]:
     """ Loading function for the dog vs cat dataset
 
     Args:
@@ -25,6 +27,7 @@ def dog_vs_cat_loader(data_path: Path,
         load_data (bool): If true then this function returns the images already loaded instead of their paths.
                           The images are loaded using the preprocessing functions (they must be provided)
         data_preprocessing_fn (callable, optional): Function used to load data (imgs) from their paths.
+        return_img_paths: If true, then the image paths will also be returned.
     Return:
         numpy array containing the images' paths and the associated label or the loaded data
     """
@@ -41,4 +44,7 @@ def dog_vs_cat_loader(data_path: Path,
             if limit and i >= limit:
                 break
 
-    return np.asarray(data), np.asarray(labels)
+    if return_img_paths:
+        return np.asarray(data), np.asarray(labels), image_paths
+    else:
+        return np.asarray(data), np.asarray(labels)
