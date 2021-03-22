@@ -1,76 +1,72 @@
-import argparse
-import glob
-import os
+from argparse import ArgumentParser
+import time
+from pathlib import Path
 
 import torch
-from torchvision.transforms import Compose
 import numpy as np
 import cv2
 
 from config.data_config import DataConfig
 from config.model_config import ModelConfig
+from src.torch_utils.utils.misc import get_config_as_dict
+from src.dataset.dataset_loaders import dog_vs_cat_loader as data_loader
+from src.dataset.defeault_loader import default_load_data
 from src.networks.build_network import build_model
 from src.torch_utils.utils.draw import draw_pred_img
-import src.dataset.transforms as transforms
+import src.dataset.data_transformations as transforms
+from src.torch_utils.utils.misc import clean_print
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("model_path", help="Path to the checkpoint to use")
-    parser.add_argument("data_path", help="Path to the test dataset")
-    parser.add_argument("--show", action="store_true", help="Show the bad images")
+    parser = ArgumentParser()
+    parser.add_argument("model_path", type=Path, help="Path to the checkpoint to use")
+    parser.add_argument("data_path", type=Path, help="Path to the test dataset")
+    parser.add_argument("--show", "--s", action="store_true", help="Show the images where the network failed.")
     args = parser.parse_args()
 
+    inference_start_time = time.perf_counter()
+
     # Creates and load the model
-    model = build_model(ModelConfig.NETWORK, args.model_path, eval=True)
+    model = build_model(ModelConfig.MODEL, DataConfig.NB_CLASSES,
+                        model_path=args.model_path, eval=True,  **get_config_as_dict(ModelConfig))
     print("Weights loaded", flush=True)
 
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    label_map = DataConfig.LABEL_MAP
-    transform = Compose([
-        transforms.Crop(top=600, bottom=500, left=800, right=200),
-        transforms.Resize(*ModelConfig.IMAGE_SIZES),
-        transforms.Normalize(),
-        transforms.ToTensor()
-    ])
+    data, labels, paths = data_loader(args.data_path, DataConfig.LABEL_MAP,
+                                      data_preprocessing_fn=default_load_data, return_img_paths=True)
+    base_cpu_pipeline = (transforms.resize(ModelConfig.IMAGE_SIZES), )
+    base_gpu_pipeline = (transforms.to_tensor(), transforms.normalize(labels_too=True))
+    data_transformations = transforms.compose_transformations((*base_cpu_pipeline, *base_gpu_pipeline))
+    print("\nData loaded", flush=True)
 
-    results = []
-    img_types = ("*.jpg", "*.bmp")
-    for key in range(len(label_map)):
-        pathname = os.path.join(args.data_path, label_map[key], "**")
-        image_paths = []
-        [image_paths.extend(glob.glob(os.path.join(pathname, ext), recursive=True)) for ext in img_types]
-        for img_path in image_paths:
-            msg = f"Loading data {img_path}"
-            print(msg + ' ' * (os.get_terminal_size()[0] - len(msg)), end="\r")
-            img = cv2.imread(img_path)
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-            img = transform({"img": img, "label": 0})["img"]   # The 0 is ignored
-            with torch.no_grad():
-                img = img.unsqueeze(0).to(device).float()
+    results = []  # Variable used to keep track of the classification results
+    for img, label, img_path in zip(data, labels, paths):
+        clean_print(f"Processing image {img_path}", end="\r")
+        img, label = data_transformations([img], [label])
+        with torch.no_grad():
+            output = model(img)
+            output = torch.nn.functional.softmax(output, dim=-1)
+            prediction = torch.argmax(output)
+            pred_correct = label == prediction
+            if pred_correct:
+                results.append(1)
+            else:
+                results.append(0)
 
-                output = model(img)
-                output = torch.nn.functional.softmax(output, dim=-1)
-                prediction = np.argmax(output.cpu().detach().numpy())
-                if key == prediction:
-                    results.append(1)
-                else:
-                    results.append(0)
-
-                if args.show and key != prediction:
-                    out_img = draw_pred_img(img, output, torch.Tensor([key]), label_map, size=ModelConfig.IMAGE_SIZES)
-                    out_img = cv2.cvtColor(out_img[0], cv2.COLOR_RGB2BGR)
-                    while True:
-                        cv2.imshow("Image", out_img)
-                        if cv2.waitKey(10) == ord("q"):
-                            break
-
-                    # out_img = draw_pred(torch.Tensor([img]), torch.Tensor([output]), torch.Tensor([key]))[0]
-                    # cv2.imshow("Image", out_img[0])
-                    # cv2.waitKey()
+            if args.show and not pred_correct:
+                out_img = draw_pred_img(img, output, label, DataConfig.LABEL_MAP, size=ModelConfig.IMAGE_SIZES)
+                out_img = cv2.cvtColor(out_img[0], cv2.COLOR_RGB2BGR)
+                while True:
+                    cv2.imshow("Image", out_img)
+                    key = cv2.waitKey(10)
+                    if key == ord("q"):
+                        cv2.destroyAllWindows()
+                        break
 
     results = np.asarray(results)
-    print(f"\nPrecision: {np.mean(results)}")
+    total_time = time.perf_counter() - inference_start_time
+    print("\nFinished running inference on the test dataset.")
+    print(f"Total inference time was {total_time:.3f}s, which averages to {total_time/len(results)].5f}s per image")
+    print(f"Precision: {np.mean(results)}")
 
 
 if __name__ == "__main__":
