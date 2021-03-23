@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
-import time
 from pathlib import Path
+import time
 
 import torch
 import numpy as np
