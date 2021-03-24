@@ -1,23 +1,13 @@
-from collections import OrderedDict
-
-import torch
 import torch.nn as nn
 from lambda_networks import λLayer
-
-
-from src.networks.layers import DarknetBlock
-from src.torch_utils.networks.network_utils import (
-    layer_init,
-    get_cnn_output_size
-)
 
 
 # r is the receptive field for relative positional encoding (23 x 23)
 # self.layer = λLayer(dim=32, dim_out=32, r=23, dim_k=16, heads=4, dim_u=4)
 
 
-
 # Code is from https://gist.github.com/PistonY/ad33ab9e3d5f9a6a38345eb184e68cb4
+
 
 def conv1x1(in_planes, out_planes, stride=1):
     """1x1 convolution"""
@@ -61,9 +51,9 @@ class Bottleneck(nn.Module):
 
 
 class LambdaResnet(nn.Module):
-    def __init__(self, small_input=False):
+    def __init__(self, nb_classes: int, small_input: bool = False):
         super().__init__()
-        num_classes = ModelConfig.OUTPUT_CLASSES
+        num_classes = nb_classes
         layers = [1, 2, 2, 1]
         channels = [16, 32, 48, 64]
 
