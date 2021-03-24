@@ -1,21 +1,5 @@
-# import argparse
-# import glob
-# import os
-
-# import cv2
-# import torch
-# from torchvision.transforms import Compose
-# import numpy as np
-
-# from config.data_config import DataConfig
-# from config.model_config import ModelConfig
-# from src.networks.build_network import build_model
-# from src.utils.draw import draw_pred
-# import src.dataset.transforms as transforms
-
 from argparse import ArgumentParser
 from pathlib import Path
-import time
 
 import torch
 import numpy as np
@@ -34,8 +18,8 @@ from src.torch_utils.utils.misc import clean_print
 
 def main():
     parser = ArgumentParser()
-    parser.add_argument("model_path", help="Path to the checkpoint to use")
-    parser.add_argument("data_path", help="Path to the test dataset")
+    parser.add_argument("model_path", type=Path, help="Path to the checkpoint to use")
+    parser.add_argument("data_path", type=Path, help="Path to the test dataset")
     args = parser.parse_args()
 
     # Creates and load the model
@@ -88,17 +72,19 @@ def main():
         cam = cam / np.max(cam)
 
         # Draw prediction (logits) on the image
-        img = draw_pred(img, output, torch.Tensor([key]),
-                        size=ModelConfig.IMAGE_SIZES, data_path=os.path.join(args.data_path, ".."))[0]
+        img = draw_pred_img(img, output, label, DataConfig.LABEL_MAP, size=ModelConfig.IMAGE_SIZES)
 
         # Fuse input image and gradcam mask
         heatmap = cv2.applyColorMap(np.uint8(255 * cam), cv2.COLORMAP_JET)
         heatmap = np.float32(heatmap)
         cam = heatmap + np.float32(img)
         cam = cam / np.max(cam)
+
         while True:
             cv2.imshow("Image", cam)
-            if cv2.waitKey(10) == ord("q"):
+            key = cv2.waitKey(10)
+            if key == ord("q"):
+                cv2.destroyAllWindows()
                 break
 
 
