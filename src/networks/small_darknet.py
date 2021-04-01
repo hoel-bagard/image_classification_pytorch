@@ -6,10 +6,7 @@ import torch
 import torch.nn as nn
 
 from src.networks.layers import DarknetBlock
-from src.torch_utils.networks.network_utils import (
-    layer_init,
-    get_cnn_output_size
-)
+from src.torch_utils.networks.network_utils import layer_init
 
 
 class SmallDarknet(nn.Module):

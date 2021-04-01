@@ -17,6 +17,7 @@ import src.dataset.data_transformations as transforms
 from src.torch_utils.utils.misc import get_config_as_dict
 from src.networks.build_network import build_model
 from src.torch_utils.utils.misc import clean_print
+from src.torch_utils.utils.logger import DummyLogger, create_logger
 from src.train import train
 
 
@@ -24,7 +25,10 @@ def main():
     parser = ArgumentParser()
     parser.add_argument("--limit", default=None, type=int, help="Limits the number of apparition of each class")
     parser.add_argument("--load_data", action="store_true", help="Loads all the videos into RAM")
+    parser.add_argument("--name", type=str, default="Train",
+                        help="Used to know what a train is when using ps. Also name of the logger.")
     args = parser.parse_args()
+
 
     if not DataConfig.KEEP_TB:
         while DataConfig.TB_DIR.exists():
@@ -53,6 +57,11 @@ def main():
         for misc_file in misc_files:
             shutil.copy(misc_file, output_folder / misc_file)
         print("Finished copying files")
+
+    if DataConfig.USE_CHECKPOINT:
+        logger = create_logger(args.name, DataConfig.CHECKPOINT_DIR / "logs")
+    else:
+        logger = DummyLogger()
 
     torch.backends.cudnn.benchmark = True   # Makes training quite a bit faster
 
@@ -98,14 +107,14 @@ def main():
                        gpu_pipeline=transforms.compose_transformations(base_gpu_pipeline),
                        shuffle=False) as val_dataloader:
 
-        print(f"\nLoaded {len(train_dataloader)} train data and",
-              f"{len(val_dataloader)} validation data", flush=True)
+        logger.info(f"Loaded {len(train_dataloader)} train data and "
+                    f"{len(val_dataloader)} validation data")
 
         print("Building model. . .", end="\r")
         model = build_model(ModelConfig.MODEL, DataConfig.NB_CLASSES, **get_config_as_dict(ModelConfig))
         summary(model, train_dataloader.data_shape)
 
-        train(model, train_dataloader, val_dataloader)
+        train(model, train_dataloader, val_dataloader, logger)
 
 
 if __name__ == '__main__':

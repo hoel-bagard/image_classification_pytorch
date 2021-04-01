@@ -1,6 +1,9 @@
 import time
 import os
+from logging import Logger
 from subprocess import CalledProcessError
+import sys
+import traceback
 
 import torch
 import torch.nn as nn
@@ -14,12 +17,13 @@ from src.torch_utils.utils.batch_generator import BatchGenerator
 from src.torch_utils.utils.ressource_usage import resource_usage
 
 
-def train(model: nn.Module, train_dataloader: BatchGenerator, val_dataloader: BatchGenerator):
+def train(model: nn.Module, train_dataloader: BatchGenerator, val_dataloader: BatchGenerator, logger: Logger):
     """ Trains and validate the given model using the datasets.
     Args:
         model (nn.Module): Model to train
         train_dataloader (BatchGenerator): BatchGenerator of the training data
         val_dataloader (BatchGenerator): BatchGenerator of the validation data
+        logger: Logger used to print and / or save process outputs  to a log file
     """
     loss_fn = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=ModelConfig.LR, weight_decay=ModelConfig.REG_FACTOR)
@@ -41,7 +45,8 @@ def train(model: nn.Module, train_dataloader: BatchGenerator, val_dataloader: Ba
     try:
         for epoch in range(ModelConfig.MAX_EPOCHS):
             epoch_start_time = time.perf_counter()
-            print(f"\nEpoch {epoch}/{ModelConfig.MAX_EPOCHS}")
+            print()  # logger doesn't handle \n super well
+            logger.info(f"Epoch {epoch}/{ModelConfig.MAX_EPOCHS}")
 
             epoch_loss = trainer.train_epoch()
 
@@ -52,12 +57,12 @@ def train(model: nn.Module, train_dataloader: BatchGenerator, val_dataloader: Ba
             if (epoch_loss < best_loss and DataConfig.USE_CHECKPOINT and epoch >= DataConfig.RECORD_START
                     and (epoch - last_checkpoint_epoch) >= DataConfig.CHECKPT_SAVE_FREQ):
                 save_path = os.path.join(DataConfig.CHECKPOINT_DIR, f"train_{epoch}.pt")
-                print(f"\nLoss improved from {best_loss:.5e} to {epoch_loss:.5e},"
-                      f"saving model to {save_path}", end='\r')
+                logger.info(f"Loss improved from {best_loss:.5e} to {epoch_loss:.5e},"
+                            f"saving model to {save_path}")
                 best_loss, last_checkpoint_epoch = epoch_loss, epoch
                 torch.save(model.state_dict(), save_path)
 
-            print(f"\nEpoch loss: {epoch_loss:.5e}  -  Took {time.perf_counter() - epoch_start_time:.5f}s")
+            logger.info(f"Epoch loss: {epoch_loss:.5e}  -  Took {time.perf_counter() - epoch_start_time:.5f}s")
 
             # Validation and other metrics
             if epoch % DataConfig.VAL_FREQ == 0 and epoch >= DataConfig.RECORD_START:
@@ -66,7 +71,7 @@ def train(model: nn.Module, train_dataloader: BatchGenerator, val_dataloader: Ba
                     epoch_loss = trainer.val_epoch()
 
                     if DataConfig.USE_TB:
-                        print("\nStarting to compute TensorBoard metrics", end="\r", flush=True)
+                        print("Starting to compute TensorBoard metrics", end="\r", flush=True)
                         # TODO: uncomment this after finishing the lambda network
                         # tensorboard.write_weights_grad(epoch)
                         tensorboard.write_loss(epoch, epoch_loss, mode="Validation")
@@ -81,19 +86,25 @@ def train(model: nn.Module, train_dataloader: BatchGenerator, val_dataloader: Ba
                         tensorboard.write_metrics(epoch, mode="Validation")
                         val_acc = metrics.get_avg_acc()
 
-                        print(f"Train accuracy: {train_acc:.3f}  -  Validation accuracy: {val_acc:.3f}", end='\r')
+                        logger.info(f"Train accuracy: {train_acc:.3f}  -  Validation accuracy: {val_acc:.3f}")
 
-                    print(f"\nValidation loss: {epoch_loss:.5e}  -  Took {time.time() - validation_start_time:.5f}s")
+                    logger.info(f"Validation loss: {epoch_loss:.5e}  -  "
+                                f"Took {time.perf_counter() - validation_start_time:.5f}s")
             scheduler.step()
     except KeyboardInterrupt:
         print("\n")
+    except Exception as error:
+        logger.error(''.join(traceback.format_exception(*sys.exc_info())))
+        raise error
+
+    if DataConfig.USE_TB:
+        tensorboard.close_writers()
 
     train_stop_time = time.time()
-    print("Finished Training"
-          f"\n\tTraining time : {train_stop_time - train_start_time:.03f}s")
-    tensorboard.close_writers()
+    end_msg = f"Finished Training\n\tTraining time : {train_stop_time - train_start_time:.03f}s"
     try:
         memory_peak, gpu_memory = resource_usage()
-        print(f"\n\tRAM peak : {memory_peak // 1024} MB\n\tVRAM usage : {gpu_memory}")
+        end_msg += f"\n\tRAM peak : {memory_peak // 1024} MB\n\tVRAM usage : {gpu_memory}"
     except CalledProcessError:
         pass
+    logger.info(end_msg)

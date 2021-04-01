@@ -65,7 +65,7 @@ def main():
     results = np.asarray(results)
     total_time = time.perf_counter() - inference_start_time
     print("\nFinished running inference on the test dataset.")
-    print(f"Total inference time was {total_time:.3f}s, which averages to {total_time/len(results)].5f}s per image")
+    print(f"Total inference time was {total_time:.3f}s, which averages to {total_time/len(results):.5f}s per image")
     print(f"Precision: {np.mean(results)}")
 
 
