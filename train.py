@@ -3,6 +3,7 @@ from argparse import ArgumentParser
 from pathlib import Path
 import shutil
 import time
+import sys
 
 import torch
 from torchsummary import summary
@@ -28,7 +29,6 @@ def main():
     parser.add_argument("--name", type=str, default="Train",
                         help="Used to know what a train is when using ps. Also name of the logger.")
     args = parser.parse_args()
-
 
     if not DataConfig.KEEP_TB:
         while DataConfig.TB_DIR.exists():
@@ -107,6 +107,8 @@ def main():
                        gpu_pipeline=transforms.compose_transformations(base_gpu_pipeline),
                        shuffle=False) as val_dataloader:
 
+        logger.info("-------- Starting train --------")
+        logger.info("From command : " + ' '.join(sys.argv))
         logger.info(f"Loaded {len(train_dataloader)} train data and "
                     f"{len(val_dataloader)} validation data")
 
