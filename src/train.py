@@ -19,6 +19,7 @@ from src.torch_utils.utils.ressource_usage import resource_usage
 
 def train(model: nn.Module, train_dataloader: BatchGenerator, val_dataloader: BatchGenerator, logger: Logger):
     """ Trains and validate the given model using the datasets.
+
     Args:
         model (nn.Module): Model to train
         train_dataloader (BatchGenerator): BatchGenerator of the training data
@@ -30,8 +31,6 @@ def train(model: nn.Module, train_dataloader: BatchGenerator, val_dataloader: Ba
     trainer = Trainer(model, loss_fn, optimizer, train_dataloader, val_dataloader)
     scheduler = torch.optim.lr_scheduler.ExponentialLR(trainer.optimizer, gamma=ModelConfig.LR_DECAY)
     # scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(trainer.optimizer, 10, T_mult=2)
-    # I forgot to use the gamma for the annealing
-    # https://github.com/katsura-jp/pytorch-cosine-annealing-with-warmup
 
     if DataConfig.USE_TB:
         metrics = ClassificationMetrics(model, train_dataloader, val_dataloader, DataConfig.LABEL_MAP, max_batches=None)

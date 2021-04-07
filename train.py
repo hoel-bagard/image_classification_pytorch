@@ -56,10 +56,8 @@ def main():
         misc_files = ["README.md", "requirements.txt", "setup.cfg", ".gitignore"]
         for misc_file in misc_files:
             shutil.copy(misc_file, output_folder / misc_file)
-        print("Finished copying files")
-
-    if DataConfig.USE_CHECKPOINT:
         logger = create_logger(args.name, DataConfig.CHECKPOINT_DIR / "logs")
+        print("Finished copying files")
     else:
         logger = DummyLogger()
 
@@ -72,7 +70,7 @@ def main():
     cpu_augmentation_pipeline = transforms.compose_transformations((
         *base_cpu_pipeline,
         transforms.vertical_flip,
-        transforms.horizontal_flip,
+        # transforms.horizontal_flip,
         transforms.rotate180,
     ))
     # GPU pipeline used by both validation and train
@@ -107,10 +105,11 @@ def main():
                        gpu_pipeline=transforms.compose_transformations(base_gpu_pipeline),
                        shuffle=False) as val_dataloader:
 
+        print()
         logger.info("-------- Starting train --------")
         logger.info("From command : " + ' '.join(sys.argv))
         logger.info(f"Loaded {len(train_dataloader)} train data and "
-                    f"{len(val_dataloader)} validation data")
+                    f"{len(val_dataloader)} validation data\n")
 
         print("Building model. . .", end="\r")
         model = build_model(ModelConfig.MODEL, DataConfig.NB_CLASSES, **get_config_as_dict(ModelConfig))
