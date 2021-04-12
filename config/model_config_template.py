@@ -14,6 +14,8 @@ class ModelConfig:
     DECAY_START        = 20
     REG_FACTOR         = 0.005       # Regularization factor (Used to be 0.005 for the fit mode)
 
+    LABEL_SMOOTHING: float = 0.1   # Value to use for label smoothing if the loss supports it. 0 for no smoothing.
+
     # Data processing
     IMAGE_SIZES: tuple[int, int] = (256, 256)
     GRAYSCALE = False   # Not fully implemented for the True case

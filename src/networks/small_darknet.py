@@ -57,7 +57,6 @@ class SmallDarknet(nn.Module):
 
         x = torch.flatten(x, start_dim=1)
         x = self.dense(x)
-        x = torch.sigmoid(x)  # TODO: Maybe not sigmoid ?
         return x
 
     # hook for the gradients of the activations
