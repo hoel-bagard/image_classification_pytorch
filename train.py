@@ -25,7 +25,7 @@ from src.train import train
 def main():
     parser = ArgumentParser()
     parser.add_argument("--limit", default=None, type=int, help="Limits the number of apparition of each class")
-    parser.add_argument("--load_data", action="store_true", help="Loads all the videos into RAM")
+    parser.add_argument("--load_data", action="store_true", help="Loads all the images into RAM")
     parser.add_argument("--name", type=str, default="Train",
                         help="Used to know what a train is when using ps. Also name of the logger.")
     args = parser.parse_args()

@@ -49,13 +49,20 @@ class Bottleneck(nn.Module):
 
 
 class LambdaResnet(nn.Module):
-    def __init__(self, nb_classes: int, small_input: bool = False):
+    def __init__(self, nb_classes: int, lambda_layers: list[int], lambda_channels: list[int], lambda_strides: list[int],
+                 small_input: bool = False):
+        """
+        Args:
+            nb_classes (int): Number of output classes
+            lambda_layers (list): Number of blocks in each lambda layer
+            lambda_channels (list): Number of channels  for each lambda layer
+            lambda_strides (list): Stride for each lambda layer
+            small_input (bool): If True, the first conv of the layer has a bigger kernel / stride / padding.
+        """
         super().__init__()
         num_classes = nb_classes
-        layers = [1, 2, 2, 1]
-        channels = [16, 32, 48, 64]
 
-        self.inplanes = channels[0]  # Not sure what this is yet
+        self.inplanes = lambda_channels[0]
 
         if small_input:
             self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=3, stride=1, padding=1, bias=False)
@@ -65,14 +72,14 @@ class LambdaResnet(nn.Module):
         self.act = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
 
-        self.layer1 = self._make_layer(channels[0], layers[0])
-        self.layer2 = self._make_layer(channels[1], layers[1], stride=2)
-        self.layer3 = self._make_layer(channels[2], layers[2], stride=2)
-        self.layer4 = self._make_layer(channels[3], layers[3], stride=2)
+        self.lambda_layers = nn.Sequential(*[self._make_layer(lambda_channels[i],
+                                                              lambda_layers[i],
+                                                              stride=lambda_strides[i])
+                                             for i in range(1, len(lambda_channels))])
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.flatten = nn.Flatten()
 
-        self.fc = nn.Linear(channels[-1] * Bottleneck.expansion, num_classes)
+        self.fc = nn.Linear(lambda_channels[-1] * Bottleneck.expansion, num_classes)
 
     def _make_layer(self, planes, blocks, stride=1):
 
@@ -98,10 +105,7 @@ class LambdaResnet(nn.Module):
         x = self.act(x)
         x = self.maxpool(x)
 
-        x = self.layer1(x)
-        x = self.layer2(x)
-        x = self.layer3(x)
-        x = self.layer4(x)
+        x = self.lambda_layers(x)
 
         x = self.avgpool(x)
         x = self.flatten(x)

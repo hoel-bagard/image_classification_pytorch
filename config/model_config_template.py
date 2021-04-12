@@ -20,9 +20,14 @@ class ModelConfig:
 
     # Network part
     MODEL = ModelHelper.SmallDarknet
-
+    # Parameters for standard CNN-like networks
     CHANNELS: list[int] = [3, 8, 16, 32, 32, 16]
     SIZES: list[Union[int, tuple[int, int]]]  = [5, 3, 3, 3, 3]   # Kernel sizes
     STRIDES: list[Union[int, tuple[int, int]]]  = [5, 3, 3, 2, 2]
     PADDINGS: list[Union[int, tuple[int, int]]]  = [2, 1, 1, 1, 1]
     BLOCKS: list[int] = [1, 2, 2, 1, 1]
+    # Parameters for lambda networks
+    SMALL_INPUT = False    # If True, the first conv of the layer has a bigger kernel / stride / padding
+    LAMBDA_LAYERS = [3, 4, 6, 3]
+    LAMBDA_CHANNELS = [64, 128, 256, 512]
+    LAMBDA_STRIDES = [1, 2, 2, 2]
