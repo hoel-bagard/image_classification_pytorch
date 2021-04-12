@@ -50,7 +50,7 @@ class Bottleneck(nn.Module):
 
 class LambdaResnet(nn.Module):
     def __init__(self, nb_classes: int, lambda_layers: list[int], lambda_channels: list[int], lambda_strides: list[int],
-                 small_input: bool = False):
+                 small_input: bool = False, **kwargs):
         """
         Args:
             nb_classes (int): Number of output classes
