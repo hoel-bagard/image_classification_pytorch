@@ -69,8 +69,8 @@ def main():
     )
     cpu_augmentation_pipeline = transforms.compose_transformations((
         *base_cpu_pipeline,
-        transforms.vertical_flip,
-        # transforms.horizontal_flip,
+        # transforms.vertical_flip,
+        transforms.horizontal_flip,
         transforms.rotate180,
     ))
     # GPU pipeline used by both validation and train
