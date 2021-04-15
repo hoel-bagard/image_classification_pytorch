@@ -30,8 +30,7 @@ def resize(img_size: tuple[int, int]) -> Callable[[np.ndarray, np.ndarray], tupl
         # Hard-coded last dim, might need to be changed later
         resized_imgs = np.empty((imgs.shape[0], img_size[1], img_size[0], 3))
         for i, img in enumerate(imgs):
-            # TODO: Should not need to cast to float...
-            resized_imgs[i] = cv2.resize(img.astype(np.float32), img_size, interpolation=cv2.INTER_AREA)
+            resized_imgs[i] = cv2.resize(img, img_size, interpolation=cv2.INTER_AREA)
         return resized_imgs, labels
     return resize_fn
 
