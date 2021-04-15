@@ -4,6 +4,7 @@ from typing import Callable
 import cv2
 import numpy as np
 import torch
+import torch.nn.functional as F
 
 
 def compose_transformations(transformations: list[Callable[[np.ndarray, np.ndarray], tuple[np.ndarray, np.ndarray]]]):
@@ -26,9 +27,11 @@ def resize(img_size: tuple[int, int]) -> Callable[[np.ndarray, np.ndarray], tupl
         callable: The function doing the resizing
     """
     def resize_fn(imgs: np.ndarray, labels: np.ndarray):
-        resized_imgs = np.empty((imgs.shape[0], *img_size, 3))  # Hard-coded last dim, might need to be changed later
+        # Hard-coded last dim, might need to be changed later
+        resized_imgs = np.empty((imgs.shape[0], img_size[1], img_size[0], 3))
         for i, img in enumerate(imgs):
-            resized_imgs[i] = cv2.resize(img, img_size, interpolation=cv2.INTER_AREA)
+            # TODO: Should not need to cast to float...
+            resized_imgs[i] = cv2.resize(img.astype(np.float32), img_size, interpolation=cv2.INTER_AREA)
         return resized_imgs, labels
     return resize_fn
 
@@ -96,6 +99,7 @@ def to_tensor():
     return to_tensor_fn
 
 
+# TODO: Make utils that computes means and var and have those in the config
 def normalize_fn(imgs: torch.Tensor, labels: torch.Tensor):
     """ Normalize a batch of images so that its values are in [0, 1] """
     return imgs/255.0, labels
@@ -114,3 +118,26 @@ def noise():
 
         return imgs, labels
     return noise_fn
+
+
+def padding(desired_size: tuple[int, int]):
+    """ Returns a function that padds images to a the desired size
+
+    Note: for this function to work, all the input images must have the same size.
+    # TODO: do the non-gpu version with cv2.copyMakeBorder
+
+    Args:
+        desired_size (tuple): Desired width and height
+
+    Returns
+        (callable): Function that padds a batch of images to the desired size
+    """
+    def padding_fn(imgs: torch.Tensor, labels: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+        delta_width = desired_size[0] - imgs.shape[3]
+        delta_height = desired_size[1] - imgs.shape[2]
+        padding_left, padding_right = delta_width // 2, delta_width - delta_width // 2
+        padding_top, padding_bottom = delta_height // 2, delta_height - delta_height // 2
+        padding = (padding_left, padding_right, padding_top, padding_bottom)
+        imgs = F.pad(imgs, padding)
+        return imgs, labels
+    return padding_fn

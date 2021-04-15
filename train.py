@@ -11,9 +11,9 @@ from torchsummary import summary
 from config.data_config import DataConfig
 from config.model_config import ModelConfig
 from src.torch_utils.utils.batch_generator import BatchGenerator
-# from src.dataset.defeault_loader import default_loader as data_loader
-from src.dataset.dataset_loaders import dog_vs_cat_loader as data_loader
-from src.dataset.defeault_loader import default_load_data
+from src.dataset.default_loader import default_loader as data_loader
+# from src.dataset.dataset_loaders import dog_vs_cat_loader as data_loader
+from src.dataset.default_loader import default_load_data
 import src.dataset.data_transformations as transforms
 from src.torch_utils.utils.misc import get_config_as_dict
 from src.networks.build_network import build_model
@@ -65,11 +65,11 @@ def main():
 
     # Data augmentation done on cpu.
     base_cpu_pipeline = (
-        transforms.resize(ModelConfig.IMAGE_SIZES),
+        transforms.resize((750, 125)),    # TODO: Temp ModelConfig.IMAGE_SIZES),
     )
     cpu_augmentation_pipeline = transforms.compose_transformations((
         *base_cpu_pipeline,
-        # transforms.vertical_flip,
+        transforms.vertical_flip,
         transforms.horizontal_flip,
         transforms.rotate180,
     ))
@@ -77,6 +77,7 @@ def main():
     base_gpu_pipeline = (
         transforms.to_tensor(),
         transforms.normalize_fn,
+        transforms.padding(ModelConfig.IMAGE_SIZES),
     )
     gpu_augmentation_pipeline = transforms.compose_transformations((
         *base_gpu_pipeline,
