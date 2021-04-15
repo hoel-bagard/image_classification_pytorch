@@ -5,11 +5,13 @@ import torch
 
 from .small_darknet import SmallDarknet
 from .lambda_network import LambdaResnet
+from .cnn import CNN
 
 
 class ModelHelper:
     SmallDarknet = SmallDarknet
     LambdaResnet = LambdaResnet
+    CNN = CNN
 
 
 def build_model(model_type: type, nb_classes: int, model_path: Optional[Path] = None,
