@@ -1,8 +1,6 @@
-from typing import Union
+from typing import Union, Optional
 
-from src.networks.build_network import (
-    ModelHelper
-)
+from src.networks.build_network import ModelHelper
 
 
 class ModelConfig:
@@ -15,6 +13,7 @@ class ModelConfig:
     REG_FACTOR         = 0.005       # Regularization factor (Used to be 0.005 for the fit mode)
 
     LABEL_SMOOTHING: float = 0.1   # Value to use for label smoothing if the loss supports it. 0 for no smoothing.
+    LOSS_WEIGTHS: Optional[list[float]] = None   # Weights the classes during the loss
 
     # Data processing
     IMAGE_SIZES: tuple[int, int] = (256, 256)

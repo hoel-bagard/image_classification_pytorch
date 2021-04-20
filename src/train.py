@@ -27,8 +27,10 @@ def train(model: nn.Module, train_dataloader: BatchGenerator, val_dataloader: Ba
         val_dataloader (BatchGenerator): BatchGenerator of the validation data
         logger: Logger used to print and / or save process outputs  to a log file
     """
-    loss_fn = nn.CrossEntropyLoss()
-    # loss_fn = SmoothCrossEntropyLoss(ModelConfig.LABEL_SMOOTHING)
+    # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    # weights = torch.Tensor(ModelConfig.LOSS_WEIGTHS).to(device) if ModelConfig.LOSS_WEIGTHS else None
+    # loss_fn = nn.CrossEntropyLoss(weight=weights)
+    loss_fn = SmoothCrossEntropyLoss(ModelConfig.LABEL_SMOOTHING)
     optimizer = torch.optim.Adam(model.parameters(), lr=ModelConfig.LR, weight_decay=ModelConfig.REG_FACTOR)
     trainer = Trainer(model, loss_fn, optimizer, train_dataloader, val_dataloader)
     scheduler = torch.optim.lr_scheduler.ExponentialLR(trainer.optimizer, gamma=ModelConfig.LR_DECAY)

@@ -15,8 +15,9 @@ def rotate_image(img: np.ndarray, angle: float) -> np.ndarray:
 
 
 def main():
-    parser = ArgumentParser("Just shows the images pf a dataset.")
+    parser = ArgumentParser("Just shows the images of a dataset.")
     parser.add_argument("data_path", type=Path, help="Path to the dataset")
+    parser.add_argument("--crop", "--c", type=int, nargs=4, help="If cropping the images, (left, right, top, bottom)")
     parser.add_argument("--angle", "--a", type=float, help="Rotates the image by an angle before displaying it")
     args = parser.parse_args()
 
@@ -32,6 +33,10 @@ def main():
 
         if args.angle:
             img = rotate_image(img, args.angle)
+
+        if args.crop is not None:
+            left, right, top, bottom = args.crop
+            img = img[top:-bottom, left:-right]  # Doesn't work for top=bottom=0
 
         while True:
             cv2.imshow("Image", img)

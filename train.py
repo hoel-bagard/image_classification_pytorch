@@ -12,8 +12,8 @@ from torchsummary import summary
 from config.data_config import DataConfig
 from config.model_config import ModelConfig
 from src.torch_utils.utils.batch_generator import BatchGenerator
-from src.dataset.default_loader import default_loader as data_loader
-# from src.dataset.dataset_loaders import dog_vs_cat_loader as data_loader
+# from src.dataset.default_loader import default_loader as data_loader
+from src.dataset.dataset_loaders import name_loader as data_loader
 from src.dataset.default_loader import default_load_data
 import src.dataset.data_transformations as transforms
 from src.torch_utils.utils.misc import get_config_as_dict
@@ -96,6 +96,7 @@ def main():
                                        limit=args.limit, load_data=args.load_data,
                                        data_preprocessing_fn=default_load_data if args.load_data else None)
     clean_print("Validation data loaded")
+    print("Constructing dataloaders. . .", end="\r")
 
     with BatchGenerator(train_data, train_labels,
                         ModelConfig.BATCH_SIZE, nb_workers=DataConfig.NB_WORKERS,
@@ -109,7 +110,7 @@ def main():
                        gpu_pipeline=transforms.compose_transformations(base_gpu_pipeline),
                        shuffle=False) as val_dataloader:
 
-        print()
+        clean_print("                               \n")
         logger.info("-------- Starting train --------")
         logger.info("From command : " + ' '.join(sys.argv))
         logger.info(f"Loaded {len(train_dataloader)} train data and "
