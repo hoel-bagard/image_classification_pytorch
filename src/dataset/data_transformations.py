@@ -110,7 +110,7 @@ def rotate180(imgs: np.ndarray, labels: np.ndarray) -> tuple[np.ndarray, np.ndar
 #     return rotate_image
 
 
-def rotate(min_angle: float, max_angle: float, imgs: np.ndarray, labels: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+def rotate(imgs: np.ndarray, labels: np.ndarray, min_angle: float, max_angle: float) -> tuple[np.ndarray, np.ndarray]:
     """ Rotates a batch of images by a random angle in the given range.
 
     Args:
@@ -126,7 +126,7 @@ def rotate(min_angle: float, max_angle: float, imgs: np.ndarray, labels: np.ndar
     rotated_imgs = np.empty_like(imgs)
 
     for i, (img, angle) in enumerate(zip(imgs, angles)):
-        img_center = np.asarray(img.shape[1::-1]) / 2
+        img_center = tuple(np.asarray(img.shape[1::-1]) / 2)
         rot_mat = cv2.getRotationMatrix2D(img_center, angle, 1.0)
         rotated_imgs[i] = cv2.warpAffine(img, rot_mat, img.shape[1::-1], flags=cv2.INTER_LINEAR)
     return rotated_imgs, labels

@@ -75,6 +75,7 @@ def main():
         transforms.rotate180,
         partial(transforms.rotate, min_angle=-5, max_angle=5)
     ))
+
     # GPU pipeline used by both validation and train
     base_gpu_pipeline = (
         transforms.to_tensor(),
