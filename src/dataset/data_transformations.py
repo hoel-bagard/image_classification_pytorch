@@ -88,6 +88,50 @@ def rotate180(imgs: np.ndarray, labels: np.ndarray) -> tuple[np.ndarray, np.ndar
     return imgs, labels
 
 
+# def rotate(min_angle: float, max_angle: float) -> Callable[[np.ndarray, np.ndarray], tuple[np.ndarray, np.ndarray]]:
+#     """ Returns a function that rotates a batch of images by a random angle in the given range.
+
+#     Args:
+#         min_angle (float): The lower bound of the angle sampling range in degrees
+#         max_angle (float): The upper bound of the angle sampling range in degrees
+
+#     Returns:
+#         callable: The function doing the rotation
+#     """
+#     def rotate_image(imgs: np.ndarray, labels: np.ndarray) -> np.ndarray:
+#         angles = np.random.uniform(min_angle, max_angle, imgs.shape[0])
+#         rotated_imgs = np.empty_like(imgs)
+
+#         for i, (img, angle) in enumerate(zip(imgs, angles)):
+#             img_center = np.asarray(img.shape[1::-1]) / 2
+#             rot_mat = cv2.getRotationMatrix2D(img_center, angle, 1.0)
+#             rotated_imgs[i] = cv2.warpAffine(img, rot_mat, img.shape[1::-1], flags=cv2.INTER_LINEAR)
+#         return rotated_imgs
+#     return rotate_image
+
+
+def rotate(min_angle: float, max_angle: float, imgs: np.ndarray, labels: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """ Rotates a batch of images by a random angle in the given range.
+
+    Args:
+        min_angle (float): The lower bound of the angle sampling range in degrees
+        max_angle (float): The upper bound of the angle sampling range in degrees
+        imgs (np.ndarray): The images to randomly rotate
+        labels (np.ndarray): The labels associated to the images, will not be modified
+
+    Returns:
+        tuple: the images and labels
+    """
+    angles = np.random.uniform(min_angle, max_angle, imgs.shape[0])
+    rotated_imgs = np.empty_like(imgs)
+
+    for i, (img, angle) in enumerate(zip(imgs, angles)):
+        img_center = np.asarray(img.shape[1::-1]) / 2
+        rot_mat = cv2.getRotationMatrix2D(img_center, angle, 1.0)
+        rotated_imgs[i] = cv2.warpAffine(img, rot_mat, img.shape[1::-1], flags=cv2.INTER_LINEAR)
+    return rotated_imgs, labels
+
+
 def to_tensor():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 

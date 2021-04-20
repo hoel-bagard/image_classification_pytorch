@@ -4,6 +4,7 @@ from pathlib import Path
 import shutil
 import time
 import sys
+from functools import partial
 
 import torch
 from torchsummary import summary
@@ -72,6 +73,7 @@ def main():
         transforms.vertical_flip,
         transforms.horizontal_flip,
         transforms.rotate180,
+        partial(transforms.rotate, min_angle=-5, max_angle=5)
     ))
     # GPU pipeline used by both validation and train
     base_gpu_pipeline = (

@@ -18,18 +18,19 @@ def mosaic_worker(args: tuple[Path, Path, tuple[int, int, int, int]]):
         img_path (Path): Path to the image to process
         output_path (Path): Folder to where the new image will be saved
         crop (tuple, optional): (left, right, top, bottom), if not None then image will be cropped by the given values.
+        padding (bool, optional): If true then the mosaic image will be a square will black padding at the bottom
 
     Return:
         output_file_path: Path of the saved image.
     """
-    img_path, output_path, crop = args
+    img_path, output_path, crop, use_padding = args
     output_file_path = output_path / img_path.relative_to(output_path.parent)
 
     img = cv2.imread(str(img_path), cv2.IMREAD_UNCHANGED)
 
     if crop is not None:
         left, right, top, bottom = crop
-        img = img[top:-bottom, left:-right]
+        img = img[top:-bottom, left:-right]  # Doesn't work for top=bottom=0
 
     height, width, _ = img.shape
     assert width % height == 0, "The image cannot be cleanly cut into a mosaic, maybe try cropping it."
@@ -39,8 +40,13 @@ def mosaic_worker(args: tuple[Path, Path, tuple[int, int, int, int]]):
     #           "black tiles will be used to complete the image.")
 
     nb_tiles_side = math.ceil(math.sqrt(width/height))   # Width of the new (square) image in number of tiles
-    # zeros and not empty to have black tiles by default
-    mosaic_img = np.zeros((nb_tiles_side * height, nb_tiles_side * height, 3))
+
+    if use_padding:
+        # zeros and not empty to have black tiles by default
+        mosaic_img = np.zeros((nb_tiles_side * height, nb_tiles_side * height, 3))
+    else:
+        mosaic_img = np.empty((math.ceil(ratio / nb_tiles_side) * height, nb_tiles_side * height, 3))
+
     for tile_idx in range(0, ratio):
         i, j = (tile_idx // nb_tiles_side) * height, (tile_idx % nb_tiles_side) * height
         mosaic_img[i:i+height, j:j+height] = img[:, tile_idx*height:(tile_idx+1)*height]
@@ -51,14 +57,15 @@ def mosaic_worker(args: tuple[Path, Path, tuple[int, int, int, int]]):
 
 
 def main():
-    parser = ArgumentParser("Converts a long, rectangular image into a square by turning it into a mosaic."
-                            "Saves the data in a mosaic_img folder, in the dataset's folder")
+    parser = ArgumentParser("Converts a long, rectangular image into a square-ish image by turning it into a mosaic."
+                            "Saves the data in a mosaic_img folder, in the dataset's parent folder")
     parser.add_argument("data_path", type=Path, help="Path to the dataset")
     parser.add_argument("--crop", "--c", type=int, nargs=4, help="If cropping the images, (left, right, top, bottom)")
+    parser.add_argument("--use_padding", "--p", action="store_true", help="If true then pad the images to have squares")
     args = parser.parse_args()
 
     data_path: Path = args.data_path
-    output_path: Path = data_path / "mosaic"
+    output_path: Path = data_path.parent / "mosaic"
     output_path.mkdir(parents=True, exist_ok=True)
 
     # Get a list of all the images
@@ -66,7 +73,7 @@ def main():
     file_list = list([p for p in data_path.rglob('*') if p.suffix in exts])
     nb_imgs = len(file_list)
 
-    mp_args = list([(img_path, output_path, args.crop) for img_path in file_list])
+    mp_args = list([(img_path, output_path, args.crop, args.use_padding) for img_path in file_list])
     nb_images_processed = 0  # Use to count the number of good / bad samples
     with Pool(processes=int(os.cpu_count() * 0.8)) as pool:
         for result in pool.imap(mosaic_worker, mp_args, chunksize=10):
