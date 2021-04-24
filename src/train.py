@@ -27,14 +27,16 @@ def train(model: nn.Module, train_dataloader: BatchGenerator, val_dataloader: Ba
         val_dataloader (BatchGenerator): BatchGenerator of the validation data
         logger: Logger used to print and / or save process outputs  to a log file
     """
-    # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    # weights = torch.Tensor(ModelConfig.LOSS_WEIGTHS).to(device) if ModelConfig.LOSS_WEIGTHS else None
-    # loss_fn = nn.CrossEntropyLoss(weight=weights)
-    loss_fn = SmoothCrossEntropyLoss(ModelConfig.LABEL_SMOOTHING)
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    weights = torch.Tensor(ModelConfig.LOSS_WEIGTHS).to(device) if ModelConfig.LOSS_WEIGTHS else None
+    loss_fn = nn.CrossEntropyLoss(weight=weights)
+    # loss_fn = SmoothCrossEntropyLoss(ModelConfig.LABEL_SMOOTHING)
+
     optimizer = torch.optim.Adam(model.parameters(), lr=ModelConfig.LR, weight_decay=ModelConfig.REG_FACTOR)
     trainer = Trainer(model, loss_fn, optimizer, train_dataloader, val_dataloader)
-    scheduler = torch.optim.lr_scheduler.ExponentialLR(trainer.optimizer, gamma=ModelConfig.LR_DECAY)
-    # scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(trainer.optimizer, 10, T_mult=2)
+    # scheduler = torch.optim.lr_scheduler.ExponentialLR(trainer.optimizer, gamma=ModelConfig.LR_DECAY)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(trainer.optimizer, ModelConfig.MAX_EPOCHS,
+                                                           eta_min=ModelConfig.MIN_LR)
 
     if DataConfig.USE_TB:
         metrics = ClassificationMetrics(model, train_dataloader, val_dataloader, DataConfig.LABEL_MAP, max_batches=None)

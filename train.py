@@ -66,14 +66,15 @@ def main():
 
     # Data augmentation done on cpu.
     base_cpu_pipeline = (
-        # transforms.resize(ModelConfig.IMAGE_SIZES),
+        transforms.resize(ModelConfig.IMAGE_SIZES),
     )
     cpu_augmentation_pipeline = transforms.compose_transformations((
         *base_cpu_pipeline,
         transforms.vertical_flip,
         transforms.horizontal_flip,
         transforms.rotate180,
-        partial(transforms.rotate, min_angle=-5, max_angle=5)
+        partial(transforms.rotate, min_angle=-20, max_angle=20),
+        partial(transforms.cut_out, size=0.1)
     ))
 
     # GPU pipeline used by both validation and train
@@ -94,7 +95,8 @@ def main():
 
     val_data, val_labels = data_loader(DataConfig.DATA_PATH / "Validation", DataConfig.LABEL_MAP,
                                        limit=args.limit, load_data=args.load_data,
-                                       data_preprocessing_fn=default_load_data if args.load_data else None)
+                                       data_preprocessing_fn=default_load_data if args.load_data else None,
+                                       shuffle=True)
     clean_print("Validation data loaded")
     print("Constructing dataloaders. . .", end="\r")
 

@@ -1,5 +1,5 @@
 import random
-from typing import Callable
+from typing import Callable, Union
 
 import cv2
 import numpy as np
@@ -88,36 +88,14 @@ def rotate180(imgs: np.ndarray, labels: np.ndarray) -> tuple[np.ndarray, np.ndar
     return imgs, labels
 
 
-# def rotate(min_angle: float, max_angle: float) -> Callable[[np.ndarray, np.ndarray], tuple[np.ndarray, np.ndarray]]:
-#     """ Returns a function that rotates a batch of images by a random angle in the given range.
-
-#     Args:
-#         min_angle (float): The lower bound of the angle sampling range in degrees
-#         max_angle (float): The upper bound of the angle sampling range in degrees
-
-#     Returns:
-#         callable: The function doing the rotation
-#     """
-#     def rotate_image(imgs: np.ndarray, labels: np.ndarray) -> np.ndarray:
-#         angles = np.random.uniform(min_angle, max_angle, imgs.shape[0])
-#         rotated_imgs = np.empty_like(imgs)
-
-#         for i, (img, angle) in enumerate(zip(imgs, angles)):
-#             img_center = np.asarray(img.shape[1::-1]) / 2
-#             rot_mat = cv2.getRotationMatrix2D(img_center, angle, 1.0)
-#             rotated_imgs[i] = cv2.warpAffine(img, rot_mat, img.shape[1::-1], flags=cv2.INTER_LINEAR)
-#         return rotated_imgs
-#     return rotate_image
-
-
 def rotate(imgs: np.ndarray, labels: np.ndarray, min_angle: float, max_angle: float) -> tuple[np.ndarray, np.ndarray]:
     """ Rotates a batch of images by a random angle in the given range.
 
     Args:
-        min_angle (float): The lower bound of the angle sampling range in degrees
-        max_angle (float): The upper bound of the angle sampling range in degrees
         imgs (np.ndarray): The images to randomly rotate
         labels (np.ndarray): The labels associated to the images, will not be modified
+        min_angle (float): The lower bound of the angle sampling range in degrees
+        max_angle (float): The upper bound of the angle sampling range in degrees
 
     Returns:
         tuple: the images and labels
@@ -130,6 +108,44 @@ def rotate(imgs: np.ndarray, labels: np.ndarray, min_angle: float, max_angle: fl
         rot_mat = cv2.getRotationMatrix2D(img_center, angle, 1.0)
         rotated_imgs[i] = cv2.warpAffine(img, rot_mat, img.shape[1::-1], flags=cv2.INTER_LINEAR)
     return rotated_imgs, labels
+
+
+def cut_out(imgs: np.ndarray, labels: np.ndarray,
+            size: Union[float, tuple[float, float]], color: list[int] = [0, 0, 0]) -> tuple[np.ndarray, np.ndarray]:
+    """ Cuts out a random rectangle from each image in the batch and replaces it by the given color.
+
+    Args:
+        imgs (np.ndarray): The images to randomly rotate
+        labels (np.ndarray): The labels associated to the images, will not be modified
+        square_size (float): Length of the rectangle's sides in percentage of the image.
+                             Tuple with values for x and y or a single float that will be used for both.
+        color (tuple): Color to use for the cut out square
+
+    Returns:
+        tuple: the images and labels
+    """
+    bs, w, h, _ = imgs.shape
+    if type(size) == float:
+        size = (size, size)
+
+    x_size = int(w * size[0])
+    y_size = int(h * size[1])
+
+    x0 = np.random.randint(w-x_size, size=bs)
+    y0 = np.random.randint(h-y_size, size=bs)
+    x1 = np.minimum(w, x0 + x_size)
+    y1 = np.minimum(h, y0 + y_size)
+
+    for i in range(bs):
+        imgs[i, x0[i]:x1[i], y0[i]:y1[i]] = color
+    return imgs, labels
+
+
+# TODO Find an opencv equivalent
+def sharpness(imgs: np.ndarray, labels: np.ndarray, v: float) -> tuple[np.ndarray, np.ndarray]:
+    pass
+    # assert 0.1 <= v <= 1.9
+    # return PIL.ImageEnhance.Sharpness(img).enhance(v)
 
 
 def to_tensor():

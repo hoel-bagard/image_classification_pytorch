@@ -8,6 +8,7 @@ class ModelConfig:
     BATCH_SIZE         = 16            # Batch size
     MAX_EPOCHS         = 2000          # Number of Epochs
     LR                 = 1e-3          # Learning Rate
+    MIN_LR             = 1e-5          # Min Learning Rate if the scheduler uses one
     LR_DECAY           = 0.998
     DECAY_START        = 20
     REG_FACTOR         = 0.005       # Regularization factor (Used to be 0.005 for the fit mode)
