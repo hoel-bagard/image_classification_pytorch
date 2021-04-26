@@ -73,6 +73,8 @@ def main():
         transforms.vertical_flip,
         transforms.horizontal_flip,
         transforms.rotate180,
+        transforms.rotate90,
+        transforms.temp_pil_aug,
         partial(transforms.rotate, min_angle=-10, max_angle=10),
         partial(transforms.cut_out, size=0.15)
     ))

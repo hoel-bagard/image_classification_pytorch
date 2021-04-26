@@ -5,6 +5,7 @@ import cv2
 import numpy as np
 import torch
 import torch.nn.functional as F
+from PIL import Image, ImageEnhance
 
 
 def compose_transformations(transformations: list[Callable[[np.ndarray, np.ndarray], tuple[np.ndarray, np.ndarray]]]):
@@ -88,6 +89,17 @@ def rotate180(imgs: np.ndarray, labels: np.ndarray) -> tuple[np.ndarray, np.ndar
     return imgs, labels
 
 
+def rotate90(imgs: np.ndarray, labels: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """ Randomly rotate images by 90 degrees """
+    for i in range(len(imgs)):
+        if random.random() > 0.5:
+            if random.random() > 0.5:
+                imgs[i] = cv2.rotate(imgs[i], cv2.ROTATE_90_CLOCKWISE)
+            else:
+                imgs[i] = cv2.rotate(imgs[i], cv2.ROTATE_90_COUNTERCLOCKWISE)
+    return imgs, labels
+
+
 def rotate(imgs: np.ndarray, labels: np.ndarray, min_angle: float, max_angle: float) -> tuple[np.ndarray, np.ndarray]:
     """ Rotates a batch of images by a random angle in the given range.
 
@@ -142,10 +154,15 @@ def cut_out(imgs: np.ndarray, labels: np.ndarray,
 
 
 # TODO Find an opencv equivalent
-def sharpness(imgs: np.ndarray, labels: np.ndarray, v: float) -> tuple[np.ndarray, np.ndarray]:
-    pass
-    # assert 0.1 <= v <= 1.9
-    # return PIL.ImageEnhance.Sharpness(img).enhance(v)
+def temp_pil_aug(imgs: np.ndarray, labels: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    for i in range(len(imgs)):
+        img = Image.fromarray(imgs[i])
+        img = ImageEnhance.Color(img).enhance(1.5 - np.random.rand())
+        img = ImageEnhance.Contrast(img).enhance(1.5 - np.random.rand())
+        img = ImageEnhance.Brightness(img).enhance(1.5 - np.random.rand())
+        img = ImageEnhance.Sharpness(img).enhance(1.5 - np.random.rand())
+        imgs[i] = np.asarray(img)
+    return imgs, labels
 
 
 def to_tensor():
