@@ -15,7 +15,8 @@ def default_loader(data_path: Path,
                    label_map: dict[int, str],
                    limit: int = None,
                    load_data: bool = False,
-                   data_preprocessing_fn: Optional[Callable[[Path], np.ndarray]] = None
+                   data_preprocessing_fn: Optional[Callable[[Path], np.ndarray]] = None,
+                   shuffle: bool = False,
                    ) -> tuple[np.ndarray, np.ndarray]:
     """ Default loading function for image classification.
 
@@ -29,6 +30,8 @@ def default_loader(data_path: Path,
         load_data (bool): If true then this function returns the images already loaded instead of their paths.
                           The images are loaded using the preprocessing functions (they must be provided)
         data_preprocessing_fn (callable, optional): Function used to load data (imgs) from their paths.
+        shuffle: If true then the data is shuffled once before being returned
+
     Return:
         numpy array containing the images' paths and the associated label or the loaded data
     """
@@ -48,7 +51,13 @@ def default_loader(data_path: Path,
             if limit and i >= limit:
                 break
 
-    return np.asarray(data), np.asarray(labels)
+    data, labels = np.asarray(data), np.asarray(labels)
+    if shuffle:
+        index_list = np.arange(len(labels))
+        np.random.shuffle(index_list)
+        data, labels, = data[index_list], labels[index_list]
+
+    return data, labels
 
 
 def default_load_data(data: Union[Path, list[Path]]) -> np.ndarray:

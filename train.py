@@ -12,8 +12,8 @@ from torchsummary import summary
 from config.data_config import DataConfig
 from config.model_config import ModelConfig
 from src.torch_utils.utils.batch_generator import BatchGenerator
-# from src.dataset.default_loader import default_loader as data_loader
-from src.dataset.dataset_loaders import name_loader as data_loader
+from src.dataset.default_loader import default_loader as data_loader
+# from src.dataset.dataset_loaders import name_loader as data_loader
 from src.dataset.default_loader import default_load_data
 import src.dataset.data_transformations as transforms
 from src.torch_utils.utils.misc import get_config_as_dict
@@ -66,22 +66,22 @@ def main():
 
     # Data augmentation done on cpu.
     base_cpu_pipeline = (
-        transforms.resize(ModelConfig.IMAGE_SIZES),
+        # transforms.resize(ModelConfig.IMAGE_SIZES),
     )
     cpu_augmentation_pipeline = transforms.compose_transformations((
         *base_cpu_pipeline,
         transforms.vertical_flip,
         transforms.horizontal_flip,
         transforms.rotate180,
-        partial(transforms.rotate, min_angle=-20, max_angle=20),
-        partial(transforms.cut_out, size=0.1)
+        partial(transforms.rotate, min_angle=-10, max_angle=10),
+        partial(transforms.cut_out, size=0.15)
     ))
 
     # GPU pipeline used by both validation and train
     base_gpu_pipeline = (
         transforms.to_tensor(),
         transforms.normalize_fn,
-        # transforms.padding(ModelConfig.IMAGE_SIZES),
+        transforms.padding(ModelConfig.IMAGE_SIZES),
     )
     gpu_augmentation_pipeline = transforms.compose_transformations((
         *base_gpu_pipeline,

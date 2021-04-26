@@ -26,7 +26,7 @@ def worker(args: tuple[Path, Path, tuple[int, int, int, int]]):
 
     # Do some data augmentation by mixing training images
     if is_train:
-        data_aug_factor = 2  # The amount of data will be original amount times this factor for the train dataset
+        data_aug_factor = 20  # The amount of data will be original amount times this factor for the train dataset
 
         img = cv2.imread(str(file_path), cv2.IMREAD_UNCHANGED)
         # Expects the image to be already split in a vertical fashion (from the mosaic script)
