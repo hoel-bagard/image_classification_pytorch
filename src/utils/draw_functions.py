@@ -2,33 +2,26 @@ from typing import Optional
 
 import cv2
 import numpy as np
-import torch
-from einops import rearrange
+import numpy.typing as npt
 
 
-def draw_pred_img(imgs: torch.Tensor,
-                  predictions: torch.Tensor,
-                  labels: torch.Tensor,
+def draw_pred_img(imgs: npt.NDArray[np.uint8],
+                  predictions: npt.NDArray[np.uint8],
+                  labels: npt.NDArray[np.uint8],
                   label_map: dict[int, str],
                   size: Optional[tuple[int, int]] = None) -> np.ndarray:
     """Draws predictions and labels on the image to help with TensorBoard visualisation.
 
     Args:
-        imgs (torch.Tensor): Raw imgs.
-        predictions (torch.Tensor): Predictions of the network, after softmax but before taking argmax
-        labels (torch.Tensor): Labels corresponding to the images
-        label_map (dict): Dictionary linking class index to class name
-        size (tuple, optional): If given, the images will be resized to this size
+        imgs: Raw imgs.
+        predictions: Predictions of the network, after softmax but before taking argmax
+        labels: Labels corresponding to the images
+        label_map: Dictionary linking class index to class name
+        size: If given, the images will be resized to this size
 
     Returns:
         np.ndarray: images with information written on them
     """
-    imgs: np.ndarray = imgs.cpu().detach().numpy()
-    labels: np.ndarray = labels.cpu().detach().numpy()
-    predictions: np.ndarray = predictions.cpu().detach().numpy()
-
-    imgs = rearrange(imgs, 'b c w h -> b w h c')  # imgs.transpose(0, 2, 3, 1)
-
     out_imgs = []
     for img, preds, label in zip(imgs, predictions, labels):
         nb_to_keep = 3 if len(preds) > 3 else 2  # have at most 3 classes printed

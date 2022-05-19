@@ -31,7 +31,7 @@ def default_loader(data_path: Path,
     exts = (".png", ".jpg", ".bmp")
     for key in range(len(label_map)):
         class_dir_path = data_path / label_map[key]
-        img_paths = list([path for path in class_dir_path.rglob('*') if path.suffix in exts])
+        img_paths = [path for path in class_dir_path.rglob('*') if path.suffix in exts]
         for i, img_path in enumerate(img_paths, start=1):
             if verbose:
                 clean_print(f"Processing image {img_path.name}    ({i}/{len(img_paths)}) for class {label_map[key]}",
