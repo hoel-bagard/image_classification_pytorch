@@ -1,7 +1,7 @@
 torch
-torchsummary
 tensorboard
 opencv-python
+albumentations
 numpy
 matplotlib
 lambda-networks
