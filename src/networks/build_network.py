@@ -1,11 +1,11 @@
-from typing import Optional
 from pathlib import Path
+from typing import Optional
 
 import torch
 
-from .small_darknet import SmallDarknet
-from .lambda_network import LambdaResnet
 from .cnn import CNN
+from .lambda_network import LambdaResnet
+from .small_darknet import SmallDarknet
 
 
 class ModelHelper:
@@ -14,15 +14,19 @@ class ModelHelper:
     CNN = CNN
 
 
-def build_model(model_type: type, nb_classes: int, model_path: Optional[Path] = None,
-                eval_mode: bool = False, **kwargs):
-    """ Function that instanciates the given model.
+def build_model(model_type: type,
+                nb_classes: int,
+                model_path: Optional[Path] = None,
+                eval_mode: bool = False,
+                **kwargs):
+    """Function that instanciates the given model.
 
     Args:
         model_type (type): Class of the model to instanciates
         nb_classes (int): Number of classes in the dataset
         model_path (Path): If given, then the weights will be loaded from that checkpoint
         eval (bool): Whether the model will be used for evaluation or not
+
     Returns:
         torch.nn.Module: Instantiated PyTorch model
     """

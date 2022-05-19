@@ -1,4 +1,4 @@
-from typing import Union, Optional
+from typing import Optional, Union
 
 from src.networks.build_network import ModelHelper
 

@@ -1,25 +1,25 @@
-import time
 import os
+import sys
+import time
+import traceback
 from logging import Logger
 from subprocess import CalledProcessError
-import sys
-import traceback
 
 import torch
 import torch.nn as nn
 
 from config.data_config import DataConfig
 from config.model_config import ModelConfig
-from src.loss import SmoothCrossEntropyLoss
-from src.torch_utils.utils.trainer import Trainer
-from src.torch_utils.utils.tensorboard import TensorBoard
-from src.torch_utils.utils.classification_metrics import ClassificationMetrics
+# from src.loss import SmoothCrossEntropyLoss
 from src.torch_utils.utils.batch_generator import BatchGenerator
+from src.torch_utils.utils.classification_metrics import ClassificationMetrics
 from src.torch_utils.utils.ressource_usage import resource_usage
+from src.torch_utils.utils.tensorboard import TensorBoard
+from src.torch_utils.utils.trainer import Trainer
 
 
 def train(model: nn.Module, train_dataloader: BatchGenerator, val_dataloader: BatchGenerator, logger: Logger):
-    """ Trains and validate the given model using the datasets.
+    """Trains and validate the given model using the datasets.
 
     Args:
         model (nn.Module): Model to train

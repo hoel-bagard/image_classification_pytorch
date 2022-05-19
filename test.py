@@ -1,20 +1,20 @@
+import time
 from argparse import ArgumentParser
 from pathlib import Path
-import time
 
-import torch
-import numpy as np
 import cv2
+import numpy as np
+import torch
 
+import src.dataset.data_transformations as transforms
 from config.data_config import DataConfig
 from config.model_config import ModelConfig
-from src.torch_utils.utils.misc import get_config_as_dict
 from src.dataset.dataset_loaders import dog_vs_cat_loader as data_loader
 from src.dataset.defeault_loader import default_load_data
 from src.networks.build_network import build_model
 from src.torch_utils.utils.draw import draw_pred_img
-import src.dataset.data_transformations as transforms
 from src.torch_utils.utils.misc import clean_print
+from src.torch_utils.utils.misc import get_config_as_dict
 
 
 def main():
@@ -28,7 +28,7 @@ def main():
 
     # Creates and load the model
     model = build_model(ModelConfig.MODEL, DataConfig.NB_CLASSES,
-                        model_path=args.model_path, eval=True,  **get_config_as_dict(ModelConfig))
+                        model_path=args.model_path, eval=True, **get_config_as_dict(ModelConfig))
     print("Weights loaded", flush=True)
 
     data, labels, paths = data_loader(args.data_path, DataConfig.LABEL_MAP,

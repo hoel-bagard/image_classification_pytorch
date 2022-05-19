@@ -1,30 +1,30 @@
-from torch.utils.tensorboard import SummaryWriter  # noqa: F401  # Needs to be there to avoid segfaults
-from argparse import ArgumentParser
-from pathlib import Path
+import argparse
 import shutil
-import time
 import sys
+import time
 from functools import partial
+from pathlib import Path
 
 import torch
 from torchsummary import summary
 
+import src.dataset.data_transformations as transforms
 from config.data_config import DataConfig
 from config.model_config import ModelConfig
-from src.torch_utils.utils.batch_generator import BatchGenerator
+from src.dataset.default_loader import default_load_data
 from src.dataset.default_loader import default_loader as data_loader
 # from src.dataset.dataset_loaders import name_loader as data_loader
-from src.dataset.default_loader import default_load_data
-import src.dataset.data_transformations as transforms
-from src.torch_utils.utils.misc import get_config_as_dict
 from src.networks.build_network import build_model
+from src.torch_utils.utils.batch_generator import BatchGenerator
+from src.torch_utils.utils.logger import create_logger, DummyLogger
 from src.torch_utils.utils.misc import clean_print
-from src.torch_utils.utils.logger import DummyLogger, create_logger
+from src.torch_utils.utils.misc import get_config_as_dict
 from src.train import train
 
 
 def main():
-    parser = ArgumentParser()
+    parser = argparse.ArgumentParser(description="Training script",
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("--limit", "--l", default=None, type=int, help="Limits the number of apparition of each class")
     parser.add_argument("--load_data", "--ld", action="store_true", help="Loads all the images into RAM")
     parser.add_argument("--name", type=str, default="Train",

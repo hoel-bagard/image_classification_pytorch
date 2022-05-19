@@ -8,7 +8,7 @@ from lambda_networks import λLayer
 
 
 def conv1x1(in_planes, out_planes, stride=1):
-    """1x1 convolution"""
+    """1x1 convolution."""
     return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
 
 
@@ -51,7 +51,8 @@ class Bottleneck(nn.Module):
 class LambdaResnet(nn.Module):
     def __init__(self, nb_classes: int, lambda_layers: list[int], lambda_channels: list[int], lambda_strides: list[int],
                  small_input: bool = False, **kwargs):
-        """
+        """Create a lambda resnet.
+
         Args:
             nb_classes (int): Number of output classes
             lambda_layers (list): Number of blocks in each lambda layer

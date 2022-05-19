@@ -1,16 +1,16 @@
-from argparse import ArgumentParser
-from pathlib import Path
-from multiprocessing import Pool
+import math
 import os
 import shutil
-import math
+from argparse import ArgumentParser
+from multiprocessing import Pool
+from pathlib import Path
 
 import cv2
 import numpy as np
 
 
-def mosaic_worker(args: tuple[Path, Path, tuple[int, int, int, int]]):
-    """ Worker in charge of turning an image into a mosaic.
+def mosaic_worker(args: tuple[Path, Path, tuple[int, int, int, int], bool]):  # noqa D417
+    """Worker in charge of turning an image into a mosaic.  # noqa D417
 
     This function only handle the case where the image's width is larger than its height (for now at least)
 
@@ -76,7 +76,7 @@ def main():
     mp_args = list([(img_path, output_path, args.crop, args.use_padding) for img_path in file_list])
     nb_images_processed = 0  # Use to count the number of good / bad samples
     with Pool(processes=int(os.cpu_count() * 0.8)) as pool:
-        for result in pool.imap(mosaic_worker, mp_args, chunksize=10):
+        for _result in pool.imap(mosaic_worker, mp_args, chunksize=10):
             nb_images_processed += 1
             msg = f"Processing status: ({nb_images_processed}/{nb_imgs})"
             print(msg + ' ' * (shutil.get_terminal_size(fallback=(156, 38)).columns - len(msg)), end='\r', flush=True)

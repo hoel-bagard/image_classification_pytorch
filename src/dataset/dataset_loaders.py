@@ -18,7 +18,7 @@ def name_loader(data_path: Path,
                 return_img_paths: bool = False,
                 shuffle: bool = False,
                 ) -> Union[tuple[np.ndarray, np.ndarray, list[Path]], tuple[np.ndarray, np.ndarray]]:
-    """ Loading function for datasets where the class is in the name of the file
+    """Loading function for datasets where the class is in the name of the file.
 
     Args:
         data_path (Path): Path to the root folder of the dataset.

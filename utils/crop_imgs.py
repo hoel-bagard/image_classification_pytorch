@@ -1,15 +1,14 @@
-
-from argparse import ArgumentParser
-from pathlib import Path
-from multiprocessing import Pool
 import os
 import shutil
+from argparse import ArgumentParser
+from multiprocessing import Pool
+from pathlib import Path
 
 import cv2
 
 
-def worker(args: tuple[Path, Path, tuple[int, int, int, int]]):
-    """ Worker in charge of cropping an image.
+def worker(args: tuple[Path, Path, tuple[int, int, int, int]]):  # noqa D417
+    """Worker in charge of cropping an image.  # noqa D417
 
     Args:
         img_path (Path): Path to the image to process
@@ -51,7 +50,7 @@ def main():
     mp_args = list([(img_path, output_path, args.crop) for img_path in file_list])
     nb_images_processed = 0
     with Pool(processes=int(os.cpu_count() * 0.8)) as pool:
-        for result in pool.imap(worker, mp_args, chunksize=10):
+        for _result in pool.imap(worker, mp_args, chunksize=10):
             nb_images_processed += 1
             msg = f"Processing status: ({nb_images_processed}/{nb_imgs})"
             print(msg + ' ' * (shutil.get_terminal_size(fallback=(156, 38)).columns - len(msg)), end='\r', flush=True)

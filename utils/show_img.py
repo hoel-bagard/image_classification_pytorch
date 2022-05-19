@@ -1,13 +1,13 @@
-from pathlib import Path
-from argparse import ArgumentParser
 import shutil
+from argparse import ArgumentParser
+from pathlib import Path
 
-import numpy as np
 import cv2
+import numpy as np
 
 
 def rotate_image(img: np.ndarray, angle: float) -> np.ndarray:
-    """ Rotates an image by the given angle (in degrees) and returns it """
+    """Rotates an image by the given angle (in degrees) and returns it."""
     img_center = np.asarray(img.shape[1::-1]) / 2
     rot_mat = cv2.getRotationMatrix2D(img_center, angle, 1.0)
     rotated_img = cv2.warpAffine(img, rot_mat, img.shape[1::-1], flags=cv2.INTER_LINEAR)

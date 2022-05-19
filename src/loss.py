@@ -1,12 +1,12 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
+import torch.nn.functional as F  # noqa: N812
 
 
 class SmoothCrossEntropyLoss(nn.Module):
-    """ Computes a loss with label smoothing for the given batch. """
     def __init__(self, smoothing: float = 0):
-        """
+        """Computes a loss with label smoothing for the given batch.
+
         Args:
             smoothing (float): Value used for label smoothing
         """
@@ -17,7 +17,7 @@ class SmoothCrossEntropyLoss(nn.Module):
 
     @staticmethod
     def _smooth_one_hot(targets: torch.Tensor, nb_classes: int, smoothing: float = 0.0) -> torch.Tensor:
-        """ Smoothes the target labels.
+        """Smoothes the target labels.
 
         Args:
             targets (torch.Tensor): The target labels (ints, not one hots). Shape (batch_size, ).
@@ -37,7 +37,8 @@ class SmoothCrossEntropyLoss(nn.Module):
         return targets
 
     def forward(self, logits: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
-        """
+        """Forward.
+
         Args:
             logits (torch.Tensor): The model's predictions
             labels (torch.Tensor): The labels

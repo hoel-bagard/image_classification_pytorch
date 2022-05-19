@@ -1,14 +1,12 @@
 from pathlib import Path
 from typing import (
     Callable,
-    Union,
-    Optional
+    Optional,
+    Union
 )
 
 import cv2
 import numpy as np
-
-from src.torch_utils.utils.misc import clean_print
 
 
 def default_loader(data_path: Path,
@@ -18,7 +16,7 @@ def default_loader(data_path: Path,
                    data_preprocessing_fn: Optional[Callable[[Path], np.ndarray]] = None,
                    shuffle: bool = False,
                    ) -> tuple[np.ndarray, np.ndarray]:
-    """ Default loading function for image classification.
+    """Default loading function for image classification.
 
     The data folder is expected to contain subfolders for each class, with the images inside.
 
@@ -61,7 +59,7 @@ def default_loader(data_path: Path,
 
 
 def default_load_data(data: Union[Path, list[Path]]) -> np.ndarray:
-    """Function that loads image(s) from path(s)
+    """Function that loads image(s) from path(s).
 
     Args:
         data (path): either an image path or a batch of image paths, and return the loaded image(s)
