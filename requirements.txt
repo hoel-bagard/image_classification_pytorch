@@ -4,4 +4,3 @@ opencv-python
 albumentations
 numpy
 matplotlib
-lambda-networks
