@@ -30,8 +30,6 @@ class CNN(nn.Module):
         super().__init__()
         self.feature_extractor = CNNFeatureExtractor(channels, sizes, strides, paddings)
 
-        # feature_extractor_output_shape: int = get_cnn_output_size(kwargs["image_sizes"], sizes, strides, paddings,
-        #                                                           output_channels=channels[-1], dense=True)
         fe_output = np.prod(self.feature_extractor(torch.zeros(1, 3, *kwargs["image_sizes"], device="cpu")).shape[1:])
 
         self.dense = nn.Linear(fe_output, nb_classes)

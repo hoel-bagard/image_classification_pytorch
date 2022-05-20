@@ -31,12 +31,6 @@ class ModelConfig:
     PADDINGS: list[int | tuple[int, int]] = field(default_factory=lambda: [2, 1, 1, 1, 1])
     BLOCKS: list[int] = field(default_factory=lambda: [1, 2, 2, 1, 1])
 
-    # Parameters for lambda networks
-    SMALL_INPUT = False    # If True, the first conv of the layer has a bigger kernel / stride / padding
-    LAMBDA_LAYERS = field(default_factory=lambda: [3, 4, 6, 3])
-    LAMBDA_CHANNELS = field(default_factory=lambda: [64, 128, 256, 512])
-    LAMBDA_STRIDES = field(default_factory=lambda: [1, 2, 2, 2])
-
 
 def get_model_config() -> ModelConfig:
     return ModelConfig()

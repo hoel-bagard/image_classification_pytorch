@@ -170,8 +170,6 @@ def main():
 
                         if data_config.USE_TB:
                             print("Starting to compute TensorBoard metrics", end="\r", flush=True)
-                            # TODO: uncomment this after finishing the lambda network
-                            # tensorboard.write_weights_grad(epoch)
                             tensorboard.write_loss(epoch, epoch_loss, mode="Validation")
 
                             # Metrics for the Train dataset

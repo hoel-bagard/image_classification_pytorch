@@ -33,8 +33,6 @@ class SmallDarknet(nn.Module):
         self.feature_extractor = nn.Sequential(*[DarknetBlock(channels[i-1], channels[i], blocks[i-1])
                                                  for i in range(1, len(channels))])
 
-        # feature_extractor_output_shape: int = get_cnn_output_size(kwargs["image_sizes"], sizes, strides, paddings,
-        #                                                           output_channels=channels[-1], dense=True)
         fe_output = np.prod(self.feature_extractor(torch.zeros(1, 3,
                                                                *kwargs["image_sizes"],
                                                                device="cpu")).shape[1:])
