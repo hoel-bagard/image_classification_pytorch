@@ -62,8 +62,16 @@ def main():
 
     # Data augmentation done on cpu.
     augmentation_pipeline = transforms.albumentation_wrapper(albumentations.Compose([
+        albumentations.HorizontalFlip(p=0.5),
+        albumentations.VerticalFlip(p=0.5),
+        albumentations.RandomRotate90(),
+        albumentations.ShiftScaleRotate(),
+        # albumentations.CLAHE(),
+        # albumentations.AdvancedBlur(),
+        # albumentations.GaussNoise(),
         albumentations.RandomBrightnessContrast(brightness_limit=0.3, contrast_limit=0.3, p=0.5),
         albumentations.HueSaturationValue(hue_shift_limit=30, sat_shift_limit=45, val_shift_limit=30, p=0.5),
+        # albumentations.ImageCompression(),
     ]))
     common_pipeline = transforms.albumentation_wrapper(albumentations.Compose([
         albumentations.Normalize(mean=model_config.IMG_MEAN, std=model_config.IMG_STD, p=1.0),
@@ -73,22 +81,6 @@ def main():
     train_pipeline = transforms.compose_transformations((augmentation_pipeline, common_pipeline))
 
     denormalize_imgs_fn = transforms.destandardize_img(model_config.IMG_MEAN, model_config.IMG_STD)
-    # base_cpu_pipeline = (
-    #     # transforms.resize(model_config.IMAGE_SIZES),
-    # )
-    # cpu_augmentation_pipeline = transforms.compose_transformations((
-    #     *base_cpu_pipeline,
-    #     transforms.vertical_flip,
-    #     transforms.horizontal_flip,
-    #     transforms.rotate180,
-    #     transforms.rotate90,
-    #     transforms.temp_pil_aug,
-    #     partial(transforms.rotate, min_angle=-10, max_angle=10),
-    #     partial(transforms.cut_out, size=0.15)
-    # ))
-
-    #     transforms.noise()
-    # ))
 
     with BatchGenerator(train_data, train_labels,
                         model_config.BATCH_SIZE, nb_workers=data_config.NB_WORKERS,
