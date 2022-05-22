@@ -38,7 +38,7 @@ def worker(args: tuple[argparse.Namespace, Path]):
         if best_frame_only:
             frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # Not necessary
             if sharpness := cv2.Laplacian(frame_gray, cv2.CV_64F).var() > best_sharpness:
-                best_sharpness, best_frame = frame, sharpness
+                best_sharpness, best_frame = sharpness, frame
         else:
             imwrite(video_output_path / (str(frame_count).zfill(3) + img_format), frame, resize_ratio)
         frame_count += 1
@@ -59,8 +59,8 @@ def main():
 
     data_path: Path = args.data_path
 
-    video_paths = data_path.rglob("*.mp4")
-    nb_videos = len(list(video_paths))
+    video_paths = list(data_path.rglob("*.mp4"))
+    nb_videos = len(video_paths)
     mp_args = [(args, video_path) for video_path in video_paths]
     with Pool(processes=int(os.cpu_count() * 0.8)) as pool:
         for nb_videos_processed, _result in enumerate(pool.imap(worker, mp_args, chunksize=10), start=1):
