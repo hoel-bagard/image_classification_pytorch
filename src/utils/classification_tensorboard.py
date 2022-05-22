@@ -6,8 +6,8 @@ import numpy as np
 import numpy.typing as npt
 import torch.nn as nn
 
-from config.model_config import get_model_config
 from config.data_config import get_data_config
+from config.model_config import get_model_config
 from src.torch_utils.utils.batch_generator import BatchGenerator
 from src.torch_utils.utils.misc import clean_print
 from src.torch_utils.utils.tensorboard_template import TensorBoard

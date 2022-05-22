@@ -20,7 +20,6 @@ from src.networks.build_network import build_model
 from src.torch_utils.utils.batch_generator import BatchGenerator
 from src.torch_utils.utils.classification_metrics import ClassificationMetrics
 from src.torch_utils.utils.logger import create_logger
-from src.torch_utils.utils.misc import clean_print
 from src.torch_utils.utils.misc import get_config_as_dict
 from src.torch_utils.utils.prepare_folders import prepare_folders
 from src.torch_utils.utils.ressource_usage import resource_usage
@@ -118,6 +117,7 @@ def main():
             logger.info(line)
         logger.info("")
 
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         weights = torch.Tensor(model_config.LOSS_WEIGTHS).to(device) if model_config.LOSS_WEIGTHS else None
         loss_fn = nn.CrossEntropyLoss(weight=weights)
         # loss_fn = SmoothCrossEntropyLoss(model_config.LABEL_SMOOTHING)

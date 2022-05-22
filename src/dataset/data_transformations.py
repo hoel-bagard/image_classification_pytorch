@@ -1,7 +1,7 @@
 """Data augmentation module using albumentations."""
 from functools import singledispatch
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Callable
 
 import albumentations
 import numpy as np
