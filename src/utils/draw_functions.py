@@ -9,7 +9,7 @@ def draw_pred_img(imgs: npt.NDArray[np.uint8],
                   predictions: npt.NDArray[np.uint8],
                   labels: npt.NDArray[np.uint8],
                   label_map: dict[int, str],
-                  size: Optional[tuple[int, int]] = None) -> np.ndarray:
+                  size: Optional[tuple[int, int]] = None) -> npt.NDArray[np.uint8]:
     """Draws predictions and labels on the image to help with TensorBoard visualisation.
 
     Args:
@@ -29,7 +29,6 @@ def draw_pred_img(imgs: npt.NDArray[np.uint8],
         idx = idx[np.argsort(preds[idx])][::-1]
         preds = str([label_map[i] + f":  {round(float(preds[i]), 2)}" for i in idx])
 
-        img = np.asarray(img * 255.0, dtype=np.uint8)
         if size:
             img = cv2.resize(img, size, interpolation=cv2.INTER_AREA)
         img = cv2.UMat(img)
