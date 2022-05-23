@@ -23,6 +23,8 @@ def main():
 
     with open(data_path / "batches.meta", "rb") as pickle_file:
         label_map = pickle.load(pickle_file, encoding="bytes")[b"label_names"]
+
+    output_path.mkdir(parents=True, exist_ok=True)
     with open(output_path / "classes.names", "w") as classes_file:
         for cls_name in label_map:
             classes_file.write(cls_name.decode("utf-8") + "\n")
