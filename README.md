@@ -1,11 +1,10 @@
 # Classification-PyTorch
 ## Installation
 
-### Dependencies
-torch\
-torchsummary\
-tensorboard\
-opencv-python
+### Requirements/dependencies
+- Python >=3.10
+- PyTorch (preferably with GPU)
+- Packages from the `requirements.txt` file
 
 ### Clone the repository
 ```
@@ -14,7 +13,22 @@ git clone git@github.com:hoel-bagard/Classification-PyTorch.git --recurse-submod
 
 ### Get some data and format it:
 
-You need to split the data between two folders: "Train" and "Validation" (the names are hard coded). You then need to create a classes.names next to the Train and Validation folder, with the names of the classes (one per line).
+You need to split the images between two folders: "Train" and "Validation" (the names are hard coded).
+You then need to create a `classes.names` file next to the Train and Validation folders, with the names of the classes (one per line).
+
+<details>
+  <summary>CIFAR-10 example</summary>
+
+The commands below will download, extract and format the cifar 10 dataset into the `./data/cifar_10_images` folder.
+
+```
+wget https://www.cs.toronto.edu/\~kriz/cifar-10-python.tar.gz -P data
+tar -xvf data/cifar-10-python.tar.gz -C data
+python utils/cifar_10.py data/cifar-10-batches-py
+rm data/cifar-10-python.tar.gz
+rm -r data/cifar-10-batches-py/
+```
+</details>
 
 
 ## Config files
