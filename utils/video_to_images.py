@@ -37,7 +37,7 @@ def worker(args: tuple[argparse.Namespace, Path]):
 
         if best_frame_only:
             frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # Not necessary
-            if sharpness := cv2.Laplacian(frame_gray, cv2.CV_64F).var() > best_sharpness:
+            if (sharpness := cv2.Laplacian(frame_gray, cv2.CV_64F).var()) > best_sharpness:
                 best_sharpness, best_frame = sharpness, frame
         else:
             imwrite(video_output_path / (str(frame_count).zfill(3) + img_format), frame, resize_ratio)
