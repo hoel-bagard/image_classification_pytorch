@@ -44,6 +44,8 @@ class ClassificationTensorBoard(TensorBoard):
         self.denormalize_imgs_fn = denormalize_imgs_fn
         self.model_config = get_model_config()
         self.data_config = get_data_config()
+        # If the images are too small, they are resized to a decent size.
+        self.tb_img_size = (max(self.model_config.IMAGE_SIZES[0], 480), max(self.model_config.IMAGE_SIZES[1], 480))
 
     def write_images(self, epoch: int, mode: str = "Train"):
         """Writes images with predictions written on them to TensorBoard.
@@ -64,8 +66,8 @@ class ClassificationTensorBoard(TensorBoard):
 
         imgs: npt.NDArray[np.uint8] = self.denormalize_imgs_fn(imgs)
         labels = labels.cpu().detach().numpy()
-        predictions = predictions.cpu().detach().numpy()
-        out_imgs = draw_pred_img(imgs, predictions, labels, self.data_config.LABEL_MAP)
+        predictions = nn.functional.softmax(predictions, dim=-1).cpu().detach().numpy()
+        out_imgs = draw_pred_img(imgs, predictions, labels, self.data_config.LABEL_MAP, self.tb_img_size)
 
         # Add them to TensorBoard
         for image_index, out_img in enumerate(out_imgs):
