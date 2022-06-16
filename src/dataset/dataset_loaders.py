@@ -1,11 +1,8 @@
 from pathlib import Path
-from typing import (
-    Callable,
-    Optional,
-    Union
-)
+from typing import Callable, Optional
 
 import numpy as np
+import numpy.typing as npt
 
 from src.torch_utils.utils.misc import clean_print
 
@@ -17,7 +14,8 @@ def name_loader(data_path: Path,
                 data_preprocessing_fn: Optional[Callable[[Path], np.ndarray]] = None,
                 return_img_paths: bool = False,
                 shuffle: bool = False,
-                ) -> Union[tuple[np.ndarray, np.ndarray, list[Path]], tuple[np.ndarray, np.ndarray]]:
+                ) -> (tuple[npt.NDArray[np.uint8], npt.NDArray[Path], list[Path]]
+                      | tuple[npt.NDArray[np.uint8], npt.NDArray[Path]]):
     """Loading function for datasets where the class is in the name of the file.
 
     Args:
