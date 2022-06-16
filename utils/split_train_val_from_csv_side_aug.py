@@ -1,21 +1,21 @@
 import argparse
-from pathlib import Path
-from multiprocessing import Pool
 import os
 import shutil
+from multiprocessing import Pool
+from pathlib import Path
 
 import cv2
 import numpy as np
 
 
-def worker(args: tuple[Path, Path, tuple[int, int, int, int]]):
-    """ Worker in charge of moving an image and possible doing some data augmentation
+def worker(args: tuple):
+    """Worker in charge of moving an image and possible doing some data augmentation.
 
     Args:
-        entry (tuple): Entry to process (tuple with img path, is_train and is_defect_on_right_side)
-        train_list (list): List with all the train entries
-        train_path (Path): Path to the output train folder
-        val_path (Path): Path to the output validation folder
+        args: entry (tuple): Entry to process (tuple with img path, is_train and is_defect_on_right_side)
+              train_list (list): List with all the train entries
+              train_path (Path): Path to the output train folder
+              val_path (Path): Path to the output validation folder
 
     Return:
         0
@@ -93,7 +93,7 @@ def main():
     mp_args = list([(entry, train_lists, args.data_path, train_path, val_path) for entry in spec_list])
     nb_images_processed, nb_imgs = 0, len(spec_list)
     with Pool(processes=int(os.cpu_count() * 0.8)) as pool:
-        for result in pool.imap(worker, mp_args, chunksize=10):
+        for _result in pool.imap(worker, mp_args, chunksize=10):
             nb_images_processed += 1
             msg = f"Processing status: ({nb_images_processed}/{nb_imgs})"
             print(msg + ' ' * (shutil.get_terminal_size(fallback=(156, 38)).columns - len(msg)), end='\r', flush=True)

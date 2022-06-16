@@ -5,6 +5,10 @@ __pycache__/
 
 *.kate-swp
 
-venv
 config/model_config.py
 config/data_config.py
+
+venv
+data
+checkpoints
+logs

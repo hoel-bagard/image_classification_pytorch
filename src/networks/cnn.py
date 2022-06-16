@@ -1,37 +1,35 @@
 from collections import OrderedDict
-from typing import Union, Callable
+from typing import Callable
 
 import numpy as np
 import torch
 import torch.nn as nn
 
-from src.torch_utils.networks.network_utils import layer_init
 from src.torch_utils.networks.cnn_feature_extractor import CNNFeatureExtractor
+from src.torch_utils.networks.network_utils import layer_init
 
 
 class CNN(nn.Module):
     def __init__(self,
                  channels: list[int],
-                 sizes: list[Union[int, tuple[int, int, int]]],
-                 strides: list[Union[int, tuple[int, int, int]]],
-                 paddings: list[Union[int, tuple[int, int, int]]],
+                 sizes: list[int | tuple[int, int, int]],
+                 strides: list[int | tuple[int, int, int]],
+                 paddings: list[int | tuple[int, int, int]],
                  nb_classes: int,
                  layer_init: Callable[[nn.Module], None] = layer_init, **kwargs):
-        """
-        Feature extractor
+        """Feature extractor.
+
         Args:
             channels: List with the number of channels for each convolution
             sizes: List with the kernel size for each convolution
             strides: List with the stride for each convolution
             paddings: List with the padding for each convolution
-            nb_class: Number of output classes
+            nb_classes: Number of output classes
             layer_init: Function used to initialise the layers of the network
         """
         super().__init__()
         self.feature_extractor = CNNFeatureExtractor(channels, sizes, strides, paddings)
 
-        # feature_extractor_output_shape: int = get_cnn_output_size(kwargs["image_sizes"], sizes, strides, paddings,
-        #                                                           output_channels=channels[-1], dense=True)
         fe_output = np.prod(self.feature_extractor(torch.zeros(1, 3, *kwargs["image_sizes"], device="cpu")).shape[1:])
 
         self.dense = nn.Linear(fe_output, nb_classes)

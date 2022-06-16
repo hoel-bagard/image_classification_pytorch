@@ -1,9 +1,4 @@
 from pathlib import Path
-from typing import (
-    Callable,
-    Union,
-    Optional
-)
 
 import cv2
 import numpy as np
@@ -14,11 +9,10 @@ from src.torch_utils.utils.misc import clean_print
 def default_loader(data_path: Path,
                    label_map: dict[int, str],
                    limit: int = None,
-                   load_data: bool = False,
-                   data_preprocessing_fn: Optional[Callable[[Path], np.ndarray]] = None,
                    shuffle: bool = False,
+                   verbose: bool = True
                    ) -> tuple[np.ndarray, np.ndarray]:
-    """ Default loading function for image classification.
+    """Default loading function for image classification.
 
     The data folder is expected to contain subfolders for each class, with the images inside.
 
@@ -27,26 +21,22 @@ def default_loader(data_path: Path,
         label_map (dict): dictionarry mapping an int to a class
         limit (int, optional): If given then the number of elements for each class in the dataset
                                will be capped to this number
-        load_data (bool): If true then this function returns the images already loaded instead of their paths.
-                          The images are loaded using the preprocessing functions (they must be provided)
-        data_preprocessing_fn (callable, optional): Function used to load data (imgs) from their paths.
-        shuffle: If true then the data is shuffled once before being returned
+        shuffle (bool): If true then the data is shuffled once before being returned
+        verbose (bool): Verbose mode, print loading progress.
 
     Return:
-        numpy array containing the images' paths and the associated label or the loaded data
+        2 numpy arrays, one containing the images' paths and the other containing the labels.
     """
-    # TODO: benchmark if it's faster to use np.append than arrays
     labels, data = [], []
     exts = (".png", ".jpg", ".bmp")
     for key in range(len(label_map)):
         class_dir_path = data_path / label_map[key]
-        image_paths = list([path for path in class_dir_path.rglob('*') if path.suffix in exts])
-        for i, image_path in enumerate(image_paths, start=1):
-            # clean_print(f"Loading data {image_path}    ({i}/{len(image_paths)}) for class {label_map[key]}", end='\r')
-            if load_data:
-                data.append(data_preprocessing_fn(image_path))
-            else:
-                data.append(image_path)
+        img_paths = [path for path in class_dir_path.rglob('*') if path.suffix in exts]
+        for i, img_path in enumerate(img_paths, start=1):
+            if verbose:
+                clean_print(f"Processing image {img_path.name}    ({i}/{len(img_paths)}) for class {label_map[key]}",
+                            end="\r" if (i != len(img_paths) and i != limit) else "\n")
+            data.append(img_path)
             labels.append(key)
             if limit and i >= limit:
                 break
@@ -60,8 +50,8 @@ def default_loader(data_path: Path,
     return data, labels
 
 
-def default_load_data(data: Union[Path, list[Path]]) -> np.ndarray:
-    """Function that loads image(s) from path(s)
+def default_load_data(data: Path | list[Path]) -> np.ndarray:
+    """Function that loads image(s) from path(s).
 
     Args:
         data (path): either an image path or a batch of image paths, and return the loaded image(s)
@@ -78,3 +68,27 @@ def default_load_data(data: Union[Path, list[Path]]) -> np.ndarray:
         for image_path in data:
             imgs.append(default_load_data(image_path))
         return np.asarray(imgs)
+
+
+if __name__ == "__main__":
+    def _test_fn():
+        from argparse import ArgumentParser
+        from src.torch_utils.utils.imgs_misc import show_img
+        parser = ArgumentParser(description=("Script to test the loading function. "
+                                             "Run with 'python -m src.dataset.default_loader <path>'"))
+        parser.add_argument("data_path", type=Path, help="Path to a classification dataset (Train or Validation).")
+        args = parser.parse_args()
+
+        data_path: Path = args.data_path
+
+        label_map = {}
+        with open(data_path.parent / "classes.names") as text_file:
+            for key, line in enumerate(text_file):
+                label_map[key] = line.strip()
+
+        data, labels = default_loader(data_path, label_map, limit=20)
+        img1, _img2 = default_load_data(data[:2])
+        print(labels[0])
+        show_img(img1)
+
+    _test_fn()

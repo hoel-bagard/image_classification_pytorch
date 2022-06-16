@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from typing import Union, Callable
+from typing import Callable, Union
 
 import numpy as np
 import torch
@@ -18,23 +18,21 @@ class SmallDarknet(nn.Module):
                  blocks: list[int],
                  nb_classes: int,
                  layer_init: Callable[[nn.Module], None] = layer_init, **kwargs):
-        """
-        Feature extractor
+        """Feature extractor.
+
         Args:
             channels: List with the number of channels for each convolution
             sizes: List with the kernel size for each convolution
             strides: List with the stride for each convolution
             paddings: List with the padding for each convolution
             blocks: List with the number of blocks for the darknet blocks
-            nb_class: Number of output classes
+            nb_classes: Number of output classes
             layer_init: Function used to initialise the layers of the network
         """
         super().__init__()
         self.feature_extractor = nn.Sequential(*[DarknetBlock(channels[i-1], channels[i], blocks[i-1])
                                                  for i in range(1, len(channels))])
 
-        # feature_extractor_output_shape: int = get_cnn_output_size(kwargs["image_sizes"], sizes, strides, paddings,
-        #                                                           output_channels=channels[-1], dense=True)
         fe_output = np.prod(self.feature_extractor(torch.zeros(1, 3,
                                                                *kwargs["image_sizes"],
                                                                device="cpu")).shape[1:])
