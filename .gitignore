@@ -10,3 +10,5 @@ config/data_config.py
 
 venv
 data
+checkpoints
+logs
