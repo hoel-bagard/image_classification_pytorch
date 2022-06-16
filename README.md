@@ -1,4 +1,4 @@
-# Classification-PyTorch
+# Image Classification using PyTorch
 ## Installation
 
 ### Requirements/dependencies
@@ -8,7 +8,7 @@
 
 ### Clone the repository
 ```
-git clone git@github.com:hoel-bagard/Classification-PyTorch.git --recurse-submodules
+git clone git@github.com:hoel-bagard/image_classification_pytorch.git --recurse-submodules
 ```
 
 ### Get some data and format it:
