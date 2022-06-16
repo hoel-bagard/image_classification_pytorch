@@ -6,6 +6,17 @@
 - PyTorch (preferably with GPU)
 - Packages from the `requirements.txt` file
 
+<details>
+<summary>Example (virtualenv/pip)</summary>
+Assuming you're on a linux PC/server with Python>=3.10 and PyTorch already installed, you can use those commands:
+
+```
+virtualenv --system-site-packages venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+</details>
+
 ### Clone the repository
 ```
 git clone git@github.com:hoel-bagard/image_classification_pytorch.git --recurse-submodules
