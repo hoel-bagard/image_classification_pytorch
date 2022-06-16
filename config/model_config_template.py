@@ -7,11 +7,11 @@ from src.networks.build_network import ModelHelper
 @dataclass(frozen=True, slots=True)
 class ModelConfig:
     # Training parameters
-    BATCH_SIZE = 32
-    MAX_EPOCHS = 500
-    START_LR = 1e-3
-    END_LR = 5e-6
-    WEIGHT_DECAY = 1e-2   # Weight decay for the optimizer
+    BATCH_SIZE: int = 32
+    MAX_EPOCHS: int = 500
+    START_LR: float = 1e-3
+    END_LR: float = 5e-6
+    WEIGHT_DECAY: float = 1e-2   # Weight decay for the optimizer
 
     # Data processing
     IMAGE_SIZES: tuple[int, int] = (224, 224)  # All images will be resized to this size
@@ -23,7 +23,7 @@ class ModelConfig:
     LOSS_WEIGTHS: Optional[list[float]] = None   # Weights the classes during the loss
 
     # Network part
-    MODEL = ModelHelper.SmallDarknet
+    MODEL: type = ModelHelper.SmallDarknet
     # Parameters for standard CNN-like networks
     CHANNELS: list[int] = field(default_factory=lambda: [3, 8, 16, 32, 32, 16])
     SIZES: list[int | tuple[int, int]] = field(default_factory=lambda: [5, 3, 3, 3, 3])   # Kernel sizes
