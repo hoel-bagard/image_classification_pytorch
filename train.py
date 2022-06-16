@@ -20,7 +20,7 @@ from src.networks.build_network import build_model
 from src.torch_utils.utils.batch_generator import BatchGenerator
 from src.torch_utils.utils.classification_metrics import ClassificationMetrics
 from src.torch_utils.utils.logger import create_logger
-from src.torch_utils.utils.misc import get_config_as_dict
+from src.torch_utils.utils.misc import get_dataclass_as_dict
 from src.torch_utils.utils.prepare_folders import prepare_folders
 from src.torch_utils.utils.ressource_usage import resource_usage
 from src.torch_utils.utils.torch_summary import summary
@@ -98,7 +98,7 @@ def main():
               f"{len(val_dataloader)} validation data", flush=True)
 
         print("Building model. . .", end="\r")
-        model = build_model(model_config.MODEL, data_config.NB_CLASSES, **get_config_as_dict(model_config))
+        model = build_model(model_config.MODEL, data_config.NB_CLASSES, **dict(get_dataclass_as_dict(model_config)))
 
         logger.info(f"{'-'*24} Starting train {'-'*24}")
         logger.info("From command : %s", ' '.join(sys.argv))
