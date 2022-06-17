@@ -3,7 +3,6 @@ import sys
 import time
 import traceback
 from pathlib import Path
-from subprocess import CalledProcessError
 
 import albumentations
 import cv2
@@ -18,13 +17,13 @@ from src.dataset.default_loader import default_load_data
 from src.dataset.default_loader import default_loader as data_loader
 from src.networks.build_network import build_model
 from src.torch_utils.utils.batch_generator import BatchGenerator
-from src.torch_utils.utils.classification_metrics import ClassificationMetrics
 from src.torch_utils.utils.logger import create_logger
 from src.torch_utils.utils.misc import get_dataclass_as_dict
 from src.torch_utils.utils.prepare_folders import prepare_folders
 from src.torch_utils.utils.ressource_usage import resource_usage
 from src.torch_utils.utils.torch_summary import summary
 from src.torch_utils.utils.trainer import Trainer
+from src.utils.classification_metrics import ClassificationMetrics
 from src.utils.classification_tensorboard import ClassificationTensorBoard
 
 
@@ -156,13 +155,15 @@ def main():
 
                 # Validation and other metrics
                 if epoch % data_config.VAL_FREQ == 0 and epoch >= data_config.RECORD_START:
+                    if data_config.USE_TB:
+                        tensorboard.write_weights_grad(epoch)
                     with torch.no_grad():
                         validation_start_time = time.perf_counter()
-                        epoch_loss = trainer.val_epoch()
+                        val_epoch_loss = trainer.val_epoch()
 
                         if data_config.USE_TB:
                             print("Starting to compute TensorBoard metrics", end="\r", flush=True)
-                            tensorboard.write_loss(epoch, epoch_loss, mode="Validation")
+                            tensorboard.write_loss(epoch, val_epoch_loss, mode="Validation")
 
                             # Metrics for the Train dataset
                             tensorboard.write_images(epoch)
@@ -176,7 +177,7 @@ def main():
 
                             logger.info(f"Train accuracy: {train_acc:.3f}  -  Validation accuracy: {val_acc:.3f}")
 
-                        logger.info(f"Validation loss: {epoch_loss:.5e}  -  "
+                        logger.info(f"Validation loss: {val_epoch_loss:.5e}  -  "
                                     f"Took {time.perf_counter() - validation_start_time:.5f}s")
                 scheduler.step()
         except KeyboardInterrupt:
@@ -186,17 +187,19 @@ def main():
             raise error
 
     if data_config.USE_TB:
+        metrics = {"Z - Final Results/Train loss": epoch_loss,
+                   "Z - Final Results/Validation loss": val_epoch_loss,
+                   "Z - Final Results/Train accuracy": train_acc,
+                   "Z - Final Results/Validation accuracy": val_acc}
+        tensorboard.write_config(get_dataclass_as_dict(model_config), metrics)
         tensorboard.close_writers()
 
     train_stop_time = time.time()
     end_msg = f"Finished Training\n\tTraining time : {train_stop_time - train_start_time:.03f}s"
-    try:
-        memory_peak, gpu_memory = resource_usage()
-        end_msg += f"\n\tRAM peak : {memory_peak // 1024} MB\n\tVRAM usage : {gpu_memory}"
-    except CalledProcessError:
-        pass
+    memory_peak, gpu_memory = resource_usage()
+    end_msg += f"\n\tRAM peak : {memory_peak // 1024} MB\n\tVRAM usage : {gpu_memory}"
     logger.info(end_msg)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
