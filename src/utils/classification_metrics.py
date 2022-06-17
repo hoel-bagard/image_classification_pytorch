@@ -100,7 +100,7 @@ class ClassificationMetrics(Metrics):
         # Create theme.
         fig = plt.figure(figsize=(8, 8))
         fg_color = "#000000" if light_mode else "#E0E0E0"
-        bg_color = "#ffffff" if light_mode else "#121212"
+        bg_color = "#ffffff" if light_mode else "#222222"  # "121212"
 
         ax = plt.axes()
         ax.set_facecolor(bg_color)
