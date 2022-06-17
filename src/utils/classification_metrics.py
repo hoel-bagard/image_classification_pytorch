@@ -3,6 +3,7 @@ from typing import Any, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
+import numpy.typing as npt
 import torch
 import torch.nn as nn
 
@@ -83,10 +84,11 @@ class ClassificationMetrics(Metrics):
         per_class_iou = [intersections[i] / unions[i] for i in range(self.nb_output_classes)]
         return per_class_iou
 
-    def get_confusion_matrix(self) -> np.ndarray:
+    def get_confusion_matrix(self, light_mode: bool = False) -> npt.NDArray[np.uint8]:
         """Returns an image containing the plotted confusion matrix.
 
-        Taken from: https://towardsdatascience.com/exploring-confusion-matrix-evolution-on-tensorboard-e66b39f4ac12
+        Args:
+            light_mode: Use a light theme instead of the default dark one.
 
         Returns:
             np.ndarray: Image of the confusion matrix.
@@ -95,28 +97,48 @@ class ClassificationMetrics(Metrics):
         cm = np.around(self.cm.astype("float") / self.cm.sum(axis=1)[:, np.newaxis], decimals=2)
         class_names = self.label_map.values()
 
+        # Create theme.
         fig = plt.figure(figsize=(8, 8))
+        fg_color = "#000000" if light_mode else "#E0E0E0"
+        bg_color = "#ffffff" if light_mode else "#222222"  # "121212"
+
+        ax = plt.axes()
+        ax.set_facecolor(bg_color)
+        fig.set_facecolor(bg_color)
+        ax.tick_params(axis='x', colors=fg_color)
+        ax.tick_params(axis='y', colors=fg_color)
+        ax.spines["top"].set_color(fg_color)
+        ax.spines["right"].set_color(fg_color)
+        ax.spines["bottom"].set_color(fg_color)
+        ax.spines["left"].set_color(fg_color)
+
+        plt.title("Confusion matrix", color=fg_color)
+        plt.ylabel("Labels", labelpad=-5, color=fg_color)
+        plt.xlabel("Predictions", color=fg_color)
+
+        # Place cm
         plt.imshow(cm, interpolation="nearest", cmap=plt.cm.Blues)
-        plt.title("Confusion matrix")
-        plt.colorbar()
         tick_marks = np.arange(len(class_names))
         plt.xticks(tick_marks, class_names, rotation=45)
         plt.yticks(tick_marks, class_names)
 
-        # Use white text if squares are dark; otherwise black.
-        threshold = cm.max() / 2.
+        # Add bar on the right
+        cb = plt.colorbar()
+        cb.ax.yaxis.set_tick_params(color=fg_color)
+        cb.outline.set_edgecolor(fg_color)
+        plt.setp(plt.getp(cb.ax.axes, 'yticklabels'), color=fg_color)
 
+        # Use white text if squares are dark, otherwise black.
+        threshold = cm.max() / 2.
         for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
             color = "white" if cm[i, j] > threshold else "black"
             plt.text(j, i, cm[i, j], horizontalalignment="center", color=color)
 
         plt.tight_layout()
-        plt.ylabel("True label", labelpad=-5)
-        plt.xlabel("Predicted label")
         fig.canvas.draw()
 
         # Convert matplotlib plot to normal image
-        img = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8, sep='')
+        img = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
         img = img.reshape(fig.canvas.get_width_height()[::-1] + (3,))
         plt.close(fig)  # Close figure explicitly to avoid memory leak
 
@@ -143,3 +165,38 @@ class ClassificationMetrics(Metrics):
         metrics["imgs"]["Confusion Matrix"] = confusion_matrix
 
         return metrics
+
+
+if __name__ == "__main__":
+    def _test():
+        from argparse import ArgumentParser
+
+        parser = ArgumentParser(description=("Script to test the metrics class. "
+                                             "Run with 'python -m src.utils.classification_metrics <path>'"))
+        args = parser.parse_args()  # noqa
+
+        def _test_draw_cm():
+            import cv2
+            from src.torch_utils.utils.imgs_misc import show_img
+
+            label_map = {0: "dog", 1: "cat", 2: "horse"}
+            metrics = ClassificationMetrics(None, None, None, label_map)
+            metrics.cm = np.arange(len(label_map)*len(label_map)).reshape((len(label_map), -1))
+            cm_img = metrics.get_confusion_matrix(light_mode=False)
+            cm_img = cv2.cvtColor(cm_img, cv2.COLOR_RGB2BGR)
+            show_img(cm_img)
+        _test_draw_cm()
+    _test()
+
+
+
+
+
+
+
+
+
+
+
+
+
