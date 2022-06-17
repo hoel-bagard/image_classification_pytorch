@@ -187,16 +187,3 @@ if __name__ == "__main__":
             show_img(cm_img)
         _test_draw_cm()
     _test()
-
-
-
-
-
-
-
-
-
-
-
-
-
