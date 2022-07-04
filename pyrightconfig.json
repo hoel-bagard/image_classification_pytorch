@@ -6,6 +6,15 @@
     "inference.py"
   ],
 
+  "ignore": [
+    "src/torch_utils",
+    "src/stubs"
+  ]
+
+  "exclude": [
+    "checkpoints"
+  ]
+
   "stubPath": "src/stubs",
 
   "strictListInference": true,
@@ -27,11 +36,11 @@
   "reportUnknownMemberType": false,
   "reportMissingParameterType": "warning",
   "reportMissingTypeArgument": "warning",
-  "reportCallInDefaultInitializer": "warning",
+  "reportCallInDefaultInitializer": false,
   "reportUnnecessaryIsInstance": "warning",
   "reportUnnecessaryCast": "warning",
   "reportUnnecessaryComparison": "warning",
-  "reportImplicitStringConcatenation": "warning",
+  "reportImplicitStringConcatenation": false,
   "reportUnusedCallResult": false,
   "reportUnusedExpression": "warning",
   "reportUnnecessaryTypeIgnoreComment": "warning",
