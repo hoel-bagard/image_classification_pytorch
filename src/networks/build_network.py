@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import timm
 import torch
@@ -22,7 +22,7 @@ def build_model(model_name: type | str,
                 model_path: Optional[Path] = None,
                 use_timm_pretrain: bool = True,
                 eval_mode: bool = False,
-                **kwargs):
+                **kwargs: dict[str, Any]) -> torch.nn.Module:
     """Function that instanciates the given model.
 
     Args:
@@ -38,14 +38,14 @@ def build_model(model_name: type | str,
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     if isinstance(model_name, str):
-        model = timm.create_model(model_name, num_classes=nb_classes, pretrained=use_timm_pretrain)
+        model: torch.nn.Module = timm.create_model(model_name, num_classes=nb_classes, pretrained=use_timm_pretrain)
     else:
         kwargs["nb_classes"] = nb_classes
         model = model_name(**kwargs)
 
     if model_path is not None:
         model.load_state_dict(torch.load(model_path, map_location=device))
-    if eval:
+    if eval_mode:
         model.eval()
 
     model.to(device).float()

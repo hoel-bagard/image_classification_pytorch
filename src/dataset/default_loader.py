@@ -1,6 +1,6 @@
+from collections.abc import Iterable
 from pathlib import Path
 from typing import Optional
-from collections.abc import Iterable
 
 
 import cv2
@@ -42,7 +42,7 @@ def default_loader(data_path: Path,
                 clean_print(f"Processing image {img_path.name}    ({i}/{len(img_paths)}) for class {label_map[key]}",
                             end="\r" if (i != len(img_paths) and i != limit) else "\n")
             data = np.append(data, img_path)  # type: ignore
-            labels = np.append(labels,key)
+            labels = np.append(labels, key)
             if limit and i >= limit:
                 break
 
