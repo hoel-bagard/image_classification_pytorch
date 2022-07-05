@@ -1,17 +1,21 @@
+from collections.abc import Iterable
 from pathlib import Path
+from typing import Optional
+
 
 import cv2
 import numpy as np
+import numpy.typing as npt
 
 from src.torch_utils.utils.misc import clean_print
 
 
 def default_loader(data_path: Path,
                    label_map: dict[int, str],
-                   limit: int = None,
+                   limit: Optional[int] = None,
                    shuffle: bool = False,
                    verbose: bool = True
-                   ) -> tuple[np.ndarray, np.ndarray]:
+                   ) -> tuple[npt.NDArray[np.object_], npt.NDArray[np.int64]]:
     """Default loading function for image classification.
 
     The data folder is expected to contain subfolders for each class, with the images inside.
@@ -27,30 +31,31 @@ def default_loader(data_path: Path,
     Return:
         2 numpy arrays, one containing the images' paths and the other containing the labels.
     """
-    labels, data = [], []
+    labels: npt.NDArray[np.int64] = np.empty(0, dtype=np.int64)
+    data: npt.NDArray[np.object_] = np.empty(0, dtype=Path)
     exts = (".png", ".jpg", ".bmp")
     for key in range(len(label_map)):
         class_dir_path = data_path / label_map[key]
-        img_paths = [path for path in class_dir_path.rglob('*') if path.suffix in exts]
+        img_paths: list[Path] = [path for path in class_dir_path.rglob('*') if path.suffix in exts]
         for i, img_path in enumerate(img_paths, start=1):
             if verbose:
                 clean_print(f"Processing image {img_path.name}    ({i}/{len(img_paths)}) for class {label_map[key]}",
                             end="\r" if (i != len(img_paths) and i != limit) else "\n")
-            data.append(img_path)
-            labels.append(key)
+            data = np.append(data, img_path)  # type: ignore
+            labels = np.append(labels, key)
             if limit and i >= limit:
                 break
 
     data, labels = np.asarray(data), np.asarray(labels)
     if shuffle:
-        index_list = np.arange(len(labels))
+        index_list = np.arange(len(labels), dtype=np.int64)
         np.random.shuffle(index_list)
         data, labels, = data[index_list], labels[index_list]
 
     return data, labels
 
 
-def default_load_data(data: Path | list[Path]) -> np.ndarray:
+def default_load_data(data: Path | Iterable[Path]) -> npt.NDArray[np.uint8]:
     """Function that loads image(s) from path(s).
 
     Args:
@@ -62,7 +67,7 @@ def default_load_data(data: Path | list[Path]) -> np.ndarray:
     if isinstance(data, Path):
         img = cv2.imread(str(data))
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        return img
+        return img  # type: ignore
     else:
         imgs = []
         for image_path in data:
