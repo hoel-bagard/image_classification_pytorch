@@ -39,6 +39,19 @@ python utils/cifar_10.py data/cifar-10-batches-py
 rm data/cifar-10-python.tar.gz
 rm -r data/cifar-10-batches-py/
 ```
+
+Note:
+You'll need to modify a few values in `config/model_config.py` in the next step since cifar10's images are small.
+```python
+    CROP_IMAGE_SIZES: tuple[int, int] = (32, 32)  # Center crop
+    RESIZE_IMAGE_SIZES: tuple[int, int] = (32, 32)  # All images will be resized to this size
+...
+    CHANNELS: list[int] = field(default_factory=lambda: [3, 16, 32, 16])
+    SIZES: list[int | tuple[int, int]] = field(default_factory=lambda: [3, 3, 3])   # Kernel sizes
+    STRIDES: list[int | tuple[int, int]] = field(default_factory=lambda: [2, 2, 2])
+    PADDINGS: list[int | tuple[int, int]] = field(default_factory=lambda: [1, 1, 1])
+    BLOCKS: list[int] = field(default_factory=lambda: [1, 2, 1])
+```
 </details>
 
 
