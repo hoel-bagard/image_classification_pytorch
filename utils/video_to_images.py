@@ -1,22 +1,27 @@
+from __future__ import annotations
+
 import argparse
 import os
 import shutil
 from multiprocessing import Pool
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import cv2
-import numpy as np
-import numpy.typing as npt
+
+if TYPE_CHECKING:
+    import numpy as np
+    import numpy.typing as npt
 
 
-def imwrite(output_path: Path, frame: npt.NDArray[np.int8], resize_ratio: float = 1):
+def imwrite(output_path: Path, frame: npt.NDArray[np.int8], resize_ratio: float = 1) -> None:
     """Save the given to disk."""
     frame = cv2.resize(frame, (int(frame.shape[1] * resize_ratio), int(frame.shape[0] * resize_ratio)))
     output_path.parent.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(output_path), frame)
 
 
-def worker(args: tuple[argparse.Namespace, Path]):
+def worker(args: tuple[argparse.Namespace, Path]) -> None:
     """Worker in charge of processing one video."""
     cli_args, video_path = args
 
@@ -46,7 +51,7 @@ def worker(args: tuple[argparse.Namespace, Path]):
         imwrite(video_output_path.with_suffix(img_format), best_frame, resize_ratio)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Script to convert videos into images.",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("data_path", type=Path, help="Path to the folder with the mp4 videos.")

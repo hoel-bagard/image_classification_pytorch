@@ -68,11 +68,13 @@ line-length = 120
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
+  "COM812",     # conflict with formatter
+  "D1",         # Missing docstring
   "D203",       # one-blank-line-before-class (incompatible with D211)
   "D213",       # multi-line-summary-second-line (incompatible with D212)
-  "COM812",     # conflict with formatter
-  "ISC001",     # conflict with formatter
   "D407",       # Missing dashed underline after section ("Args")
+  "T201",       # `print` found
+  "ISC001",     # conflict with formatter
 ]
 
 [tool.ruff.lint.per-file-ignores]

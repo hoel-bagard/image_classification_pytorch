@@ -5,7 +5,7 @@ from shutil import get_terminal_size
 import cv2
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser("Cuts images into small tiles")
     parser.add_argument("data_path", type=Path, help="Path to the dataset")
     parser.add_argument("output_path", type=Path, help="Output path")

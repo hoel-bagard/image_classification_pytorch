@@ -8,7 +8,7 @@ import cv2
 
 
 def worker(args: tuple[Path, Path, tuple[int, int, int, int]]):  # noqa D417
-    """Worker in charge of cropping an image.  # noqa D417
+    """Worker in charge of cropping an image.  # noqa D417.
 
     Args:
     ----
@@ -34,7 +34,7 @@ def worker(args: tuple[Path, Path, tuple[int, int, int, int]]):  # noqa D417
     return output_file_path
 
 
-def main():
+def main() -> None:
     parser = ArgumentParser("Crops all the image in the given folder by the given values."
                             "Saves the data in a cropped_imgs folder, in the dataset's parent folder")
     parser.add_argument("data_path", type=Path, help="Path to the dataset")
@@ -47,10 +47,10 @@ def main():
 
     # Get a list of all the images
     exts = [".jpg", ".png"]
-    file_list = list([p for p in data_path.rglob("*") if p.suffix in exts])
+    file_list = [p for p in data_path.rglob("*") if p.suffix in exts]
     nb_imgs = len(file_list)
 
-    mp_args = list([(img_path, output_path, args.crop) for img_path in file_list])
+    mp_args = [(img_path, output_path, args.crop) for img_path in file_list]
     nb_images_processed = 0
     with Pool(processes=int(os.cpu_count() * 0.8)) as pool:
         for _result in pool.imap(worker, mp_args, chunksize=10):

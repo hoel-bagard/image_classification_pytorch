@@ -10,7 +10,7 @@ import numpy as np
 
 
 def mosaic_worker(args: tuple[Path, Path, tuple[int, int, int, int], bool]):  # noqa D417
-    """Worker in charge of turning an image into a mosaic.  # noqa D417
+    """Worker in charge of turning an image into a mosaic.  # noqa D417.
 
     This function only handle the case where the image's width is larger than its height (for now at least)
 
@@ -59,7 +59,7 @@ def mosaic_worker(args: tuple[Path, Path, tuple[int, int, int, int], bool]):  # 
     return output_file_path
 
 
-def main():
+def main() -> None:
     parser = ArgumentParser("Converts a long, rectangular image into a square-ish image by turning it into a mosaic."
                             "Saves the data in a mosaic_img folder, in the dataset's parent folder")
     parser.add_argument("data_path", type=Path, help="Path to the dataset")
@@ -73,10 +73,10 @@ def main():
 
     # Get a list of all the images
     exts = [".jpg", ".png"]
-    file_list = list([p for p in data_path.rglob("*") if p.suffix in exts])
+    file_list = [p for p in data_path.rglob("*") if p.suffix in exts]
     nb_imgs = len(file_list)
 
-    mp_args = list([(img_path, output_path, args.crop, args.use_padding) for img_path in file_list])
+    mp_args = [(img_path, output_path, args.crop, args.use_padding) for img_path in file_list]
     nb_images_processed = 0  # Use to count the number of good / bad samples
     with Pool(processes=int(os.cpu_count() * 0.8)) as pool:
         for _result in pool.imap(mosaic_worker, mp_args, chunksize=10):

@@ -4,7 +4,7 @@ from pathlib import Path
 from random import shuffle
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser("Validation/Train splitting")
     parser.add_argument("data_path", type=Path, help="Path to the train dataset")
     parser.add_argument("--split_ratio", "--s", type=float, default=0.8, help="Fraction of the dataset used for train")
@@ -14,7 +14,7 @@ def main():
     val_path.mkdir(parents=True, exist_ok=True)
 
     exts = [".jpg", ".png"]
-    file_list = list([p for p in args.data_path.rglob("*") if p.suffix in exts])
+    file_list = [p for p in args.data_path.rglob("*") if p.suffix in exts]
 
     nb_imgs = len(file_list)
     shuffle(file_list)  # Too lazy to split each class individually

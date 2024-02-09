@@ -3,7 +3,7 @@ import shutil
 from pathlib import Path
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser("Validation/Train splitting")
     parser.add_argument("data_path", type=Path, help=("Path to the dataset."
                                                       " The Train and Validation directories will be placed there."))

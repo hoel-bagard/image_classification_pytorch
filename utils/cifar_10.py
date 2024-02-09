@@ -11,7 +11,7 @@ import cv2
 import numpy as np
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Script to convert cifar-10 data to images.",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("data_path", type=Path, help="Path to the folder with the cifar-10 data.")

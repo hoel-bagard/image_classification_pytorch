@@ -1,11 +1,12 @@
 import argparse
 import shutil
+import sys
 from pathlib import Path
 
 import cv2
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser("Tool to label images for (binary) classification")
     parser.add_argument("data_path", type=Path, help="Path to the dataset")
     parser.add_argument("output_path", type=Path, help="Output path")
@@ -22,7 +23,7 @@ def main():
     bad_output_path.mkdir(parents=True, exist_ok=True)
     unsure_output_path.mkdir(parents=True, exist_ok=True)
 
-    file_list = sorted(list(data_path.rglob("*.png")))
+    file_list = sorted(data_path.rglob("*.png"))
     nb_imgs = len(file_list)
     for i, file_path in enumerate(file_list):
         msg = f"Processing image {file_path.name} ({i+1}/{nb_imgs})"
@@ -54,7 +55,7 @@ def main():
                 break
             elif key == ord("q"):  # quit
                 cv2.destroyAllWindows()
-                return -1
+                sys.exit(0)
 
     print("\nFinished labelling dataset")
 

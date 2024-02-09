@@ -8,7 +8,7 @@ import cv2
 import numpy as np
 
 
-def worker(args: tuple):
+def worker(args: tuple) -> int:
     """Worker in charge of moving an image and possible doing some data augmentation.
 
     Args:
@@ -65,7 +65,7 @@ def worker(args: tuple):
     return 0
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser("Validation/Train splitting that does some data augmentation")
     parser.add_argument("data_path", type=Path, help=("Path to the dataset."
                                                       " The Train and Validation directories will be placed there."))
@@ -81,11 +81,11 @@ def main():
     val_path.mkdir(exist_ok=True)
 
     with open(args.csv_path) as spec_file:
-        spec_list = list([(args.data_path / line.split(",")[0],     # Image path
+        spec_list = [(args.data_path / line.split(",")[0],     # Image path
                            line.split(",")[3].strip() == "train",   # Val or train
                            line.split(",")[2].strip(),              # Class
                            line.split(",")[4].strip())              # Side
-                          for line in spec_file])
+                          for line in spec_file]
 
     train_list = [entry for entry in spec_list if entry[1]]
     # Took elements at random at first but that was extremely ineficient, hence the lists
@@ -93,7 +93,7 @@ def main():
     train_list_right_ok = [entry for entry in train_list if entry[2] == "ok" and entry[3] == "right"]
     train_lists = (train_list_left_ok, train_list_right_ok)
 
-    mp_args = list([(entry, train_lists, args.data_path, train_path, val_path) for entry in spec_list])
+    mp_args = [(entry, train_lists, args.data_path, train_path, val_path) for entry in spec_list]
     nb_images_processed, nb_imgs = 0, len(spec_list)
     with Pool(processes=int(os.cpu_count() * 0.8)) as pool:
         for _result in pool.imap(worker, mp_args, chunksize=10):
