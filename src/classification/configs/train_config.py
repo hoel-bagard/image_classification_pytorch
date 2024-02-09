@@ -1,11 +1,9 @@
-from collections.abc import Iterable
 import os
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from pathlib import Path
-
-
-from dataclasses import dataclass, field
 from typing import Optional
+
 from typing_extensions import Self
 
 from classification.networks.build_network import ModelHelper

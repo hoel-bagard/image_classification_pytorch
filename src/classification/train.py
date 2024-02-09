@@ -8,11 +8,12 @@ from typing import Literal
 import albumentations
 import cv2
 import torch
-from classification.configs import RecordConfig, TrainConfig, LOGGER_NAME
+from hbtools import create_logger
 from torch import nn
 from torch.optim.lr_scheduler import CosineAnnealingLR
 
 import classification.data.data_transformations as transforms
+from classification.configs import LOGGER_NAME, RecordConfig, TrainConfig
 from classification.data.default_loader import default_load_data
 from classification.data.default_loader import default_loader as data_loader
 from classification.networks.build_network import build_model
@@ -24,7 +25,6 @@ from classification.torch_utils.utils.torch_summary import summary
 from classification.torch_utils.utils.trainer import Trainer
 from classification.utils.classification_metrics import ClassificationMetrics
 from classification.utils.classification_tensorboard import ClassificationTensorBoard
-from hbtools import create_logger
 
 
 def main():

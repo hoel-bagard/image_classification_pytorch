@@ -5,8 +5,8 @@ import numpy as np
 import torch
 from torch import nn
 
-from classification.torch_utils.networks.network_utils import layer_init
 from classification.torch_utils.networks.layers import DarknetBlock
+from classification.torch_utils.networks.network_utils import layer_init
 
 
 class SmallDarknet(nn.Module):

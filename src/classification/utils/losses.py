@@ -27,6 +27,7 @@ class SmoothCrossEntropyLoss(nn.Module):
 
         Returns:
             torch.Tensor: The smoothed labels with shape (batch_size, nb_classes).
+
         """
         with torch.no_grad():
             targets = (

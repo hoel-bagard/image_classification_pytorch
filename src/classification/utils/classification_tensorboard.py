@@ -5,9 +5,8 @@ from typing import Callable
 import numpy as np
 import numpy.typing as npt
 from torch import nn
-from classification.configs import RecordConfig
-from classification.configs import TrainConfig
 
+from classification.configs import RecordConfig, TrainConfig
 from classification.torch_utils.utils.batch_generator import BatchGenerator
 from classification.torch_utils.utils.misc import clean_print
 from classification.torch_utils.utils.tensorboard_template import TensorBoard
