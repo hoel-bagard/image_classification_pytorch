@@ -30,12 +30,11 @@ class ClassificationMetrics(Metrics):
         """Initialize the instance.
 
         Args:
-        ----
-            model (nn.Module): The PyTorch model being trained
-            train_dataloader (BatchGenerator): DataLoader containing train data
-            val_dataloader (BatchGenerator): DataLoader containing validation data
-            label_map (dict): Dictionary linking class index to class name
-            max_batches (int): If not None, then the metrics will be computed using at most this number of batches
+            model: The PyTorch model being trained
+            train_dataloader: DataLoader containing train data
+            val_dataloader: DataLoader containing validation data
+            label_map: Dictionary linking class index to class name
+            max_batches: If not None, then the metrics will be computed using at most this number of batches
 
         """
         super().__init__(model, train_dataloader, val_dataloader, max_batches)
@@ -45,11 +44,10 @@ class ClassificationMetrics(Metrics):
         self.nb_output_classes = len(label_map)
 
     def compute_confusion_matrix(self, mode: str = "Train") -> None:
-        """Computes the confusion matrix. This function has to be called before using the get functions.
+        """Compute the confusion matrix. This function has to be called before using the get functions.
 
         Args:
-        ----
-            mode (str): Either "Train" or "Validation"
+            mode: Either "Train" or "Validation"
 
         """
         self.cm = np.zeros((self.nb_output_classes, self.nb_output_classes))
@@ -67,10 +65,9 @@ class ClassificationMetrics(Metrics):
         dataloader.reset_epoch()  # Reset the epoch to not cause issues for other functions
 
     def get_avg_acc(self) -> float:
-        """Uses the confusion matrix to return the average accuracy of the model.
+        """Use the confusion matrix to return the average accuracy of the model.
 
         Returns
-        -------
             float: Average accuracy
 
         """
@@ -78,10 +75,9 @@ class ClassificationMetrics(Metrics):
         return avg_acc
 
     def get_class_accuracy(self) -> list[float]:
-        """Uses the confusion matrix to return the average accuracy of the model.
+        """Use the confusion matrix to return the average accuracy of the model.
 
         Returns
-        -------
             list: An array containing the accuracy for each class
 
         """
@@ -89,10 +85,9 @@ class ClassificationMetrics(Metrics):
         return per_class_acc
 
     def get_class_iou(self) -> list[float]:
-        """Uses the confusion matrix to return the iou for each class.
+        """Use the confusion matrix to return the iou for each class.
 
         Returns
-        -------
             list: List of the IOU for each class
 
         """
@@ -101,15 +96,13 @@ class ClassificationMetrics(Metrics):
         per_class_iou = [intersections[i] / unions[i] for i in range(self.nb_output_classes)]
         return per_class_iou
 
-    def get_confusion_matrix(self, light_mode: bool = False) -> npt.NDArray[np.uint8]:
-        """Returns an image containing the plotted confusion matrix.
+    def get_confusion_matrix(self, *, light_mode: bool = False) -> npt.NDArray[np.uint8]:
+        """Return an image containing the plotted confusion matrix.
 
         Args:
-        ----
             light_mode: Use a light theme instead of the default dark one.
 
         Returns:
-        -------
             np.ndarray: Image of the confusion matrix.
 
         """
@@ -164,7 +157,7 @@ class ClassificationMetrics(Metrics):
 
         return img
 
-    def get_metrics(self, mode: str = "Train", **kwargs) -> dict[str, dict[str, Any]]:
+    def get_metrics(self, mode: str = "Train") -> dict[str, dict[str, Any]]:
         """See base class."""
         metrics: dict[str, dict] = {"scalars": {}, "imgs": {}}
 
@@ -192,13 +185,12 @@ if __name__ == "__main__":
     def _test() -> None:
         from argparse import ArgumentParser
 
-        parser = ArgumentParser(
+        ArgumentParser(
             description=(
                 "Script to test the metrics class. "
                 "Run with 'python -m classification.utils.classification_metrics <path>'"
             )
         )
-        args = parser.parse_args()  # noqa
 
         def _test_draw_cm() -> None:
             import cv2

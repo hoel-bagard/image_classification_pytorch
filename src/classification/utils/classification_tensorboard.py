@@ -47,8 +47,9 @@ class ClassificationTensorBoard(TensorBoard):
         record_config: RecordConfig,
         metrics: ClassificationMetrics,
         denormalize_imgs_fn: Callable,
-        write_graph: bool = True,
         max_outputs: int = 4,
+        *,
+        write_graph: bool = True,
     ) -> None:
         super().__init__(model, tb_dir, train_dataloader, val_dataloader, logger, metrics, write_graph)
         self.max_outputs = max_outputs
@@ -59,12 +60,11 @@ class ClassificationTensorBoard(TensorBoard):
         self.tb_img_size = (max(self.train_config.IMAGE_SIZES[0], 480), max(self.train_config.IMAGE_SIZES[1], 480))
 
     def write_images(self, epoch: int, mode: str = "Train") -> None:
-        """Writes images with predictions written on them to TensorBoard.
+        """Write images with predictions written on them to TensorBoard.
 
         Args:
-        ----
-            epoch (int): Current epoch
-            mode (str): Either "Train" or "Validation"
+            epoch: Current epoch
+            mode: Either "Train" or "Validation"
 
         """
         clean_print("Writing images", end="\r")
@@ -89,15 +89,13 @@ class ClassificationTensorBoard(TensorBoard):
         dataloader.reset_epoch()  # Reset the epoch to not cause issues for other functions
 
     def write_losses(self, epoch: int, losses: list[float], names: list[str], mode: str = "Train") -> None:
-        """Writes loss metric in TensorBoard.
+        """Write loss metric in TensorBoard.
 
         Args:
-        ----
-            epoch (int): Current epoch
+            epoch: Current epoch
             losses: Losses to add to the TensorBoard
             names: Name for each loss
-            mode (str): Either "Train" or "Validation"
-
+            mode: Either "Train" or "Validation"
         """
         tb_writer = self.train_tb_writer if mode == "Train" else self.val_tb_writer
         for name, loss in zip(names, losses):

@@ -64,15 +64,21 @@ addopts = ["--import-mode=importlib",]
 
 [tool.ruff]
 line-length = 120
+exclude = [".venv", "src/classification/torch_utils"]
 
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
+  "ANN101",     # Missing type annotation for `self` in method
+  "ANN102",     # Missing type annotation for `cls` in classmethod
   "COM812",     # conflict with formatter
   "D1",         # Missing docstring
   "D203",       # one-blank-line-before-class (incompatible with D211)
   "D213",       # multi-line-summary-second-line (incompatible with D212)
   "D407",       # Missing dashed underline after section ("Args")
+  "D413",       # Missing blank line after last section ("Args")
+  "ERA001",     # Found commented-out code
+  "G004",       # Logging statement uses f-string
   "T201",       # `print` found
   "ISC001",     # conflict with formatter
   "INP001",     # File is part of an implicit namespace package. Add an `__init__.py`.
@@ -80,6 +86,7 @@ ignore = [
   "S301",       # `pickle` and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue
   "PLW2901",    # `for` loop variable `img` overwritten by assignment target
   "RET508",     # Unnecessary `elif` after `break` statement
+  "PLC0414",    # Import alias does not rename original package
 ]
 
 [tool.ruff.lint.per-file-ignores]
