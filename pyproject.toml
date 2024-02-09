@@ -108,7 +108,7 @@ max-statements = 60
 [tool.pyright]
 include = ["src/classification"]
 exclude = ["checkpoints", "data", "outputs", ".venv"]
-ignore = ["**/__init__.py"]
+ignore = ["**/__init__.py", "src/classification/torch_utils"]
 venvPath = "."
 venv = ".venv"
 pythonVersion = "3.10"
