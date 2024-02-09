@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import argparse
 import sys
 import time
@@ -27,7 +29,7 @@ from classification.utils.classification_metrics import ClassificationMetrics
 from classification.utils.classification_tensorboard import ClassificationTensorBoard
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Training script", formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
@@ -58,7 +60,8 @@ def main():
     elif classes_names is not None:
         train_config = TrainConfig.from_classes_names(classes_names)
     else:
-        raise ValueError("Either --classes_names_path or --classes_names must be provided")
+        msg = "Either --classes_names_path or --classes_names must be provided"
+        raise ValueError(msg)
     train_config = train_config  # TODO: Temp
 
     prepare_folders(
@@ -228,9 +231,9 @@ def main():
                 scheduler.step()
         except KeyboardInterrupt:
             print("\n")
-        except Exception as error:
-            logger.error("".join(traceback.format_exception(*sys.exc_info())))
-            raise error
+        except Exception:
+            logger.exception("".join(traceback.format_exception(*sys.exc_info())))
+            raise
 
     if record_config.USE_TB:
         metrics = {

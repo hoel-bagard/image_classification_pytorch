@@ -1,11 +1,15 @@
-from pathlib import Path
-from typing import Any, Optional
+from __future__ import annotations
+
+from typing import Any, TYPE_CHECKING
 
 import timm
 import torch
 
 from .cnn import CNN
 from .small_darknet import SmallDarknet
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 class ModelHelper:
@@ -20,7 +24,7 @@ class ModelHelper:
 def build_model(
     model_name: type | str,
     nb_classes: int,
-    model_path: Optional[Path] = None,
+    model_path: Path | None = None,
     use_timm_pretrain: bool = True,
     eval_mode: bool = False,
     **kwargs: dict[str, Any],

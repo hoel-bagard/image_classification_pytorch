@@ -1,12 +1,16 @@
+from __future__ import annotations
+
 import os
-from collections.abc import Iterable
 from dataclasses import dataclass, field
-from pathlib import Path
-from typing import Optional
+from typing import TYPE_CHECKING
 
 from typing_extensions import Self
 
 from classification.networks.build_network import ModelHelper
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+    from pathlib import Path
 
 
 @dataclass(frozen=True, slots=True)
@@ -25,7 +29,7 @@ class TrainConfig:
     IMG_STD: tuple[float, float, float] = (0.229, 0.224, 0.225)
 
     LABEL_SMOOTHING: float = 0.1  # Value to use for label smoothing if the loss supports it. 0 for no smoothing.
-    LOSS_WEIGTHS: Optional[list[float]] = None  # Weights the classes during the loss
+    LOSS_WEIGTHS: list[float] | None = None  # Weights the classes during the loss
 
     # Network part
     MODEL: type = ModelHelper.SmallDarknet

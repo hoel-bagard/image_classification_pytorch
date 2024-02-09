@@ -4,7 +4,7 @@ from torch import nn
 
 
 class SmoothCrossEntropyLoss(nn.Module):
-    def __init__(self, smoothing: float = 0):
+    def __init__(self, smoothing: float = 0) -> None:
         """Computes a loss with label smoothing for the given batch.
 
         Args:
@@ -13,7 +13,8 @@ class SmoothCrossEntropyLoss(nn.Module):
         """
         super().__init__()
         if not 0 <= smoothing < 1:
-            raise ValueError("Smoothing value must be in [0, 1[.")
+            msg = "Smoothing value must be in [0, 1[."
+            raise ValueError(msg)
         self.smoothing = smoothing
 
     @staticmethod

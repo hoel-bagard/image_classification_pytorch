@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from collections import OrderedDict
 from typing import Any, Callable
 
@@ -19,7 +21,7 @@ class CNN(nn.Module):
         nb_classes: int,
         layer_init: Callable[[nn.Module], None] = layer_init,
         **kwargs: Any,
-    ):
+    ) -> None:
         """Feature extractor.
 
         Args:
@@ -57,7 +59,7 @@ class CNN(nn.Module):
         return x
 
     # hook for the gradients of the activations
-    def activations_hook(self, grad: torch.Tensor):
+    def activations_hook(self, grad: torch.Tensor) -> None:
         self.gradients = grad
 
     def get_gradients(self):

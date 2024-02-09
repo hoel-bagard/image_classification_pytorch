@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from collections import OrderedDict
-from typing import Callable, Union
+from typing import Callable
 
 import numpy as np
 import torch
@@ -13,14 +15,14 @@ class SmallDarknet(nn.Module):
     def __init__(
         self,
         channels: list[int],
-        sizes: list[Union[int, tuple[int, int, int]]],
-        strides: list[Union[int, tuple[int, int, int]]],
-        paddings: list[Union[int, tuple[int, int, int]]],
+        sizes: list[int | tuple[int, int, int]],
+        strides: list[int | tuple[int, int, int]],
+        paddings: list[int | tuple[int, int, int]],
         blocks: list[int],
         nb_classes: int,
         layer_init: Callable[[nn.Module], None] = layer_init,
         **kwargs,
-    ):
+    ) -> None:
         """Feature extractor.
 
         Args:
@@ -62,7 +64,7 @@ class SmallDarknet(nn.Module):
         return x
 
     # hook for the gradients of the activations
-    def activations_hook(self, grad):
+    def activations_hook(self, grad) -> None:
         self.gradients = grad
 
     def get_gradients(self):

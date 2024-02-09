@@ -15,7 +15,7 @@ from classification.torch_utils.utils.draw import draw_pred_img
 from classification.torch_utils.utils.misc import clean_print, get_config_as_dict
 
 
-def main():
+def main() -> None:
     parser = ArgumentParser()
     parser.add_argument("model_path", type=Path, help="Path to the checkpoint to use")
     parser.add_argument("data_path", type=Path, help="Path to the test dataset")

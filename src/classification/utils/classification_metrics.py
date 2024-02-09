@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import itertools
-from typing import Any, Optional
+from typing import Any, TYPE_CHECKING
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -7,9 +9,11 @@ import numpy.typing as npt
 import torch
 from torch import nn
 
-from classification.torch_utils.utils.batch_generator import BatchGenerator
 from classification.torch_utils.utils.metrics import Metrics
 from classification.torch_utils.utils.misc import clean_print
+
+if TYPE_CHECKING:
+    from classification.torch_utils.utils.batch_generator import BatchGenerator
 
 
 class ClassificationMetrics(Metrics):
@@ -21,8 +25,8 @@ class ClassificationMetrics(Metrics):
         train_dataloader: BatchGenerator,
         val_dataloader: BatchGenerator,
         label_map: dict[int, str],
-        max_batches: Optional[int] = 10,
-    ):
+        max_batches: int | None = 10,
+    ) -> None:
         """Initialize the instance.
 
         Args:
@@ -40,7 +44,7 @@ class ClassificationMetrics(Metrics):
         self.label_map = label_map
         self.nb_output_classes = len(label_map)
 
-    def compute_confusion_matrix(self, mode: str = "Train"):
+    def compute_confusion_matrix(self, mode: str = "Train") -> None:
         """Computes the confusion matrix. This function has to be called before using the get functions.
 
         Args:
@@ -185,7 +189,7 @@ class ClassificationMetrics(Metrics):
 
 if __name__ == "__main__":
 
-    def _test():
+    def _test() -> None:
         from argparse import ArgumentParser
 
         parser = ArgumentParser(
@@ -196,7 +200,7 @@ if __name__ == "__main__":
         )
         args = parser.parse_args()  # noqa
 
-        def _test_draw_cm():
+        def _test_draw_cm() -> None:
             import cv2
 
             from classification.torch_utils.utils.imgs_misc import show_img

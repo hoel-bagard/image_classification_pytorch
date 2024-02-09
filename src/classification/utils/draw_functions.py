@@ -1,4 +1,4 @@
-from typing import Optional
+from __future__ import annotations
 
 import cv2
 import numpy as np
@@ -10,7 +10,7 @@ def draw_pred_img(
     predictions: npt.NDArray[np.uint8],
     labels: npt.NDArray[np.uint8],
     label_map: dict[int, str],
-    size: Optional[tuple[int, int]] = None,
+    size: tuple[int, int] | None = None,
 ) -> npt.NDArray[np.uint8]:
     """Draws predictions and labels on the image to help with TensorBoard visualisation.
 

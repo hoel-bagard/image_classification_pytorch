@@ -1,17 +1,23 @@
-from logging import Logger
-from pathlib import Path
-from typing import Callable
+from __future__ import annotations
 
-import numpy as np
-import numpy.typing as npt
+from typing import Callable, TYPE_CHECKING
+
 from torch import nn
 
-from classification.configs import RecordConfig, TrainConfig
-from classification.torch_utils.utils.batch_generator import BatchGenerator
 from classification.torch_utils.utils.misc import clean_print
 from classification.torch_utils.utils.tensorboard_template import TensorBoard
-from classification.utils.classification_metrics import ClassificationMetrics
 from classification.utils.draw_functions import draw_pred_img
+
+if TYPE_CHECKING:
+    from logging import Logger
+    from pathlib import Path
+
+    import numpy as np
+    import numpy.typing as npt
+
+    from classification.configs import RecordConfig, TrainConfig
+    from classification.torch_utils.utils.batch_generator import BatchGenerator
+    from classification.utils.classification_metrics import ClassificationMetrics
 
 
 class ClassificationTensorBoard(TensorBoard):
@@ -43,7 +49,7 @@ class ClassificationTensorBoard(TensorBoard):
         denormalize_imgs_fn: Callable,
         write_graph: bool = True,
         max_outputs: int = 4,
-    ):
+    ) -> None:
         super().__init__(model, tb_dir, train_dataloader, val_dataloader, logger, metrics, write_graph)
         self.max_outputs = max_outputs
         self.denormalize_imgs_fn = denormalize_imgs_fn
@@ -52,7 +58,7 @@ class ClassificationTensorBoard(TensorBoard):
         # If the images are too small, they are resized to a decent size.
         self.tb_img_size = (max(self.train_config.IMAGE_SIZES[0], 480), max(self.train_config.IMAGE_SIZES[1], 480))
 
-    def write_images(self, epoch: int, mode: str = "Train"):
+    def write_images(self, epoch: int, mode: str = "Train") -> None:
         """Writes images with predictions written on them to TensorBoard.
 
         Args:
@@ -82,7 +88,7 @@ class ClassificationTensorBoard(TensorBoard):
 
         dataloader.reset_epoch()  # Reset the epoch to not cause issues for other functions
 
-    def write_losses(self, epoch: int, losses: list[float], names: list[str], mode: str = "Train"):
+    def write_losses(self, epoch: int, losses: list[float], names: list[str], mode: str = "Train") -> None:
         """Writes loss metric in TensorBoard.
 
         Args:
