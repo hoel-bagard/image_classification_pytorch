@@ -5,16 +5,15 @@ from pathlib import Path
 import cv2
 import numpy as np
 import torch
+from config.record_config import DataConfig
+from config.train_config import ModelConfig
 
-import src.dataset.data_transformations as transforms
-from config.data_config import DataConfig
-from config.model_config import ModelConfig
-from src.dataset.dataset_loaders import dog_vs_cat_loader as data_loader
-from src.dataset.defeault_loader import default_load_data
-from src.networks.build_network import build_model
-from src.torch_utils.utils.draw import draw_pred_img
-from src.torch_utils.utils.misc import clean_print
-from src.torch_utils.utils.misc import get_config_as_dict
+import classification.data.data_transformations as transforms
+from classification.data.dataset_loaders import dog_vs_cat_loader as data_loader
+from classification.data.default_loader import default_load_data
+from classification.networks.build_network import build_model
+from classification.torch_utils.utils.draw import draw_pred_img
+from classification.torch_utils.utils.misc import clean_print, get_config_as_dict
 
 
 def main():
@@ -27,13 +26,19 @@ def main():
     inference_start_time = time.perf_counter()
 
     # Creates and load the model
-    model = build_model(ModelConfig.MODEL, DataConfig.NB_CLASSES,
-                        model_path=args.model_path, eval=True, **get_config_as_dict(ModelConfig))
+    model = build_model(
+        ModelConfig.MODEL,
+        DataConfig.NB_CLASSES,
+        model_path=args.model_path,
+        eval=True,
+        **get_config_as_dict(ModelConfig),
+    )
     print("Weights loaded", flush=True)
 
-    data, labels, paths = data_loader(args.data_path, DataConfig.LABEL_MAP,
-                                      data_preprocessing_fn=default_load_data, return_img_paths=True)
-    base_cpu_pipeline = (transforms.resize(ModelConfig.IMAGE_SIZES), )
+    data, labels, paths = data_loader(
+        args.data_path, DataConfig.LABEL_MAP, data_preprocessing_fn=default_load_data, return_img_paths=True
+    )
+    base_cpu_pipeline = (transforms.resize(ModelConfig.IMAGE_SIZES),)
     base_gpu_pipeline = (transforms.to_tensor(), transforms.normalize(labels_too=True))
     data_transformations = transforms.compose_transformations((*base_cpu_pipeline, *base_gpu_pipeline))
     print("\nData loaded", flush=True)

@@ -22,7 +22,7 @@ def main():
     nb_imgs = len(spec_list)
     for i, (file_path, is_train) in enumerate(spec_list):
         msg = f"Processing image {file_path.name} ({i+1}/{nb_imgs})"
-        print(msg + ' ' * (shutil.get_terminal_size(fallback=(156, 38)).columns - len(msg)), end='\r')
+        print(msg + " " * (shutil.get_terminal_size(fallback=(156, 38)).columns - len(msg)), end="\r")
         if is_train:
             dest_path = (train_path / file_path.relative_to(args.data_path)).parent
         else:

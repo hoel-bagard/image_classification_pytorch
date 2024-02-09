@@ -22,7 +22,7 @@ def main():
     nb_imgs = len(file_list)
     for i, file_path in enumerate(file_list):
         msg = f"Processing image {file_path.name} ({i+1}/{nb_imgs})"
-        print(msg + ' ' * (get_terminal_size(fallback=(156, 38)).columns - len(msg)), end='\r')
+        print(msg + " " * (get_terminal_size(fallback=(156, 38)).columns - len(msg)), end="\r")
         img = cv2.imread(str(file_path))
         height, width, _ = img.shape
 
@@ -35,7 +35,7 @@ def main():
                     x = width - tile_width
                 tile = img[y:y+tile_height, x:x+tile_width]
 
-                new_tile_name = file_path.stem + '_' + str(tile_index).zfill(5) + file_path.suffix
+                new_tile_name = file_path.stem + "_" + str(tile_index).zfill(5) + file_path.suffix
                 tile_path = output_path / new_tile_name
                 cv2.imwrite(str(tile_path), tile)
                 tile_index += 1

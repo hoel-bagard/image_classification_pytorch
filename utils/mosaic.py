@@ -15,13 +15,16 @@ def mosaic_worker(args: tuple[Path, Path, tuple[int, int, int, int], bool]):  # 
     This function only handle the case where the image's width is larger than its height (for now at least)
 
     Args:
+    ----
         img_path (Path): Path to the image to process
         output_path (Path): Folder to where the new image will be saved
         crop (tuple, optional): (left, right, top, bottom), if not None then image will be cropped by the given values.
         padding (bool, optional): If true then the mosaic image will be a square will black padding at the bottom
 
     Return:
+    ------
         output_file_path: Path of the saved image.
+
     """
     img_path, output_path, crop, use_padding = args
     output_file_path = output_path / img_path.relative_to(output_path.parent)
@@ -47,7 +50,7 @@ def mosaic_worker(args: tuple[Path, Path, tuple[int, int, int, int], bool]):  # 
     else:
         mosaic_img = np.empty((math.ceil(ratio / nb_tiles_side) * height, nb_tiles_side * height, 3))
 
-    for tile_idx in range(0, ratio):
+    for tile_idx in range(ratio):
         i, j = (tile_idx // nb_tiles_side) * height, (tile_idx % nb_tiles_side) * height
         mosaic_img[i:i+height, j:j+height] = img[:, tile_idx*height:(tile_idx+1)*height]
 
@@ -70,7 +73,7 @@ def main():
 
     # Get a list of all the images
     exts = [".jpg", ".png"]
-    file_list = list([p for p in data_path.rglob('*') if p.suffix in exts])
+    file_list = list([p for p in data_path.rglob("*") if p.suffix in exts])
     nb_imgs = len(file_list)
 
     mp_args = list([(img_path, output_path, args.crop, args.use_padding) for img_path in file_list])
@@ -79,7 +82,7 @@ def main():
         for _result in pool.imap(mosaic_worker, mp_args, chunksize=10):
             nb_images_processed += 1
             msg = f"Processing status: ({nb_images_processed}/{nb_imgs})"
-            print(msg + ' ' * (shutil.get_terminal_size(fallback=(156, 38)).columns - len(msg)), end='\r', flush=True)
+            print(msg + " " * (shutil.get_terminal_size(fallback=(156, 38)).columns - len(msg)), end="\r", flush=True)
 
     print(f"\nFinished processing dataset. Converted {nb_images_processed} images, and saved them in {output_path}")
 

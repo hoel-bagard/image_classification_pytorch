@@ -37,8 +37,8 @@ def main():
 
         for img_idx, (label, img, filename) in enumerate(zip(*tuple(data.values())[1:]), start=1):
             msg = f"Processing status: ({img_idx}/10000)"
-            print(msg + ' ' * (shutil.get_terminal_size(fallback=(156, 38)).columns - len(msg)),
-                  end=('\r' if img_idx < 10000 else '\n'), flush=True)
+            print(msg + " " * (shutil.get_terminal_size(fallback=(156, 38)).columns - len(msg)),
+                  end=("\r" if img_idx < 10000 else "\n"), flush=True)
 
             # Separate and assemble the color channels, and then reshape the 2D array (list of colors) into an image.
             img = np.asarray(img)
@@ -56,8 +56,8 @@ def main():
 
     for img_idx, (label, img, filename) in enumerate(zip(*tuple(data.values())[1:]), start=1):
         msg = f"Processing status: ({img_idx}/10000)"
-        print(msg + ' ' * (shutil.get_terminal_size(fallback=(156, 38)).columns - len(msg)),
-              end=('\r' if img_idx < 10000 else '\n'), flush=True)
+        print(msg + " " * (shutil.get_terminal_size(fallback=(156, 38)).columns - len(msg)),
+              end=("\r" if img_idx < 10000 else "\n"), flush=True)
 
         # Separate and assemble the color channels, and then reshape the 2D array (list of colors) into an image.
         img = np.asarray(img)

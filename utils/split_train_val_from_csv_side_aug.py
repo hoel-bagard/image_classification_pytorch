@@ -12,13 +12,16 @@ def worker(args: tuple):
     """Worker in charge of moving an image and possible doing some data augmentation.
 
     Args:
+    ----
         args: entry (tuple): Entry to process (tuple with img path, is_train and is_defect_on_right_side)
               train_list (list): List with all the train entries
               train_path (Path): Path to the output train folder
               val_path (Path): Path to the output validation folder
 
     Return:
+    ------
         0
+
     """
     entry, train_lists, data_path, train_path, val_path = args
     train_list_left_ok, train_list_right_ok = train_lists
@@ -96,7 +99,7 @@ def main():
         for _result in pool.imap(worker, mp_args, chunksize=10):
             nb_images_processed += 1
             msg = f"Processing status: ({nb_images_processed}/{nb_imgs})"
-            print(msg + ' ' * (shutil.get_terminal_size(fallback=(156, 38)).columns - len(msg)), end='\r', flush=True)
+            print(msg + " " * (shutil.get_terminal_size(fallback=(156, 38)).columns - len(msg)), end="\r", flush=True)
 
     print("\nFinished processing dataset")
 

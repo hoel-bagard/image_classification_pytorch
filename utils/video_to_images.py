@@ -65,7 +65,7 @@ def main():
     with Pool(processes=int(os.cpu_count() * 0.8)) as pool:
         for nb_videos_processed, _result in enumerate(pool.imap(worker, mp_args, chunksize=10), start=1):
             msg = f"Processing status: ({nb_videos_processed}/{nb_videos})"
-            print(msg + ' ' * (shutil.get_terminal_size(fallback=(156, 38)).columns - len(msg)), end='\r', flush=True)
+            print(msg + " " * (shutil.get_terminal_size(fallback=(156, 38)).columns - len(msg)), end="\r", flush=True)
     print("\nFinished")
 
 

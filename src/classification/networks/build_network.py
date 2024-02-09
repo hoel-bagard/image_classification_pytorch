@@ -17,15 +17,18 @@ class ModelHelper:
     EfficientNetv2_s = "efficientnetv2_s"
 
 
-def build_model(model_name: type | str,
-                nb_classes: int,
-                model_path: Optional[Path] = None,
-                use_timm_pretrain: bool = True,
-                eval_mode: bool = False,
-                **kwargs: dict[str, Any]) -> torch.nn.Module:
+def build_model(
+    model_name: type | str,
+    nb_classes: int,
+    model_path: Optional[Path] = None,
+    use_timm_pretrain: bool = True,
+    eval_mode: bool = False,
+    **kwargs: dict[str, Any],
+) -> torch.nn.Module:
     """Function that instanciates the given model.
 
     Args:
+    ----
         model_type (type): Class of the model to instanciates
         nb_classes (int): Number of classes in the dataset
         model_path (Path): If given, then the weights will be loaded from that checkpoint
@@ -33,7 +36,9 @@ def build_model(model_name: type | str,
         eval (bool): Whether the model will be used for evaluation or not
 
     Returns:
+    -------
         torch.nn.Module: Instantiated PyTorch model
+
     """
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 

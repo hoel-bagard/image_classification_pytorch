@@ -1,27 +1,24 @@
 # Image Classification using PyTorch
+
 ## Installation
-
-### Requirements/dependencies
+### Requirements
 - Python >=3.10
-- PyTorch (preferably with GPU)
-- Packages from the `requirements.txt` file
+- Poetry
 
-<details>
-<summary>Example (virtualenv/pip)</summary>
-Assuming you're on a linux PC/server with Python>=3.10 and PyTorch already installed, you can use those commands:
-
-```
-virtualenv --system-site-packages venv
-source venv/bin/activate
-pip install -r requirements.txt
-```
-</details>
-
-### Clone the repository
-```
-git clone git@github.com:hoel-bagard/image_classification_pytorch.git --recurse-submodules
+### Install
+If simply using the package:
+```console
+poetry install
 ```
 
+If developing:
+```console
+poetry install --with dev,test
+```
+
+Then use `poetry shell` to enter the virtualenv.
+
+## Data
 ### Get some data and format it:
 
 You need to split the images between two folders: "Train" and "Validation" (the names are hard coded).
@@ -83,16 +80,3 @@ TODO: TB screenshots
 ## Inference
 
 TODO
-
-### Misc
-#### Formating
-The code is trying to follow diverse PEPs conventions (notably PEP8). To have a similar dev environment you can install the following packages (pacman is for arch-based linux distros):
-
-```
-sudo pacman -S flake8 python-flake8-docstrings
-pip install pep8-naming flake8-import-order
-```
-
-#### Typing
-Typing is done using Pyright.\
-The type stubs for OpenCV are taken from [this repo](https://github.com/microsoft/python-type-stubs/tree/main/cv2).

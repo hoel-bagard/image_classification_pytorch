@@ -11,12 +11,15 @@ def worker(args: tuple[Path, Path, tuple[int, int, int, int]]):  # noqa D417
     """Worker in charge of cropping an image.  # noqa D417
 
     Args:
+    ----
         img_path (Path): Path to the image to process
         output_path (Path): Folder to where the new image will be saved
         crop (tuple, optional): (left, right, top, bottom), if not None then image will be cropped by the given values.
 
     Return:
+    ------
         output_file_path: Path of the saved image.
+
     """
     img_path, output_path, crop = args
     output_file_path = output_path / img_path.relative_to(output_path.parent)
@@ -44,7 +47,7 @@ def main():
 
     # Get a list of all the images
     exts = [".jpg", ".png"]
-    file_list = list([p for p in data_path.rglob('*') if p.suffix in exts])
+    file_list = list([p for p in data_path.rglob("*") if p.suffix in exts])
     nb_imgs = len(file_list)
 
     mp_args = list([(img_path, output_path, args.crop) for img_path in file_list])
@@ -53,7 +56,7 @@ def main():
         for _result in pool.imap(worker, mp_args, chunksize=10):
             nb_images_processed += 1
             msg = f"Processing status: ({nb_images_processed}/{nb_imgs})"
-            print(msg + ' ' * (shutil.get_terminal_size(fallback=(156, 38)).columns - len(msg)), end='\r', flush=True)
+            print(msg + " " * (shutil.get_terminal_size(fallback=(156, 38)).columns - len(msg)), end="\r", flush=True)
 
     print(f"\nFinished processing dataset. Converted {nb_images_processed} images, and saved them in {output_path}")
 

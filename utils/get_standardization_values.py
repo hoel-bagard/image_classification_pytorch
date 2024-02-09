@@ -12,10 +12,13 @@ def get_img_mean_std(img_path: Path) -> tuple[npt.NDArray[np.float64], npt.NDArr
     """Compute the means and stds of the given images.
 
     Args:
+    ----
         img_path (Path): Path to the image whose means and stds should be computed.
 
     Returns:
+    -------
         The means and stds of the images.
+
     """
     # Get the mean and std for the RGB images
     img = cv2.imread(str(img_path))
@@ -38,14 +41,14 @@ if __name__ == "__main__":
     np.set_printoptions(precision=3)
 
     exts = (".png", ".jpg", ".bmp")
-    img_paths_list = [path for path in data_path.rglob('*') if path.suffix in exts]
+    img_paths_list = [path for path in data_path.rglob("*") if path.suffix in exts]
     nb_imgs = len(img_paths_list)
     means, stds = np.zeros(3), np.zeros(3)
     with Pool(processes=int(os.cpu_count() * 0.8)) as pool:
         for i, (img_mean, img_std) in enumerate(pool.imap(get_img_mean_std, img_paths_list, chunksize=10), start=1):
             msg = f"Processing status: ({i}/{nb_imgs})"
-            print(msg + ' ' * (shutil.get_terminal_size(fallback=(156, 38)).columns - len(msg)),
-                  end='\r' if i != nb_imgs else '\n', flush=True)
+            print(msg + " " * (shutil.get_terminal_size(fallback=(156, 38)).columns - len(msg)),
+                  end="\r" if i != nb_imgs else "\n", flush=True)
             means += img_mean
             stds += img_std
 
