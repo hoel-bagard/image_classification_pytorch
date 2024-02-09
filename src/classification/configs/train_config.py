@@ -44,11 +44,10 @@ class TrainConfig:
     # CROP_IMAGE_SIZES: tuple[int, int] = (32, 32)  # Center crop
     # RESIZE_IMAGE_SIZES: tuple[int, int] = (32, 32)  # All images will be resized to this size
     CHANNELS: list[int] = field(default_factory=lambda: [3, 16, 32, 16])
-    SIZES: list[int | tuple[int, int]] = field(default_factory=lambda: [3, 3, 3])   # Kernel sizes
+    SIZES: list[int | tuple[int, int]] = field(default_factory=lambda: [3, 3, 3])  # Kernel sizes
     STRIDES: list[int | tuple[int, int]] = field(default_factory=lambda: [2, 2, 2])
     PADDINGS: list[int | tuple[int, int]] = field(default_factory=lambda: [1, 1, 1])
     BLOCKS: list[int] = field(default_factory=lambda: [1, 2, 1])
-
 
     # Number of workers to use for dataloading
     NB_WORKERS: int = field(
@@ -57,7 +56,6 @@ class TrainConfig:
 
     LABEL_MAP: dict[int, str] = field(default_factory=dict)
     NB_CLASSES: int = 0
-
 
     @classmethod
     def from_classes_path(cls, classes_names_path: Path) -> Self:

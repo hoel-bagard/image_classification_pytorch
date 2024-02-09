@@ -71,6 +71,7 @@ select = ["ALL"]
 ignore = [
   "ANN101",     # Missing type annotation for `self` in method
   "ANN102",     # Missing type annotation for `cls` in classmethod
+  "ANN401",     # Dynamically typed expressions (typing.Any) are disallowed in `**kwargs`
   "COM812",     # conflict with formatter
   "D1",         # Missing docstring
   "D203",       # one-blank-line-before-class (incompatible with D211)
@@ -78,8 +79,11 @@ ignore = [
   "D407",       # Missing dashed underline after section ("Args")
   "D413",       # Missing blank line after last section ("Args")
   "ERA001",     # Found commented-out code
+  "FBT003",     # Boolean positional value in function call
+  "FIX002",     # Line contains TODO, consider resolving the issue
   "G004",       # Logging statement uses f-string
   "T201",       # `print` found
+   "TD",        # TODO rules (missing author, missing link)
   "ISC001",     # conflict with formatter
   "INP001",     # File is part of an implicit namespace package. Add an `__init__.py`.
   "RET504",     # Unnecessary assignment before `return` statement
@@ -87,6 +91,7 @@ ignore = [
   "PLW2901",    # `for` loop variable `img` overwritten by assignment target
   "RET508",     # Unnecessary `elif` after `break` statement
   "PLC0414",    # Import alias does not rename original package
+  "PLR2004",    # Magic value used in comparison, consider replacing `2` with a constant variable
 ]
 
 [tool.ruff.lint.per-file-ignores]

@@ -5,7 +5,7 @@ from torch import nn
 
 class SmoothCrossEntropyLoss(nn.Module):
     def __init__(self, smoothing: float = 0) -> None:
-        """Computes a loss with label smoothing for the given batch.
+        """Compute a loss with label smoothing for the given batch.
 
         Args:
             smoothing: Value used for label smoothing
@@ -19,7 +19,7 @@ class SmoothCrossEntropyLoss(nn.Module):
 
     @staticmethod
     def _smooth_one_hot(targets: torch.Tensor, nb_classes: int, smoothing: float = 0.0) -> torch.Tensor:
-        """Smoothes the target labels.
+        """Smooth the target labels.
 
         Args:
             targets: The target labels (ints, not one hots). Shape (batch_size, ).
@@ -43,7 +43,7 @@ class SmoothCrossEntropyLoss(nn.Module):
 
         Args:
             logits: The model's predictions
-            labels: The labels
+            targets: The labels
 
         Returns:
             float: the loss

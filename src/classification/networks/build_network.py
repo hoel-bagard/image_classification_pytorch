@@ -25,24 +25,23 @@ def build_model(
     model_name: type | str,
     nb_classes: int,
     model_path: Path | None = None,
+    *,
     use_timm_pretrain: bool = True,
     eval_mode: bool = False,
-    **kwargs: dict[str, Any],
+    **kwargs: dict[str, Any],  # TODO: Have a typed dict
 ) -> torch.nn.Module:
-    """Function that instanciates the given model.
+    """Instantiate the given model.
 
     Args:
-    ----
-        model_type (type): Class of the model to instanciates
-        nb_classes (int): Number of classes in the dataset
-        model_path (Path): If given, then the weights will be loaded from that checkpoint
-        use_timm_pretrain (Bool): If using a timm model, whether to use a pretrain or not.
-        eval (bool): Whether the model will be used for evaluation or not
+        model_name: Class of the model to instanciates
+        nb_classes: Number of classes in the dataset
+        model_path: If given, then the weights will be loaded from that checkpoint
+        use_timm_pretrain: If using a timm model, whether to use a pretrain or not.
+        eval_mode: Whether the model will be used for evaluation or not
+        kwargs: Must contain image_sizes and nb_classes
 
     Returns:
-    -------
-        torch.nn.Module: Instantiated PyTorch model
-
+        Instantiated PyTorch model
     """
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 

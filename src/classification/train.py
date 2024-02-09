@@ -29,7 +29,7 @@ from classification.utils.classification_metrics import ClassificationMetrics
 from classification.utils.classification_tensorboard import ClassificationTensorBoard
 
 
-def main() -> None:
+def main() -> None:  # noqa: C901, PLR0915
     parser = argparse.ArgumentParser(
         description="Training script", formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
@@ -62,7 +62,6 @@ def main() -> None:
     else:
         msg = "Either --classes_names_path or --classes_names must be provided"
         raise ValueError(msg)
-    train_config = train_config  # TODO: Temp
 
     prepare_folders(
         record_config.TB_DIR if record_config.USE_TB else None,
@@ -166,7 +165,15 @@ def main() -> None:
                 model, train_dataloader, val_dataloader, train_config.LABEL_MAP, max_batches=None
             )
             tensorboard = ClassificationTensorBoard(
-                model, record_config.TB_DIR, train_dataloader, val_dataloader, logger, train_config, record_config, metrics, denormalize_imgs_fn
+                model,
+                record_config.TB_DIR,
+                train_dataloader,
+                val_dataloader,
+                logger,
+                train_config,
+                record_config,
+                metrics,
+                denormalize_imgs_fn,
             )
 
         best_loss = 1000
