@@ -76,6 +76,10 @@ ignore = [
   "T201",       # `print` found
   "ISC001",     # conflict with formatter
   "INP001",     # File is part of an implicit namespace package. Add an `__init__.py`.
+  "RET504",     # Unnecessary assignment before `return` statement
+  "S301",       # `pickle` and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue
+  "PLW2901",    # `for` loop variable `img` overwritten by assignment target
+  "RET508",     # Unnecessary `elif` after `break` statement
 ]
 
 [tool.ruff.lint.per-file-ignores]

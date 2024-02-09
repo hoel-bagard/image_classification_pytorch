@@ -8,24 +8,20 @@ import cv2
 import numpy as np
 
 
-def worker(args: tuple) -> int:
+def worker(args: tuple) -> None:
     """Worker in charge of moving an image and possible doing some data augmentation.
 
     Args:
-    ----
         args: entry (tuple): Entry to process (tuple with img path, is_train and is_defect_on_right_side)
               train_list (list): List with all the train entries
               train_path (Path): Path to the output train folder
               val_path (Path): Path to the output validation folder
 
-    Return:
-    ------
-        0
-
     """
     entry, train_lists, data_path, train_path, val_path = args
     train_list_left_ok, train_list_right_ok = train_lists
     file_path, is_train, cls, side = entry
+    rng = np.random.default_rng(42)
 
     # Do some data augmentation by mixing training images
     if is_train:
@@ -41,9 +37,9 @@ def worker(args: tuple) -> int:
 
         for i in range(data_aug_factor):
             if side == "left":
-                file_path_aug, _, _, _ = train_list_right_ok[np.random.randint(len(train_list_right_ok))]
+                file_path_aug, _, _, _ = train_list_right_ok[rng.integers(len(train_list_right_ok))]
             else:
-                file_path_aug, _, _, _ = train_list_left_ok[np.random.randint(len(train_list_left_ok))]
+                file_path_aug, _, _, _ = train_list_left_ok[rng.integers(len(train_list_left_ok))]
 
             img = cv2.imread(str(file_path_aug), cv2.IMREAD_UNCHANGED)
             if side == "right":
@@ -62,7 +58,6 @@ def worker(args: tuple) -> int:
         dest_path = (val_path / file_path.relative_to(data_path)).parent
         dest_path.mkdir(parents=True, exist_ok=True)
         shutil.copy(file_path, dest_path)
-    return 0
 
 
 def main() -> None:
@@ -80,7 +75,7 @@ def main() -> None:
     val_path: Path = args.data_path / "Validation"
     val_path.mkdir(exist_ok=True)
 
-    with open(args.csv_path) as spec_file:
+    with args.csv_path.open() as spec_file:
         spec_list = [(args.data_path / line.split(",")[0],     # Image path
                            line.split(",")[3].strip() == "train",   # Val or train
                            line.split(",")[2].strip(),              # Class
@@ -95,7 +90,7 @@ def main() -> None:
 
     mp_args = [(entry, train_lists, args.data_path, train_path, val_path) for entry in spec_list]
     nb_images_processed, nb_imgs = 0, len(spec_list)
-    with Pool(processes=int(os.cpu_count() * 0.8)) as pool:
+    with Pool(processes=int(nb_cpus * 0.8) if (nb_cpus := os.cpu_count()) is not None else 1) as pool:
         for _result in pool.imap(worker, mp_args, chunksize=10):
             nb_images_processed += 1
             msg = f"Processing status: ({nb_images_processed}/{nb_imgs})"

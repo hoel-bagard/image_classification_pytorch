@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 import shutil
 from argparse import ArgumentParser
@@ -7,17 +9,15 @@ from pathlib import Path
 import cv2
 
 
-def worker(args: tuple[Path, Path, tuple[int, int, int, int]]):  # noqa D417
-    """Worker in charge of cropping an image.  # noqa D417.
+def worker(args: tuple[Path, Path, tuple[int, int, int, int]]) -> Path:  # noqa: D417
+    """Worker in charge of cropping an image.
 
     Args:
-    ----
-        img_path (Path): Path to the image to process
-        output_path (Path): Folder to where the new image will be saved
-        crop (tuple, optional): (left, right, top, bottom), if not None then image will be cropped by the given values.
+        img_path: Path to the image to process
+        output_path: Folder to where the new image will be saved
+        crop: (left, right, top, bottom), if not None then image will be cropped by the given values.
 
     Return:
-    ------
         output_file_path: Path of the saved image.
 
     """

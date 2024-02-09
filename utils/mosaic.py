@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import math
 import os
 import shutil
@@ -9,20 +11,18 @@ import cv2
 import numpy as np
 
 
-def mosaic_worker(args: tuple[Path, Path, tuple[int, int, int, int], bool]):  # noqa D417
-    """Worker in charge of turning an image into a mosaic.  # noqa D417.
+def mosaic_worker(args: tuple[Path, Path, tuple[int, int, int, int], bool]) -> Path:  # noqa: D417
+    """Worker in charge of turning an image into a mosaic.
 
     This function only handle the case where the image's width is larger than its height (for now at least)
 
     Args:
-    ----
         img_path (Path): Path to the image to process
         output_path (Path): Folder to where the new image will be saved
         crop (tuple, optional): (left, right, top, bottom), if not None then image will be cropped by the given values.
         padding (bool, optional): If true then the mosaic image will be a square will black padding at the bottom
 
     Return:
-    ------
         output_file_path: Path of the saved image.
 
     """
@@ -36,7 +36,10 @@ def mosaic_worker(args: tuple[Path, Path, tuple[int, int, int, int], bool]):  # 
         img = img[top:-bottom, left:-right]  # Doesn't work for top=bottom=0
 
     height, width, _ = img.shape
-    assert width % height == 0, "The image cannot be cleanly cut into a mosaic, maybe try cropping it."
+    if width % height != 0:
+        msg = "The image cannot be cleanly cut into a mosaic, maybe try cropping it."
+        raise ValueError(msg)
+
     ratio = width // height
     # if ratio != math.isqrt(ratio) ** 2:
     #     print("The image's ratio does not lead to a square number of mosaic tiles,"
@@ -78,7 +81,7 @@ def main() -> None:
 
     mp_args = [(img_path, output_path, args.crop, args.use_padding) for img_path in file_list]
     nb_images_processed = 0  # Use to count the number of good / bad samples
-    with Pool(processes=int(os.cpu_count() * 0.8)) as pool:
+    with Pool(processes=int(nb_cpus * 0.8) if (nb_cpus := os.cpu_count()) is not None else 1) as pool:
         for _result in pool.imap(mosaic_worker, mp_args, chunksize=10):
             nb_images_processed += 1
             msg = f"Processing status: ({nb_images_processed}/{nb_imgs})"

@@ -16,7 +16,7 @@ def main() -> None:
     val_path: Path = args.data_path / "Validation"
     val_path.mkdir(exist_ok=True)
 
-    with open(args.csv_path) as spec_file:
+    with args.csv_path.open() as spec_file:
         spec_list = [(args.data_path / line.split(",")[0], line.split(",")[3].strip() == "train") for line in spec_file]
 
     nb_imgs = len(spec_list)
