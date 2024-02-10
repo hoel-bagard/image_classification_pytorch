@@ -34,7 +34,7 @@ def worker(args: tuple[argparse.Namespace, Path]) -> None:
     video = cv2.VideoCapture(str(video_path))
     video_output_path = output_path / video_path.relative_to(data_path).parent / video_path.stem
     frame_count = 0
-    best_sharpness = 0.  # Used when keeping only the least blurry frame (the lower the more blurry)
+    best_sharpness = 0.0  # Used when keeping only the least blurry frame (the lower the more blurry)
     best_frame = None
     while True:
         success, frame = video.read()
@@ -53,14 +53,16 @@ def worker(args: tuple[argparse.Namespace, Path]) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Script to convert videos into images.",
-                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description="Script to convert videos into images.", formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
     parser.add_argument("data_path", type=Path, help="Path to the folder with the mp4 videos.")
     parser.add_argument("--output_path", "-o", type=Path, default=Path("../out_images"), help="Output path.")
     parser.add_argument("--img_format", "-f", type=str, choices=[".jpg", ".png"], default=".jpg", help="Image format.")
     parser.add_argument("--resize_ratio", "-r", type=float, default=1, help="Resize the images using that ratio.")
-    parser.add_argument("--single_frame", "-s", action="store_true",
-                        help="Keep only the least blury frame for each video.")
+    parser.add_argument(
+        "--single_frame", "-s", action="store_true", help="Keep only the least blury frame for each video."
+    )
     args = parser.parse_args()
 
     data_path: Path = args.data_path

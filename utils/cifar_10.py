@@ -12,8 +12,9 @@ import numpy as np
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Script to convert cifar-10 data to images.",
-                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description="Script to convert cifar-10 data to images.", formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
     parser.add_argument("data_path", type=Path, help="Path to the folder with the cifar-10 data.")
     parser.add_argument("--output_path", "-o", type=Path, default=Path("data/cifar_10_images"), help="Output path.")
     args = parser.parse_args()
@@ -38,8 +39,11 @@ def main() -> None:
 
         for img_idx, (label, img, filename) in enumerate(zip(*tuple(data.values())[1:]), start=1):
             msg = f"Processing status: ({img_idx}/{nb_imgs})"
-            print(msg + " " * (shutil.get_terminal_size(fallback=(156, 38)).columns - len(msg)),
-                  end=("\r" if img_idx < nb_imgs else "\n"), flush=True)
+            print(
+                msg + " " * (shutil.get_terminal_size(fallback=(156, 38)).columns - len(msg)),
+                end=("\r" if img_idx < nb_imgs else "\n"),
+                flush=True,
+            )
 
             # Separate and assemble the color channels, and then reshape the 2D array (list of colors) into an image.
             img = np.asarray(img)
@@ -57,8 +61,11 @@ def main() -> None:
 
     for img_idx, (label, img, filename) in enumerate(zip(*tuple(data.values())[1:]), start=1):
         msg = f"Processing status: ({img_idx}/{nb_imgs})"
-        print(msg + " " * (shutil.get_terminal_size(fallback=(156, 38)).columns - len(msg)),
-              end=("\r" if img_idx < nb_imgs else "\n"), flush=True)
+        print(
+            msg + " " * (shutil.get_terminal_size(fallback=(156, 38)).columns - len(msg)),
+            end=("\r" if img_idx < nb_imgs else "\n"),
+            flush=True,
+        )
 
         # Separate and assemble the color channels, and then reshape the 2D array (list of colors) into an image.
         img = np.asarray(img)

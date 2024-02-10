@@ -31,9 +31,9 @@ def worker(args: tuple) -> None:
         # Expects the image to be already split in a vertical fashion (from the mosaic script)
         # Long live single use scripts!
         if side == "right":
-            original_img_part = img[img.shape[0]//2:, :]
+            original_img_part = img[img.shape[0] // 2 :, :]
         elif side == "left":
-            original_img_part = img[:img.shape[0]//2, :]
+            original_img_part = img[: img.shape[0] // 2, :]
 
         for i in range(data_aug_factor):
             if side == "left":
@@ -43,14 +43,15 @@ def worker(args: tuple) -> None:
 
             img = cv2.imread(str(file_path_aug), cv2.IMREAD_UNCHANGED)
             if side == "right":
-                augmentation_img_part = img[:img.shape[0]//2, :]
+                augmentation_img_part = img[: img.shape[0] // 2, :]
                 final_img = cv2.vconcat((augmentation_img_part, original_img_part))
             else:
-                augmentation_img_part = img[img.shape[0]//2:, :]
+                augmentation_img_part = img[img.shape[0] // 2 :, :]
                 final_img = cv2.vconcat((original_img_part, augmentation_img_part))
 
-            dest_path = (train_path / file_path.relative_to(data_path)).parent \
-                / (file_path.stem + f"_{i}" + file_path.suffix)
+            dest_path = (train_path / file_path.relative_to(data_path)).parent / (
+                file_path.stem + f"_{i}" + file_path.suffix
+            )
             dest_path.parent.mkdir(parents=True, exist_ok=True)
             cv2.imwrite(str(dest_path), final_img)
     # Just move the image to the validation folder
@@ -62,10 +63,18 @@ def worker(args: tuple) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser("Validation/Train splitting that does some data augmentation")
-    parser.add_argument("data_path", type=Path, help=("Path to the dataset."
-                                                      " The Train and Validation directories will be placed there."))
-    parser.add_argument("csv_path", type=Path, help=("Path to the csv specifying how to split."
-                                                     "Expected format: (image_path,image_id,class,class,split,side)"))
+    parser.add_argument(
+        "data_path",
+        type=Path,
+        help=("Path to the dataset." " The Train and Validation directories will be placed there."),
+    )
+    parser.add_argument(
+        "csv_path",
+        type=Path,
+        help=(
+            "Path to the csv specifying how to split." "Expected format: (image_path,image_id,class,class,split,side)"
+        ),
+    )
     args = parser.parse_args()
     # Note: The way this is implemented can lead to generating the same ok image twice.
     #       Shouldn't matter in the grand scheme of things though.
@@ -76,11 +85,15 @@ def main() -> None:
     val_path.mkdir(exist_ok=True)
 
     with args.csv_path.open() as spec_file:
-        spec_list = [(args.data_path / line.split(",")[0],     # Image path
-                           line.split(",")[3].strip() == "train",   # Val or train
-                           line.split(",")[2].strip(),              # Class
-                           line.split(",")[4].strip())              # Side
-                          for line in spec_file]
+        spec_list = [
+            (
+                args.data_path / line.split(",")[0],  # Image path
+                line.split(",")[3].strip() == "train",  # Val or train
+                line.split(",")[2].strip(),  # Class
+                line.split(",")[4].strip(),
+            )  # Side
+            for line in spec_file
+        ]
 
     train_list = [entry for entry in spec_list if entry[1]]
     # Took elements at random at first but that was extremely ineficient, hence the lists

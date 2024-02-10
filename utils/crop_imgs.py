@@ -35,8 +35,10 @@ def worker(args: tuple[Path, Path, tuple[int, int, int, int]]) -> Path:  # noqa:
 
 
 def main() -> None:
-    parser = ArgumentParser("Crops all the image in the given folder by the given values."
-                            "Saves the data in a cropped_imgs folder, in the dataset's parent folder")
+    parser = ArgumentParser(
+        "Crops all the image in the given folder by the given values."
+        "Saves the data in a cropped_imgs folder, in the dataset's parent folder"
+    )
     parser.add_argument("data_path", type=Path, help="Path to the dataset")
     parser.add_argument("crop", type=int, nargs=4, help="How much should be cropped, (left, right, top, bottom)")
     args = parser.parse_args()

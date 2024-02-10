@@ -45,7 +45,7 @@ def mosaic_worker(args: tuple[Path, Path, tuple[int, int, int, int], bool]) -> P
     #     print("The image's ratio does not lead to a square number of mosaic tiles,"
     #           "black tiles will be used to complete the image.")
 
-    nb_tiles_side = math.ceil(math.sqrt(width/height))   # Width of the new (square) image in number of tiles
+    nb_tiles_side = math.ceil(math.sqrt(width / height))  # Width of the new (square) image in number of tiles
 
     if use_padding:
         # zeros and not empty to have black tiles by default
@@ -55,7 +55,7 @@ def mosaic_worker(args: tuple[Path, Path, tuple[int, int, int, int], bool]) -> P
 
     for tile_idx in range(ratio):
         i, j = (tile_idx // nb_tiles_side) * height, (tile_idx % nb_tiles_side) * height
-        mosaic_img[i:i+height, j:j+height] = img[:, tile_idx*height:(tile_idx+1)*height]
+        mosaic_img[i : i + height, j : j + height] = img[:, tile_idx * height : (tile_idx + 1) * height]
 
     output_file_path.parent.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(output_file_path), mosaic_img)
@@ -63,8 +63,10 @@ def mosaic_worker(args: tuple[Path, Path, tuple[int, int, int, int], bool]) -> P
 
 
 def main() -> None:
-    parser = ArgumentParser("Converts a long, rectangular image into a square-ish image by turning it into a mosaic."
-                            "Saves the data in a mosaic_img folder, in the dataset's parent folder")
+    parser = ArgumentParser(
+        "Converts a long, rectangular image into a square-ish image by turning it into a mosaic."
+        "Saves the data in a mosaic_img folder, in the dataset's parent folder"
+    )
     parser.add_argument("data_path", type=Path, help="Path to the dataset")
     parser.add_argument("--crop", "--c", type=int, nargs=4, help="If cropping the images, (left, right, top, bottom)")
     parser.add_argument("--use_padding", "--p", action="store_true", help="If true then pad the images to have squares")

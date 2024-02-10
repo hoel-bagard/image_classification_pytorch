@@ -29,11 +29,11 @@ def main() -> None:
         tile_index = 0
         for x in range(0, width, tile_width):
             for y in range(0, height, tile_height):
-                if y+tile_height > height:
+                if y + tile_height > height:
                     y = height - tile_height
-                if x+tile_width > width:
+                if x + tile_width > width:
                     x = width - tile_width
-                tile = img[y:y+tile_height, x:x+tile_width]
+                tile = img[y : y + tile_height, x : x + tile_width]
 
                 new_tile_name = file_path.stem + "_" + str(tile_index).zfill(5) + file_path.suffix
                 tile_path = output_path / new_tile_name

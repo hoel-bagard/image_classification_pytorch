@@ -21,7 +21,7 @@ def main() -> None:
     for i, file_path in enumerate(file_list):
         msg = f"Processing image {file_path.name} ({i+1}/{nb_imgs})"
         print(msg + " " * (shutil.get_terminal_size(fallback=(156, 38)).columns - len(msg)), end="\r")
-        if i >= args.split_ratio*nb_imgs:
+        if i >= args.split_ratio * nb_imgs:
             dest_path = (val_path / file_path.relative_to(args.data_path)).parent
             dest_path.mkdir(parents=True, exist_ok=True)
             shutil.move(file_path, dest_path)

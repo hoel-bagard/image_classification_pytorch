@@ -33,13 +33,10 @@ def main() -> None:
         if args.resize:
             img = cv2.resize(img, tuple(args.resize))
 
-        text = ('Press "d" if there is a defect, "a" if there are none, "w" if you are unsure'
-                'and "q" to quit')
+        text = 'Press "d" if there is a defect, "a" if there are none, "w" if you are unsure' 'and "q" to quit'
         img = cv2.copyMakeBorder(img, 70, 0, 0, 0, cv2.BORDER_CONSTANT, None, 0)
-        img = cv2.putText(img, text, (20, 25),
-                          cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1, cv2.LINE_AA)
-        img = cv2.putText(img, msg, (20, 45),
-                          cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1, cv2.LINE_AA)
+        img = cv2.putText(img, text, (20, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1, cv2.LINE_AA)
+        img = cv2.putText(img, msg, (20, 45), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1, cv2.LINE_AA)
 
         while True:
             cv2.imshow("Image", img)

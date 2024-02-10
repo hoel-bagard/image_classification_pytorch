@@ -5,10 +5,16 @@ from pathlib import Path
 
 def main() -> None:
     parser = argparse.ArgumentParser("Validation/Train splitting")
-    parser.add_argument("data_path", type=Path, help=("Path to the dataset."
-                                                      " The Train and Validation directories will be placed there."))
-    parser.add_argument("csv_path", type=Path, help=("Path to the csv specifying how to split."
-                                                     "Expected format: (image_path,image_id,class,split)"))
+    parser.add_argument(
+        "data_path",
+        type=Path,
+        help=("Path to the dataset." " The Train and Validation directories will be placed there."),
+    )
+    parser.add_argument(
+        "csv_path",
+        type=Path,
+        help=("Path to the csv specifying how to split." "Expected format: (image_path,image_id,class,split)"),
+    )
     args = parser.parse_args()
 
     train_path: Path = args.data_path / "Train"
