@@ -46,7 +46,6 @@ optional = true
 ruff = "^0.2.1"
 pyright = "^1.1.350"
 pre-commit = "^3.6.0"
-opencv-stubs = "^0.0.8"
 flake8-pyproject = "^1.2.3"
 matplotlib-stubs = "^0.2.0"
 

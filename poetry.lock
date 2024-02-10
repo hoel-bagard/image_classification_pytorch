@@ -1162,28 +1162,6 @@ numpy = [
 ]
 
 [[package]]
-name = "opencv-stubs"
-version = "0.0.8"
-description = "Unofficial stubs for the opencv-python package."
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "opencv_stubs-0.0.8-py3-none-any.whl", hash = "sha256:9c9ff5b91c6891b9a43ac5e8615dbd824a74db9903fea5eb0cfd564d65b6f314"},
-    {file = "opencv_stubs-0.0.8.tar.gz", hash = "sha256:361e6f9b1dca139b58fbc24db753006e5ea1b3016d7660698d62d188b7034655"},
-]
-
-[package.dependencies]
-numpy = ">=1.21"
-
-[package.extras]
-build = ["hatch"]
-dev = ["pip-tools", "pre-commit", "pyright", "ruff"]
-flake8 = ["flake8", "flake8-broken-line", "flake8-bugbear", "flake8-builtins", "flake8-commas", "flake8-comprehensions", "flake8-docstrings", "flake8-import-order", "flake8-noqa", "flake8-pyproject", "flake8-quotes", "pep8-naming"]
-opencv = ["opencv-python (>=4.7.0)"]
-opencv-contrib = ["opencv-contrib-python (>=4.7.0)"]
-opencv-headless = ["opencv-python-headless (>=4.7.0)"]
-
-[[package]]
 name = "packaging"
 version = "23.2"
 description = "Core utilities for Python packages"
@@ -2509,4 +2487,4 @@ watchdog = ["watchdog (>=2.3)"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.13"
-content-hash = "3fd696aff4787a85579c1e17e47a4044cfee3bda3b931d4b868f5536137ab2fd"
+content-hash = "f499d08935c6af50a50d10b9b1db7c7ec3527f68386bb18cc9ad7e79bfe0051f"
