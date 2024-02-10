@@ -199,7 +199,7 @@ def main() -> None:  # noqa: C901, PLR0915
                     and epoch >= record_config.RECORD_START
                     and (epoch - last_checkpoint_epoch) >= record_config.CHECKPT_SAVE_FREQ
                 ):
-                    save_path = record_config.CHECKPOINT_DIRS / f"train_{epoch}.pt"
+                    save_path = record_config.CHECKPOINTS_DIR / f"train_{epoch}.pt"
                     logger.info(
                         f"Loss improved from {best_loss:.5e} to {epoch_loss:.5e}," f"saving model to {save_path}"
                     )
