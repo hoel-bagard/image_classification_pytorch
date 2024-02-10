@@ -6,12 +6,13 @@ import numpy as np
 import torch
 
 import classification.data.data_transformations as transforms
+from classification.configs import RecordConfig, TrainConfig
 from classification.data.dataset_loaders import dog_vs_cat_loader as data_loader
 from classification.data.defeault_loader import default_load_data
 from classification.networks.build_network import build_model
 from classification.torch_utils.utils.draw import draw_pred_img
 from classification.torch_utils.utils.misc import clean_print, get_config_as_dict
-from classification.configs import RecordConfig, TrainConfig
+
 
 def main() -> None:
     parser = ArgumentParser()
