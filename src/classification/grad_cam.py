@@ -32,7 +32,6 @@ def main() -> None:
         msg = "Either --classes_names_path or --classes_names must be provided"
         raise ValueError(msg)
 
-
     # Creates and load the model
     model = build_model(
         train_config.MODEL,

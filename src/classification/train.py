@@ -180,6 +180,7 @@ def main() -> None:  # noqa: C901, PLR0915
         last_checkpoint_epoch = 0
         train_start_time = time.time()
 
+        epoch_loss, val_epoch_loss, train_acc, val_acc = 0, 0, 0, 0
         try:
             for epoch in range(train_config.MAX_EPOCHS):
                 epoch_start_time = time.perf_counter()
@@ -189,8 +190,7 @@ def main() -> None:  # noqa: C901, PLR0915
                 epoch_loss = trainer.train_epoch()
 
                 if record_config.USE_TB:
-                    if isinstance(epoch_loss, float):
-                        tensorboard.write_loss(epoch, epoch_loss)
+                    tensorboard.write_loss(epoch, epoch_loss)
                     tensorboard.write_lr(epoch, scheduler.get_last_lr()[0])
 
                 if (
@@ -245,18 +245,18 @@ def main() -> None:  # noqa: C901, PLR0915
 
     if record_config.USE_TB:
         metrics = {
-            "Z - Final Results/Train loss": epoch_loss,
-            "Z - Final Results/Validation loss": val_epoch_loss,
-            "Z - Final Results/Train accuracy": train_acc,
-            "Z - Final Results/Validation accuracy": val_acc,
+            "Z - Final Results/Train loss": float(epoch_loss),
+            "Z - Final Results/Validation loss": float(val_epoch_loss),
+            "Z - Final Results/Train accuracy": float(train_acc),
+            "Z - Final Results/Validation accuracy": float(val_acc),
         }
         tensorboard.write_config(get_dataclass_as_dict(train_config), metrics)
         tensorboard.close_writers()
 
     train_stop_time = time.time()
     end_msg = f"Finished Training\n\tTraining time : {train_stop_time - train_start_time:.03f}s"
-    memory_peak, gpu_memory = resource_usage()
-    end_msg += f"\n\tRAM peak : {memory_peak // 1024} MB\n\tVRAM usage : {gpu_memory}"
+    mem_peak, gpu_memory = resource_usage()
+    end_msg += f"\n\tRAM peak : {mem_peak // 1024 if mem_peak is not None else 'N/A'} MB\n\tVRAM usage : {gpu_memory}"
     logger.info(end_msg)
 
 
