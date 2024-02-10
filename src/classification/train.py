@@ -189,7 +189,8 @@ def main() -> None:  # noqa: C901, PLR0915
                 epoch_loss = trainer.train_epoch()
 
                 if record_config.USE_TB:
-                    tensorboard.write_loss(epoch, epoch_loss)
+                    if isinstance(epoch_loss, float):
+                        tensorboard.write_loss(epoch, epoch_loss)
                     tensorboard.write_lr(epoch, scheduler.get_last_lr()[0])
 
                 if (
