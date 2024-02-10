@@ -6,14 +6,14 @@
 - Poetry
 
 ### Install
-If simply using the package:
+If simply using the package on cpu:
 ```console
 poetry install
 ```
 
-If developing:
+If developing you can add any of the following options:
 ```console
-poetry install --with dev,test
+poetry install --with dev,test,gpu
 ```
 
 Then use `poetry shell` to enter the virtualenv.
