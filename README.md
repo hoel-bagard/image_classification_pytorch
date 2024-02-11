@@ -29,7 +29,7 @@ You then need to create a `classes.names` file next to the Train and Validation 
 
 The commands below will download, extract and format the cifar 10 dataset into the `./data/cifar_10_images` folder.
 
-```
+```console
 wget https://www.cs.toronto.edu/\~kriz/cifar-10-python.tar.gz -P data
 tar -xvf data/cifar-10-python.tar.gz -C data
 python utils/cifar_10.py data/cifar-10-batches-py
@@ -51,6 +51,18 @@ You'll need to modify a few values in `config/model_config.py` in the next step 
 ```
 </details>
 
+<details>
+  <summary>CIFAR-10 example</summary>
+
+The commands below will download, extract and format the cifar 10 dataset into the `./data/cifar_10_images` folder.
+
+```console
+wget https://s3.amazonaws.com/fast-ai-imageclas/imagenette2.tgz -P data
+tar -xvf data/imagenette2.tgz -C data
+python utils/preprocess_imagenette.py data/imagenette2
+rm data/imagenette2.tgz
+```
+</details>
 
 ## Config files
 In the config folder of this repo you will find two config template files. You need to copy them and remove the "_template" part like this:
