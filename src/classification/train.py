@@ -76,9 +76,8 @@ def main() -> None:  # noqa: C901, PLR0915
     logger = create_logger(LOGGER_NAME, log_dir=log_dir, verbose_level=verbose_level)
     logger.info("Finished preparing tensorboard and checkpoints folders.")
 
-    torch.backends.cudnn.benchmark = (
-        True  # Makes training quite a bit faster  # pyright: ignore[reportAttributeAccessIssue]
-    )
+    # Makes training quite a bit faster
+    torch.backends.cudnn.benchmark = True   # pyright: ignore[reportAttributeAccessIssue]
 
     train_data, train_labels = data_loader(train_data_path, train_config.LABEL_MAP, limit=limit)
     logger.info("Train data loaded")
