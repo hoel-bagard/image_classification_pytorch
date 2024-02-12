@@ -1,6 +1,7 @@
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from pathlib import Path
-from typing import Optional
+import typing
+from typing import overload
 
 
 import cv2
@@ -8,12 +9,13 @@ import numpy as np
 import numpy.typing as npt
 
 from classification.torch_utils.utils.misc import clean_print
+from classification.utils.type_aliases import ImgArray, ImgArrayT, ImgRaw
 
 
 def default_loader(
     data_path: Path,
     label_map: dict[int, str],
-    limit: Optional[int] = None,
+    limit: int | None = None,
     shuffle: bool = False,
     verbose: bool = True
 ) -> tuple[npt.NDArray[np.object_], npt.NDArray[np.int64]]:
@@ -57,7 +59,18 @@ def default_loader(
     return data, labels
 
 
-def default_load_data(data: Path | Iterable[Path]) -> npt.NDArray[np.uint8]:
+@overload
+def default_load_data(data: Path | Iterable[Path], preprocessing_pipeline: None) -> ImgRaw:
+    ...
+
+@overload
+def default_load_data(data: Path | Iterable[Path], preprocessing_pipeline: Callable[[ImgRaw], ImgArrayT]) -> ImgArrayT:
+    ...
+
+def default_load_data(
+    data: Path | Iterable[Path],
+    preprocessing_pipeline: Callable[[ImgRaw], ImgArrayT] | None = None,
+) -> ImgRaw | ImgArrayT:
     """Function that loads image(s) from path(s).
 
     Args:
@@ -68,12 +81,14 @@ def default_load_data(data: Path | Iterable[Path]) -> npt.NDArray[np.uint8]:
     """
     if isinstance(data, Path):
         img = cv2.imread(str(data))
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        return img  # type: ignore
+        img = typing.cast(ImgRaw, cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+        if preprocessing_pipeline is not None:
+            img = preprocessing_pipeline(img)
+        return img
     else:
-        imgs: list[npt.NDArray[np.uint8]] = []
+        imgs: list[ImgArray] = []
         for image_path in data:
-            imgs.append(default_load_data(image_path))
+            imgs.append(default_load_data(image_path, preprocessing_pipeline))
         return np.asarray(imgs)
 
 
