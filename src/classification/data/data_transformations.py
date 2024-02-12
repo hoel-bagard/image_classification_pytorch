@@ -1,8 +1,8 @@
 """Data augmentation module using albumentations."""
-from functools import singledispatch
-from pathlib import Path
-from typing import Any, Callable
 import typing
+from collections.abc import Iterable
+from functools import singledispatch
+from typing import Callable
 
 import albumentations
 import numpy as np
@@ -10,7 +10,16 @@ import numpy.typing as npt
 import torch
 from einops import rearrange
 
-from classification.utils.type_aliases import ImgArray, ArrayOrTensor, LabelArray, LabelDtype, ImgRaw, ImgStandardized, StandardizedImgDType
+from classification.utils.type_aliases import (
+    ImgArray,
+    ImgArrayOrTensor,
+    ImgRaw,
+    ImgStandardized,
+    LabelArray,
+    LabelDtype,
+    StandardizedImgDType,
+)
+
 
 def albumentation_img_wrapper(transform: albumentations.Compose) -> Callable[[ImgArray], ImgArray]:
     """Returns a function that applies the albumentations transforms to an image.
@@ -22,7 +31,7 @@ def albumentation_img_wrapper(transform: albumentations.Compose) -> Callable[[Im
     return albumentation_transform_fn
 
 
-def albumentation_batch_wrapper(transform: albumentations.Compose) -> Callable[[ImgArray, LabelArray],
+def albumentation_batch_wrapper(transform: albumentations.Compose | albumentations.ImageOnlyTransform) -> Callable[[ImgArray, LabelArray],
                                                                          tuple[ImgArray, LabelArray]]:
     """Returns a function that applies the albumentations transforms to a batch."""
     def albumentation_transform_fn(imgs: ImgArray, labels: LabelArray) -> tuple[ImgArray, LabelArray]:
@@ -37,10 +46,9 @@ def albumentation_batch_wrapper(transform: albumentations.Compose) -> Callable[[
 
 
 def compose_transformations(
-    transformations: list[Callable[[ArrayOrTensor, ArrayOrTensor],
-                                   tuple[ArrayOrTensor, ArrayOrTensor]]]):
+    transformations: Iterable[Callable[[ImgArray, LabelArray], tuple[ImgArray, LabelArray]]]):
     """Returns a function that applies all the given transformations."""
-    def compose_transformations_fn(imgs: ArrayOrTensor, labels: ArrayOrTensor):
+    def compose_transformations_fn(imgs: ImgArray, labels: LabelArray):
         """Apply transformations on a batch of data."""
         for fn in transformations:
             imgs, labels = fn(imgs, labels)
@@ -65,7 +73,7 @@ def to_tensor():
 def destandardize_img(
     img_mean: tuple[float, float, float],
     img_std: tuple[float, float, float],
-) -> Callable[[ArrayOrTensor, ArrayOrTensor], ImgRaw]:
+) -> Callable[[ImgArrayOrTensor, ImgArrayOrTensor], ImgRaw]:
     """Create a function to undo the standardization process on a batch of images.
 
     Notes: The singe dispatch thing is because I was bored and mypy was complaining when using an if isinstance().

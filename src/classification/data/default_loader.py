@@ -1,8 +1,7 @@
+import typing
 from collections.abc import Callable, Iterable
 from pathlib import Path
-import typing
 from typing import overload
-
 
 import cv2
 import numpy as np
@@ -38,7 +37,7 @@ def default_loader(
     exts = (".png", ".jpg", ".jpeg", ".bmp")
     for key in range(len(label_map)):
         class_dir_path = data_path / label_map[key]
-        img_paths: list[Path] = [path for path in class_dir_path.rglob('*') if path.suffix.lower() in exts]
+        img_paths: list[Path] = [path for path in class_dir_path.rglob("*") if path.suffix.lower() in exts]
         for i, img_path in enumerate(img_paths, start=1):
             if verbose:
                 clean_print(
@@ -95,6 +94,7 @@ def default_load_data(
 if __name__ == "__main__":
     def _test_fn():
         from argparse import ArgumentParser
+
         from classification.torch_utils.utils.imgs_misc import show_img
         parser = ArgumentParser(description=("Script to test the loading function. "
                                              "Run with 'python -m classification.dataset.default_loader <path>'"))
