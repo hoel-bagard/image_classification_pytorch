@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 import argparse
-from collections.abc import Callable
-from functools import partial
 import sys
 import time
 import traceback
+import typing
+from collections.abc import Callable
+from functools import partial
 from pathlib import Path
 from typing import Literal
-import typing
 
 import albumentations
 import cv2
@@ -30,7 +30,7 @@ from classification.torch_utils.utils.torch_summary import summary
 from classification.torch_utils.utils.trainer import Trainer
 from classification.utils.classification_metrics import ClassificationMetrics
 from classification.utils.classification_tensorboard import ClassificationTensorBoard
-from classification.utils.type_aliases import ImgArray, ImgRaw, ImgStandardized
+from classification.utils.type_aliases import ImgRaw, ImgStandardized
 
 
 def main() -> None:  # noqa: C901, PLR0915
@@ -83,13 +83,6 @@ def main() -> None:  # noqa: C901, PLR0915
     # Makes training quite a bit faster
     torch.backends.cudnn.benchmark = True
 
-    preprocessing_pipeline = typing.cast(Callable[[ImgRaw], ImgStandardized], transforms.albumentation_img_wrapper(albumentations.Compose(
-        [
-            albumentations.Normalize(mean=train_config.IMG_MEAN, std=train_config.IMG_STD, p=1.0),
-            albumentations.Resize(*train_config.IMAGE_SIZES, interpolation=cv2.INTER_LINEAR),
-        ]
-    )))
-
     train_data, train_labels = data_loader(train_data_path, train_config.LABEL_MAP, limit=limit)
     logger.info("Train data loaded")
     val_data, val_labels = data_loader(val_data_path, train_config.LABEL_MAP, limit=limit, shuffle=True)
@@ -118,8 +111,13 @@ def main() -> None:  # noqa: C901, PLR0915
         )
     )
 
+    resize_fn = typing.cast(Callable[[ImgRaw], ImgStandardized], partial(cv2.resize, dsize=train_config.IMAGE_SIZES, interpolation=cv2.INTER_LINEAR))
     denormalize_imgs_fn = transforms.destandardize_img(train_config.IMG_MEAN, train_config.IMG_STD)
-    load_data_fn = partial(default_load_data, preprocessing_pipeline=preprocessing_pipeline)
+    load_data_fn = partial(default_load_data, preprocessing_pipeline=resize_fn)
+    common_pipeline = transforms.albumentation_batch_wrapper(
+        albumentations.Normalize(mean=train_config.IMG_MEAN, std=train_config.IMG_STD, p=1.0),
+    )
+    train_pipeline = transforms.compose_transformations((augmentation_pipeline, common_pipeline))
 
     with BatchGenerator(
         train_data,
@@ -127,8 +125,8 @@ def main() -> None:  # noqa: C901, PLR0915
         train_config.BATCH_SIZE,
         nb_workers=train_config.NB_WORKERS,
         data_preprocessing_fn=load_data_fn,
-        cpu_pipeline=augmentation_pipeline,
-        gpu_pipeline=transforms.to_tensor(),
+        cpu_pipeline=train_pipeline,  # pyright: ignore[reportArgumentType]
+        gpu_pipeline=transforms.to_tensor(),  # pyright: ignore[reportArgumentType]
         shuffle=True,
     ) as train_dataloader, BatchGenerator(
         val_data,
@@ -136,8 +134,8 @@ def main() -> None:  # noqa: C901, PLR0915
         train_config.BATCH_SIZE,
         nb_workers=train_config.NB_WORKERS,
         data_preprocessing_fn=load_data_fn,
-        cpu_pipeline=None,
-        gpu_pipeline=transforms.to_tensor(),
+        cpu_pipeline=common_pipeline,  # pyright: ignore[reportArgumentType]
+        gpu_pipeline=transforms.to_tensor(),  # pyright: ignore[reportArgumentType]
         shuffle=False,
     ) as val_dataloader:
         print(f"\nLoaded {len(train_dataloader)} train data and", f"{len(val_dataloader)} validation data", flush=True)
@@ -181,6 +179,8 @@ def main() -> None:  # noqa: C901, PLR0915
                 metrics,
                 denormalize_imgs_fn,
             )
+        else:
+            metrics, tensorboard = None, None
 
         best_loss = 1000
         last_checkpoint_epoch = 0
@@ -193,9 +193,9 @@ def main() -> None:  # noqa: C901, PLR0915
                 print()  # logger doesn't handle \n super well
                 logger.info(f"Epoch {epoch}/{train_config.MAX_EPOCHS}")
 
-                epoch_loss = trainer.train_epoch()
+                epoch_loss = typing.cast(float, trainer.train_epoch())
 
-                if record_config.USE_TB:
+                if tensorboard is not None:
                     tensorboard.write_loss(epoch, epoch_loss)
                     tensorboard.write_lr(epoch, scheduler.get_last_lr()[0])
 
@@ -216,13 +216,13 @@ def main() -> None:  # noqa: C901, PLR0915
 
                 # Validation and other metrics
                 if epoch % record_config.VAL_FREQ == 0 and epoch >= record_config.RECORD_START:
-                    if record_config.USE_TB:
+                    if tensorboard is not None:
                         tensorboard.write_weights_grad(epoch)
                     with torch.no_grad():
                         validation_start_time = time.perf_counter()
-                        val_epoch_loss = trainer.val_epoch()
+                        val_epoch_loss = typing.cast(float, trainer.val_epoch())
 
-                        if record_config.USE_TB:
+                        if tensorboard is not None and metrics is not None:
                             print("Starting to compute TensorBoard metrics", end="\r", flush=True)
                             tensorboard.write_loss(epoch, val_epoch_loss, mode="Validation")
 
@@ -249,7 +249,7 @@ def main() -> None:  # noqa: C901, PLR0915
             logger.exception("".join(traceback.format_exception(*sys.exc_info())))
             raise
 
-    if record_config.USE_TB:
+    if tensorboard is not None:
         metrics = {
             "Z - Final Results/Train loss": float(epoch_loss),
             "Z - Final Results/Validation loss": float(val_epoch_loss),
