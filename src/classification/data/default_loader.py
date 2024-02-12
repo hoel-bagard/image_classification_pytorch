@@ -60,7 +60,7 @@ def default_loader(
 
 
 @overload
-def default_load_data(data: Path | Iterable[Path], preprocessing_pipeline: None) -> ImgRaw:
+def default_load_data(data: Path | Iterable[Path], preprocessing_pipeline: None = None) -> ImgRaw:
     ...
 
 @overload
