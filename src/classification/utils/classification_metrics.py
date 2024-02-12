@@ -39,7 +39,7 @@ class ClassificationMetrics(Metrics):
         """
         super().__init__(model, train_dataloader, val_dataloader, max_batches)
 
-        self.cm: np.ndarray  # Confusion Matrix
+        self.cm: npt.NDArray[np.uint32]  # Confusion Matrix
         self.label_map = label_map
         self.nb_output_classes = len(label_map)
 
@@ -50,11 +50,11 @@ class ClassificationMetrics(Metrics):
             mode: Either "Train" or "Validation"
 
         """
-        self.cm = np.zeros((self.nb_output_classes, self.nb_output_classes))
+        self.cm = np.zeros((self.nb_output_classes, self.nb_output_classes), dtype=np.uint32)
         dataloader = self.train_dataloader if mode == "Train" else self.val_dataloader
         for step, batch in enumerate(dataloader, start=1):
-            data_batch, labels_batch = batch[0].float(), batch[1]
-            predictions_batch = self.model(data_batch.to(self.device))
+            data_batch, labels_batch = batch[0], batch[1]
+            predictions_batch = self.model(data_batch)
 
             predictions_batch = torch.argmax(predictions_batch, dim=-1).int().cpu().detach().numpy()
             for label, pred in zip(labels_batch, predictions_batch):
