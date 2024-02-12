@@ -116,10 +116,23 @@ You'll need to modify a few values in `config/model_config.py` in the next step 
 </details>
 
 ## Train
-Once you have the environment all set up and your two config files ready, training an AI is straightforward. Just run the following command: 
+Once you have the environment all set up and your two config files ready, training an AI is straightforward.
+```console
+classification-train \
+    --train_data_path <path to train dataset> \
+    --val_data_path <path to val dataset> \
+    --classes_names_path <path to classes.names file>
 ```
-CUDA_VISIBLE_DEVICES=0 python train.py
+
+<details>
+  <summary>Imagenette example</summary>
+```console
+classification-train \
+    --train_data_path data/imagenette2/train/ \
+    --val_data_path data/imagenette2/val/ \
+    --classes_names_path data/imagenette2/classes.names
 ```
+</details>
 
 ### Results
 
