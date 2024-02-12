@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import argparse
+from collections.abc import Callable
+from functools import partial
 import sys
 import time
 import traceback
 from pathlib import Path
 from typing import Literal
+import typing
 
 import albumentations
 import cv2
@@ -27,6 +30,7 @@ from classification.torch_utils.utils.torch_summary import summary
 from classification.torch_utils.utils.trainer import Trainer
 from classification.utils.classification_metrics import ClassificationMetrics
 from classification.utils.classification_tensorboard import ClassificationTensorBoard
+from classification.utils.type_aliases import ImgArray, ImgRaw, ImgStandardized
 
 
 def main() -> None:  # noqa: C901, PLR0915
@@ -79,13 +83,20 @@ def main() -> None:  # noqa: C901, PLR0915
     # Makes training quite a bit faster
     torch.backends.cudnn.benchmark = True
 
+    preprocessing_pipeline = typing.cast(Callable[[ImgRaw], ImgStandardized], transforms.albumentation_img_wrapper(albumentations.Compose(
+        [
+            albumentations.Normalize(mean=train_config.IMG_MEAN, std=train_config.IMG_STD, p=1.0),
+            albumentations.Resize(*train_config.IMAGE_SIZES, interpolation=cv2.INTER_LINEAR),
+        ]
+    )))
+
     train_data, train_labels = data_loader(train_data_path, train_config.LABEL_MAP, limit=limit)
     logger.info("Train data loaded")
     val_data, val_labels = data_loader(val_data_path, train_config.LABEL_MAP, limit=limit)
     logger.info("Validation data loaded")
 
     # Data augmentation done on cpu.
-    augmentation_pipeline = transforms.albumentation_wrapper(
+    augmentation_pipeline = transforms.albumentation_batch_wrapper(
         albumentations.Compose(
             [
                 albumentations.HorizontalFlip(p=0.5),
@@ -97,30 +108,21 @@ def main() -> None:  # noqa: C901, PLR0915
                 # albumentations.GaussNoise(),
                 albumentations.RandomBrightnessContrast(brightness_limit=0.3, contrast_limit=0.3, p=0.5),
                 albumentations.HueSaturationValue(hue_shift_limit=30, sat_shift_limit=45, val_shift_limit=30, p=0.5),
-                # albumentations.ImageCompression(),
+                albumentations.ImageCompression(),
             ]
         )
     )
-    common_pipeline = transforms.albumentation_wrapper(
-        albumentations.Compose(
-            [
-                albumentations.Normalize(mean=train_config.IMG_MEAN, std=train_config.IMG_STD, p=1.0),
-                albumentations.Resize(*train_config.IMAGE_SIZES, interpolation=cv2.INTER_LINEAR),
-            ]
-        )
-    )
-
-    train_pipeline = transforms.compose_transformations((augmentation_pipeline, common_pipeline))
 
     denormalize_imgs_fn = transforms.destandardize_img(train_config.IMG_MEAN, train_config.IMG_STD)
+    load_data_fn = partial(default_load_data, preprocessing_pipeline=preprocessing_pipeline)
 
     with BatchGenerator(
         train_data,
         train_labels,
         train_config.BATCH_SIZE,
         nb_workers=train_config.NB_WORKERS,
-        data_preprocessing_fn=default_load_data,
-        cpu_pipeline=train_pipeline,
+        data_preprocessing_fn=load_data_fn,
+        cpu_pipeline=augmentation_pipeline,
         gpu_pipeline=transforms.to_tensor(),
         shuffle=True,
     ) as train_dataloader, BatchGenerator(
@@ -128,8 +130,8 @@ def main() -> None:  # noqa: C901, PLR0915
         val_labels,
         train_config.BATCH_SIZE,
         nb_workers=train_config.NB_WORKERS,
-        data_preprocessing_fn=default_load_data,
-        cpu_pipeline=common_pipeline,
+        data_preprocessing_fn=load_data_fn,
+        cpu_pipeline=None,
         gpu_pipeline=transforms.to_tensor(),
         shuffle=False,
     ) as val_dataloader:
