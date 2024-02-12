@@ -3,12 +3,8 @@
 See https://github.com/fastai/imagenette for more information on imagenette.
 """
 import argparse
-import pickle
 import shutil
 from pathlib import Path
-
-import cv2
-import numpy as np
 
 
 def main() -> None:
@@ -46,7 +42,7 @@ def main() -> None:
     with (data_path / "classes.names").open("w", encoding="utf-8") as classes_file:
         classes_file.write("\n".join(class_map.values()))
 
-    print(f"Finished.")
+    print("Finished.")
 
 
 if __name__ == "__main__":
