@@ -9,7 +9,7 @@ import numpy as np
 import numpy.typing as npt
 
 from classification.torch_utils.utils.misc import clean_print
-from classification.utils.type_aliases import ImgArray, ImgArrayT, ImgRaw
+from classification.utils.type_aliases import ImgArrayT, ImgRaw
 
 if typing.TYPE_CHECKING:
     from collections.abc import Callable, Iterable
@@ -19,10 +19,11 @@ def default_loader(
     data_path: Path,
     label_map: dict[int, str],
     limit: int | None = None,
-    shuffle: bool = False,
+    shuffle_rng: np.random.Generator | None = None,
+    *,
     verbose: bool = True
 ) -> tuple[npt.NDArray[np.object_], npt.NDArray[np.int64]]:
-    """Default loading function for image classification.
+    """Load datasets where the class is given by the parent folder.
 
     The data folder is expected to contain subfolders for each class, with the images inside.
 
@@ -30,7 +31,7 @@ def default_loader(
         data_path: Path to the root folder of the dataset.
         label_map: dictionarry mapping an int to a class
         limit: If given then the number of elements for each class in the dataset will be capped to this number.
-        shuffle: If True then the data is shuffled once before being returned
+        shuffle_rng: If given, then the data is shuffled once using this generator before being returned.
         verbose: Verbose mode, print loading progress.
 
     Return:
@@ -48,15 +49,15 @@ def default_loader(
                     f"Processing image {img_path.name}    ({i}/{len(img_paths)}) for class {label_map[key]}",
                     end="\r" if (i != len(img_paths) and i != limit) else "\n",
                 )
-            data = np.append(data, img_path)  # type: ignore
+            data = np.append(data, img_path)  # type: ignore[reportGeneralTypeIssues]
             labels = np.append(labels, key)
             if limit and i >= limit:
                 break
 
     data, labels = np.asarray(data), np.asarray(labels)
-    if shuffle:
+    if shuffle_rng is not None:
         index_list = np.arange(len(labels), dtype=np.int64)
-        np.random.shuffle(index_list)
+        shuffle_rng.shuffle(index_list)
         data, labels, = data[index_list], labels[index_list]
 
     return data, labels
@@ -74,10 +75,11 @@ def default_load_data(
     data: Path | Iterable[Path],
     preprocessing_pipeline: Callable[[ImgRaw], ImgArrayT] | None = None,
 ) -> ImgRaw | ImgArrayT:
-    """Function that loads image(s) from path(s).
+    """Load image(s) from path(s).
 
     Args:
         data: either an image path or a batch of image paths, and return the loaded image(s)
+        preprocessing_pipeline: Function used to load/pre-process the images.
 
     Returns:
         Image or batch of image
@@ -89,10 +91,11 @@ def default_load_data(
             img = preprocessing_pipeline(img)
         return img
     else:
-        imgs: list[ImgArray] = []
-        for image_path in data:
-            imgs.append(default_load_data(image_path, preprocessing_pipeline))
-        return np.asarray(imgs)
+        imgs = np.asarray(
+            default_load_data(image_path, preprocessing_pipeline)
+            for image_path in data
+        )
+        return imgs
 
 
 if __name__ == "__main__":
@@ -108,7 +111,7 @@ if __name__ == "__main__":
         data_path: Path = args.data_path
 
         label_map: dict[int, str] = {}
-        with open(data_path.parent / "classes.names") as text_file:
+        with (data_path.parent / "classes.names").open("r") as text_file:
             for key, line in enumerate(text_file):
                 label_map[key] = line.strip()
 

@@ -27,7 +27,7 @@ if typing.TYPE_CHECKING:
 
 
 def albumentation_img_wrapper(transform: albumentations.Compose) -> Callable[[ImgArray], ImgArray]:
-    """Returns a function that applies the albumentations transforms to an image.
+    """Return a function that applies the albumentations transforms to an image.
 
     This is done to make the function more general, since albumentation is keyword argument only.
     """
@@ -36,9 +36,10 @@ def albumentation_img_wrapper(transform: albumentations.Compose) -> Callable[[Im
     return albumentation_transform_fn
 
 
-def albumentation_batch_wrapper(transform: albumentations.Compose | albumentations.ImageOnlyTransform) -> Callable[[ImgArray, LabelArray],
-                                                                         tuple[ImgArray, LabelArray]]:
-    """Returns a function that applies the albumentations transforms to a batch."""
+def albumentation_batch_wrapper(
+    transform: albumentations.Compose | albumentations.ImageOnlyTransform) -> Callable[[ImgArray, LabelArray],
+                                                                                       tuple[ImgArray, LabelArray]]:
+    """Return a function that applies the albumentations transforms to a batch."""
     def albumentation_transform_fn(imgs: ImgArray, labels: LabelArray) -> tuple[ImgArray, LabelArray]:
         """Apply transformations on a batch of data."""
         out_sizes = transform(image=imgs[0])["image"].shape
@@ -51,9 +52,10 @@ def albumentation_batch_wrapper(transform: albumentations.Compose | albumentatio
 
 
 def compose_transformations(
-    transformations: Iterable[Callable[[ImgArray, LabelArray], tuple[ImgArray, LabelArray]]]):
-    """Returns a function that applies all the given transformations."""
-    def compose_transformations_fn(imgs: ImgArray, labels: LabelArray):
+    transformations: Iterable[Callable[[ImgArray, LabelArray], tuple[ImgArray, LabelArray]]]
+) -> Callable[[ImgArray, LabelArray], tuple[ImgArray, LabelArray]]:
+    """Return a function that applies all the given transformations."""
+    def compose_transformations_fn(imgs: ImgArray, labels: LabelArray) -> tuple[ImgArray, LabelArray]:
         """Apply transformations on a batch of data."""
         for fn in transformations:
             imgs, labels = fn(imgs, labels)
@@ -61,7 +63,7 @@ def compose_transformations(
     return compose_transformations_fn
 
 
-def to_tensor():
+def to_tensor() -> Callable[[ImgArray, npt.NDArray[LabelDtype]], tuple[torch.Tensor, torch.Tensor]]:
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     def to_tensor_fn(imgs: ImgArray, labels: npt.NDArray[LabelDtype]) -> tuple[torch.Tensor, torch.Tensor]:
@@ -71,7 +73,7 @@ def to_tensor():
         # torch image: C X H X W
 
         imgs = imgs.transpose((0, 3, 1, 2))
-        return torch.from_numpy(imgs).float().to(device), torch.from_numpy(labels).to(device)  # TODO: remove float
+        return torch.from_numpy(imgs).float().to(device), torch.from_numpy(labels).to(device)
     return to_tensor_fn
 
 
@@ -97,7 +99,7 @@ def destandardize_img(
     std_tensor = torch.Tensor(img_std).to(device)
 
     @singledispatch
-    def destandardize_fn(imgs) -> typing.NoReturn:
+    def destandardize_fn(imgs) -> typing.NoReturn:  #   noqa: ANN001 pyright: ignore
         # TODO: 3.11 | Use typing.Never if switching to 3.11
         msg = f"Wrong data type: {type(imgs)}"
         raise NotImplementedError(msg)

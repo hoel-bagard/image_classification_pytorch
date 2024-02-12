@@ -111,7 +111,10 @@ def main() -> None:  # noqa: C901, PLR0915
         )
     )
 
-    resize_fn = typing.cast(Callable[[ImgRaw], ImgStandardized], partial(cv2.resize, dsize=train_config.IMAGE_SIZES, interpolation=cv2.INTER_LINEAR))
+    resize_fn = typing.cast(
+        Callable[[ImgRaw], ImgStandardized],
+        partial(cv2.resize, dsize=train_config.IMAGE_SIZES, interpolation=cv2.INTER_LINEAR)
+    )
     denormalize_imgs_fn = transforms.destandardize_img(train_config.IMG_MEAN, train_config.IMG_STD)
     load_data_fn = partial(default_load_data, preprocessing_pipeline=resize_fn)
     common_pipeline = transforms.albumentation_batch_wrapper(

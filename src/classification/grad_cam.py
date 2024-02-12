@@ -39,7 +39,7 @@ def main() -> None:
         train_config.NB_CLASSES,
         model_path=args.model_path,
         eval=True,
-        **get_config_as_dict(ModelConfig),
+        **get_config_as_dict(TrainConfig),
     )
     print("Weights loaded", flush=True)
 

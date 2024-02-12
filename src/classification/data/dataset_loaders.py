@@ -10,29 +10,30 @@ from classification.torch_utils.utils.misc import clean_print
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from classification.utils.type_aliases import ImgRaw
+
 
 def name_loader(
     data_path: Path,
     label_map: dict[int, str],
     limit: int | None = None,
-    load_data: bool = False,
-    data_preprocessing_fn: Callable[[Path], np.ndarray] | None = None,
+    *,
+    data_preprocessing_fn: Callable[[Path], ImgRaw] | None = None,
     return_img_paths: bool = False,
-    shuffle: bool = False,
-) -> (tuple[npt.NDArray[np.uint8], npt.NDArray[Path], list[Path]]
-      | tuple[npt.NDArray[np.uint8], npt.NDArray[Path]]):
-    """Loading function for datasets where the class is in the name of the file.
+    shuffle_rng: np.random.Generator | None = None,
+) -> (tuple[npt.NDArray[np.uint8], npt.NDArray[np.object_], list[Path]]
+      | tuple[npt.NDArray[np.uint8], npt.NDArray[np.object_]]):
+    """Load datasets where the class is in the name of the file.
 
     Args:
-        data_path (Path): Path to the root folder of the dataset.
-        label_map (dict): dictionarry mapping an int to a class
-        limit (int, optional): If given then the number of elements for each class in the dataset
-                               will be capped to this number
-        load_data (bool): If true then this function returns the images already loaded instead of their paths.
-                          The images are loaded using the preprocessing functions (they must be provided)
-        data_preprocessing_fn (callable, optional): Function used to load data (imgs) from their paths.
+        data_path: Path to the root folder of the dataset.
+        label_map: dictionarry mapping an int to a class
+        limit: If given then the number of elements for each class in the dataset
+               will be capped to this number
+        data_preprocessing_fn: If given, then this function returns the images already loaded instead of their paths.
+                               The images are loaded using this preprocessing function.
         return_img_paths: If true, then the image paths will also be returned.
-        shuffle: If true then the data is shuffled once before being returned
+        shuffle_rng: If given, then the data is shuffled once using this generator before being returned.
 
     Return:
         numpy array containing the images' paths and the associated label or the loaded data
@@ -49,7 +50,7 @@ def name_loader(
 
         for i, image_path in enumerate(image_paths, start=1):
             clean_print(f"Loading data {image_path}    ({i}/{len(image_paths)}) for class label_map[key]", end="\r")
-            if load_data:
+            if data_preprocessing_fn is not None:
                 data.append(data_preprocessing_fn(image_path))
             else:
                 data.append(image_path)
@@ -58,9 +59,9 @@ def name_loader(
                 break
 
     data, labels, image_paths = np.asarray(data), np.asarray(labels), np.asarray(image_paths, dtype=object)
-    if shuffle:
+    if shuffle_rng is not None:
         index_list = np.arange(len(labels))
-        np.random.shuffle(index_list)
+        shuffle_rng.shuffle(index_list)
         data, labels, = data[index_list], labels[index_list]
         if return_img_paths:
             all_paths = all_paths[index_list]
