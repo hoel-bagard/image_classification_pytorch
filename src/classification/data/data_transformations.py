@@ -1,39 +1,46 @@
 """Data augmentation module using albumentations."""
 from functools import singledispatch
 from pathlib import Path
-from typing import Callable
+from typing import Any, Callable
+import typing
 
 import albumentations
 import numpy as np
+import numpy.typing as npt
 import torch
 from einops import rearrange
 
-NumpyOrTensor = np.ndarray | torch.Tensor
+from classification.utils.type_aliases import ImgArray, ArrayOrTensor, LabelArray, LabelDtype, ImgRaw, ImgStandardized, StandardizedImgDType
+
+def albumentation_img_wrapper(transform: albumentations.Compose) -> Callable[[ImgArray], ImgArray]:
+    """Returns a function that applies the albumentations transforms to an image.
+
+    This is done to make the function more general, since albumentation is keyword argument only.
+    """
+    def albumentation_transform_fn(img: ImgArray) -> ImgArray:
+        return transform(image=img)["image"]
+    return albumentation_transform_fn
 
 
-def albumentation_wrapper(transform: albumentations.Compose) -> Callable[[np.ndarray, np.ndarray],
-                                                                         tuple[np.ndarray, np.ndarray]]:
+def albumentation_batch_wrapper(transform: albumentations.Compose) -> Callable[[ImgArray, LabelArray],
+                                                                         tuple[ImgArray, LabelArray]]:
     """Returns a function that applies the albumentations transforms to a batch."""
-    def albumentation_transform_fn(imgs: np.ndarray, labels: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    def albumentation_transform_fn(imgs: ImgArray, labels: LabelArray) -> tuple[ImgArray, LabelArray]:
         """Apply transformations on a batch of data."""
-        out_sizes = transform(image=imgs[0, ..., :3])["image"].shape[:2]
-        out_imgs = np.empty((imgs.shape[0], *out_sizes, imgs.shape[-1]), dtype=np.float32)
+        out_sizes = transform(image=imgs[0])["image"].shape
+        out_imgs = np.empty((imgs.shape[0], *out_sizes), dtype=StandardizedImgDType)
         for i, img in enumerate(imgs):
-            # The depth map is treated as a mask (kept for the resize operation).
-            if img.shape[-1] == 4:
-                transformed = transform(image=img[..., :3], mask=img[..., 3:])
-                out_imgs[i] = np.concatenate((transformed["image"], transformed["mask"]), axis=-1)
-            else:
-                transformed = transform(image=img)
-                out_imgs[i] = transformed["image"]
+            transformed = transform(image=img)
+            out_imgs[i] = transformed["image"]
         return out_imgs, labels
     return albumentation_transform_fn
 
 
-def compose_transformations(transformations: list[Callable[[NumpyOrTensor, NumpyOrTensor],
-                                                           tuple[NumpyOrTensor, NumpyOrTensor]]]):
+def compose_transformations(
+    transformations: list[Callable[[ArrayOrTensor, ArrayOrTensor],
+                                   tuple[ArrayOrTensor, ArrayOrTensor]]]):
     """Returns a function that applies all the given transformations."""
-    def compose_transformations_fn(imgs: NumpyOrTensor, labels: NumpyOrTensor):
+    def compose_transformations_fn(imgs: ArrayOrTensor, labels: ArrayOrTensor):
         """Apply transformations on a batch of data."""
         for fn in transformations:
             imgs, labels = fn(imgs, labels)
@@ -44,7 +51,7 @@ def compose_transformations(transformations: list[Callable[[NumpyOrTensor, Numpy
 def to_tensor():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    def to_tensor_fn(imgs: np.ndarray, labels: np.ndarray) -> tuple[torch.Tensor, torch.Tensor]:
+    def to_tensor_fn(imgs: ImgArray, labels: npt.NDArray[LabelDtype]) -> tuple[torch.Tensor, torch.Tensor]:
         """Convert ndarrays in sample to Tensors."""
         # swap color axis because
         # numpy image: H x W x C
@@ -55,23 +62,24 @@ def to_tensor():
     return to_tensor_fn
 
 
-def destandardize_img(img_mean: tuple[float, float, float],
-                      img_std: tuple[float, float, float],
-                      ) -> Callable[[NumpyOrTensor, NumpyOrTensor], np.ndarray]:
+def destandardize_img(
+    img_mean: tuple[float, float, float],
+    img_std: tuple[float, float, float],
+) -> Callable[[ArrayOrTensor, ArrayOrTensor], ImgRaw]:
     """Create a function to undo the standardization process on a batch of images.
 
     Notes: The singe dispatch thing is because I was bored and mypy was complaining when using an if isinstance().
 
     Args:
-        img_mean (tuple): The mean values that were used to standardize the image.
-        img_std (tuple): The std values that were used to standardize the image.
+        img_mean: The mean values that were used to standardize the image.
+        img_std: The std values that were used to standardize the image.
 
     Returns:
         The function to destandardize a batch of images.
     """
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    mean_array = np.asarray(img_mean)
-    std_array = np.asarray(img_std)
+    mean_array = np.asarray(img_mean, dtype=StandardizedImgDType)
+    std_array = np.asarray(img_std, dtype=StandardizedImgDType)
     mean_tensor = torch.Tensor(img_mean).to(device)
     std_tensor = torch.Tensor(img_std).to(device)
 
@@ -80,17 +88,17 @@ def destandardize_img(img_mean: tuple[float, float, float],
         raise NotImplementedError(f"Wrong data type: {type(imgs)}")
 
     @destandardize_fn.register
-    def denormalize_numpy(imgs: np.ndarray) -> np.ndarray:
-        imgs = (imgs * std_array + mean_array) * 255
-        imgs = imgs.astype(np.uint8)
+    def destandardize_numpy(imgs: np.ndarray) -> ImgRaw:  # pyright: ignore[reportMissingTypeArgument]
+        imgs = typing.cast(ImgStandardized, imgs)
+        imgs = ((imgs * std_array + mean_array) * 255.0).astype(np.uint8)
         return imgs
 
     @destandardize_fn.register
-    def denormalize_tensors(imgs: torch.Tensor) -> np.ndarray:
+    def destandardize_tensors(imgs: torch.Tensor) -> ImgRaw:
         # Destandardize the images
         imgs = rearrange(imgs, "b c w h -> b w h c")
         imgs = (imgs * std_tensor + mean_tensor) * 255
-        imgs = imgs.cpu().detach().numpy().astype(np.uint8)
-        return imgs
+        destandardized_imgs = imgs.cpu().detach().numpy().astype(np.uint8)
+        return destandardized_imgs
 
     return destandardize_fn
