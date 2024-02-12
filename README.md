@@ -8,7 +8,7 @@
 ### Install
 If simply using the package on cpu:
 ```console
-poetry install
+poetry install --with cpu
 ```
 
 If developing you can add any of the following options:

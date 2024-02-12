@@ -10,7 +10,7 @@ readme = "README.md"
 
 [tool.poetry.scripts]
 classification-train = "classification.train:main"
-classification-inference = "classification.inference:main"
+classification-test = "classification.test:main"
 classification-gradcam = "classification.grad_cam:main"
 
 [tool.poetry.dependencies]
@@ -24,6 +24,10 @@ tensorboard = "^2.15.1"
 timm = "^0.9.12"
 hbtools = "^0.4.0"
 matplotlib = "^3.8.2"
+
+[tool.poetry.group.cpu]
+optional = true
+[tool.poetry.group.cpu.dependencies]
 torch = {version = "^2.1.2", source = "torch-cpu", markers = "extra!='cuda'" }
 
 [tool.poetry.group.gpu]
