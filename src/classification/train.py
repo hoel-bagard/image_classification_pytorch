@@ -13,9 +13,9 @@ from typing import Literal
 
 import albumentations
 import cv2
+import numpy as np
 import torch
 from hbtools import create_logger
-import numpy as np
 from torch import nn
 from torch.optim.lr_scheduler import CosineAnnealingLR
 
@@ -127,12 +127,12 @@ def main() -> None:  # noqa: C901, PLR0915
     load_data_fn = partial(default_load_data, preprocessing_pipeline=resize_fn)
     common_pipeline = transforms.albumentation_batch_wrapper(
         albumentations.Normalize(mean=train_config.IMG_MEAN, std=train_config.IMG_STD, p=1.0),
-    )
+    )  # TODO: Do the normalization on GPU.
     train_pipeline = transforms.compose_transformations((augmentation_pipeline, common_pipeline))
 
     with BatchGenerator(
         train_data,
-        train_labels,
+        train_labels,  # pyright: ignore[reportArgumentType]
         train_config.BATCH_SIZE,
         nb_workers=train_config.NB_WORKERS,
         data_preprocessing_fn=load_data_fn,
@@ -141,7 +141,7 @@ def main() -> None:  # noqa: C901, PLR0915
         shuffle=True,
     ) as train_dataloader, BatchGenerator(
         val_data,
-        val_labels,
+        val_labels,  # pyright: ignore[reportArgumentType]
         train_config.BATCH_SIZE,
         nb_workers=train_config.NB_WORKERS,
         data_preprocessing_fn=load_data_fn,

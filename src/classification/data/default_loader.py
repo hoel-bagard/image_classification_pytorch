@@ -9,7 +9,7 @@ import numpy as np
 import numpy.typing as npt
 
 from classification.torch_utils.utils.misc import clean_print
-from classification.utils.type_aliases import ImgArrayT, ImgRaw
+from classification.utils.type_aliases import ImgArrayT, ImgRaw, LabelArray, LabelDtype
 
 if typing.TYPE_CHECKING:
     from collections.abc import Callable, Iterable
@@ -22,7 +22,7 @@ def default_loader(
     shuffle_rng: np.random.Generator | None = None,
     *,
     verbose: bool = True
-) -> tuple[npt.NDArray[np.object_], npt.NDArray[np.int64]]:
+) -> tuple[npt.NDArray[np.object_], LabelArray]:
     """Load datasets where the class is given by the parent folder.
 
     The data folder is expected to contain subfolders for each class, with the images inside.
@@ -37,7 +37,7 @@ def default_loader(
     Return:
         2 numpy arrays, one containing the images' paths and the other containing the labels.
     """
-    labels: npt.NDArray[np.int64] = np.empty(0, dtype=np.int64)
+    labels: LabelArray = np.empty(0, dtype=LabelDtype)
     data: npt.NDArray[np.object_] = np.empty(0, dtype=Path)
     exts = (".png", ".jpg", ".jpeg", ".bmp")
     for key in range(len(label_map)):

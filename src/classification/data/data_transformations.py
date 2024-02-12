@@ -26,7 +26,7 @@ if typing.TYPE_CHECKING:
     import albumentations
 
 
-def albumentation_img_wrapper(transform: albumentations.Compose) -> Callable[[ImgArray], ImgArray]:
+def albumentation_img_wrapper(transform: albumentations.Compose | albumentations.ImageOnlyTransform) -> Callable[[ImgArray], ImgArray]:
     """Return a function that applies the albumentations transforms to an image.
 
     This is done to make the function more general, since albumentation is keyword argument only.

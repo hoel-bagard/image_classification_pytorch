@@ -129,12 +129,14 @@ classification-train \
 
 <details>
   <summary>Imagenette example</summary>
+
 ```console
 classification-train \
     --train_data_path data/imagenette2/train/ \
     --val_data_path data/imagenette2/val/ \
     --classes_names_path data/imagenette2/classes.names
 ```
+
 </details>
 
 ### Results
@@ -143,5 +145,10 @@ The resulting checkpoints can be found in `CHECKPOINTS_DIR` (see the RecordConfi
 The resulting checkpoints can be found in `TB_DIR` (see the RecordConfig).
 
 ## Inference
-
-TODO
+```console
+classification-test \
+    checkpoints/imagenette_resnet32/train_50.pt \
+    data/imagenette2/val \
+    --classes_names_path data/imagenette2/classes.names \
+    --limit 100
+```
