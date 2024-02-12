@@ -90,23 +90,26 @@ cp config/data_config_template.py config/data_config.py
 cp config/model_config_template.py config/model_config.py
 ```
 
-### DataConfig
-Contains most of the parameters regarding the data. Most of the values in the template can be kept as they are. The 3 paths usually need to be modified for each training (`DATA_PATH`, `CHECKPOINT_DIR` & `TB_DIR`). 
+### RecordConfig
+Contains config for recording TensorBoard and checkpoints. You probably just want to modify `_training_name`.
 
-### ModelConfig
+### TrainConfig
 Contains the parameters that influence training. Most default values should work okayish, but you'll need to modify a few:
-- `MAX_EPOCHS`: usually around 400 or 600 epochs is enough, you will need to train at least once to get an idea for your particular dataset.
+- `MAX_EPOCHS`: usually around 400 epochs is enough, you will need to train at least once to get an idea for your particular dataset.
 - `IMG_MEAN` and `IMG_STD`: The defaults are the imagenet ones. You can keep them as long as they are not too different from the actual ones (especially if using a pretrained model).
 
 <details>
-  <summary>Cifar-10 example</summary>
+  <summary>Imagenette example</summary>
+The default, gitted config should give decent-ish (~85% val acc) result.
+</details>
 
-Note:
-You'll need to modify a few values in `config/model_config.py` in the next step since cifar10's images are small.
+
+<details>
+  <summary>Cifar-10 example</summary>
+If training on Cifar-10, you'll need to modify the model in the config `src/classfication/configs/train_config.py` since cifar10's images are small.
+You'll also need to remove/modify the resize hardcoded in `src/classfication/train.py`.
 ```python
-    CROP_IMAGE_SIZES: tuple[int, int] = (32, 32)  # Center crop
-    RESIZE_IMAGE_SIZES: tuple[int, int] = (32, 32)  # All images will be resized to this size
-...
+    MODEL: ModelHelper = ModelHelper.SmallDarknet
     CHANNELS: list[int] = field(default_factory=lambda: [3, 16, 32, 16])
     SIZES: list[int | tuple[int, int]] = field(default_factory=lambda: [3, 3, 3])   # Kernel sizes
     STRIDES: list[int | tuple[int, int]] = field(default_factory=lambda: [2, 2, 2])
@@ -136,7 +139,8 @@ classification-train \
 
 ### Results
 
-TODO: TB screenshots
+The resulting checkpoints can be found in `CHECKPOINTS_DIR` (see the RecordConfig).
+The resulting checkpoints can be found in `TB_DIR` (see the RecordConfig).
 
 ## Inference
 

@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 class TrainConfig:
     # Training parameters
     BATCH_SIZE: int = 128
-    MAX_EPOCHS: int = 500
+    MAX_EPOCHS: int = 50
     START_LR: float = 1e-3
     END_LR: float = 5e-6
     WEIGHT_DECAY: float = 1e-2  # Weight decay for the optimizer
