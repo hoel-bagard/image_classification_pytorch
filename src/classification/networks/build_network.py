@@ -1,34 +1,48 @@
 from __future__ import annotations
 
+from enum import Enum
 from typing import Any, TYPE_CHECKING
 
 import timm
 import torch
 
-from .cnn import CNN
-from .small_darknet import SmallDarknet
+from classification.networks import CNN, SmallDarknet
 
 if TYPE_CHECKING:
     from pathlib import Path
 
 
-class ModelHelper:
-    SmallDarknet = SmallDarknet
-    CNN = CNN
+class ModelHelper(str, Enum):
+    """Helper enum given a list of available models (more timm models can be added).
+
+    TODO: Use StrEnum if python version requirements becomes >=3.11
+    """
+
+    SmallDarknet = "small_darknet"
+    CustomCNN = "custom_cnn"
+    # Timm models below
     ConvNeXt = "convnext_small"
+    ConvNeXtV2 = "convnextv2_small"
+    ResNet34 = "resnet34"
+    ResNet50 = "resnet50"
     ResNetv2_50t = "resnetv2_50t"
+    EfficientVIT_M3 = "efficientvit_m3"
     MobileNetv3_small_050 = "mobilenetv3_small_050"
     EfficientNetv2_s = "efficientnetv2_s"
 
+    def __str__(self) -> str:
+        return self.value
+
+
 
 def build_model(
-    model_name: type | str,
+    model_name: ModelHelper,
     nb_classes: int,
     model_path: Path | None = None,
     *,
     use_timm_pretrain: bool = True,
     eval_mode: bool = False,
-    **kwargs: dict[str, Any],  # TODO: Have a typed dict
+    **kwargs: Any,  # TODO: Have a typed dict
 ) -> torch.nn.Module:
     """Instantiate the given model.
 
@@ -43,13 +57,18 @@ def build_model(
     Returns:
         Instantiated PyTorch model
     """
+    # TODO: Take as an argument, do not hardcode.
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    if isinstance(model_name, str):
-        model: torch.nn.Module = timm.create_model(model_name, num_classes=nb_classes, pretrained=use_timm_pretrain)
-    else:
-        kwargs["nb_classes"] = nb_classes
-        model = model_name(**kwargs)
+    match model_name:
+        case ModelHelper.SmallDarknet:
+            kwargs["nb_classes"] = nb_classes
+            model = SmallDarknet(**kwargs)
+        case ModelHelper.CustomCNN:
+            kwargs["nb_classes"] = nb_classes
+            model = CNN(**kwargs)
+        case _:
+            model: torch.nn.Module = timm.create_model(model_name, num_classes=nb_classes, pretrained=use_timm_pretrain)
 
     if model_path is not None:
         model.load_state_dict(torch.load(model_path, map_location=device))

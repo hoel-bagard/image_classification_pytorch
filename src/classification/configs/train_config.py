@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from typing_extensions import Self
 
-from classification.networks.build_network import ModelHelper
+from classification.networks import ModelHelper
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -32,22 +32,13 @@ class TrainConfig:
     LOSS_WEIGTHS: list[float] | None = None  # Weights the classes during the loss
 
     # Network part
-    MODEL: type = ModelHelper.SmallDarknet
+    MODEL: ModelHelper = ModelHelper.ResNet34
     # Parameters for standard CNN-like networks
-    # CHANNELS: list[int] = field(default_factory=lambda: [3, 8, 16, 32, 32, 16])
-    # SIZES: list[int | tuple[int, int]] = field(default_factory=lambda: [5, 3, 3, 3, 3])  # Kernel sizes
-    # STRIDES: list[int | tuple[int, int]] = field(default_factory=lambda: [5, 3, 3, 2, 2])
-    # PADDINGS: list[int | tuple[int, int]] = field(default_factory=lambda: [2, 1, 1, 1, 1])
-    # BLOCKS: list[int] = field(default_factory=lambda: [1, 2, 2, 1, 1])
-
-    # Cifar-10
-    # CROP_IMAGE_SIZES: tuple[int, int] = (32, 32)  # Center crop
-    # RESIZE_IMAGE_SIZES: tuple[int, int] = (32, 32)  # All images will be resized to this size
-    CHANNELS: list[int] = field(default_factory=lambda: [3, 16, 32, 16])
-    SIZES: list[int | tuple[int, int]] = field(default_factory=lambda: [3, 3, 3])  # Kernel sizes
-    STRIDES: list[int | tuple[int, int]] = field(default_factory=lambda: [2, 2, 2])
-    PADDINGS: list[int | tuple[int, int]] = field(default_factory=lambda: [1, 1, 1])
-    BLOCKS: list[int] = field(default_factory=lambda: [1, 2, 1])
+    CHANNELS: list[int] = field(default_factory=lambda: [3, 8, 16, 32, 32, 16])
+    SIZES: list[int | tuple[int, int]] = field(default_factory=lambda: [5, 3, 3, 3, 3])  # Kernel sizes
+    STRIDES: list[int | tuple[int, int]] = field(default_factory=lambda: [5, 3, 3, 2, 2])
+    PADDINGS: list[int | tuple[int, int]] = field(default_factory=lambda: [2, 1, 1, 1, 1])
+    BLOCKS: list[int] = field(default_factory=lambda: [1, 2, 2, 1, 1])
 
     # Number of workers to use for dataloading
     NB_WORKERS: int = field(
