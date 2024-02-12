@@ -92,7 +92,7 @@ def main() -> None:  # noqa: C901, PLR0915
 
     train_data, train_labels = data_loader(train_data_path, train_config.LABEL_MAP, limit=limit)
     logger.info("Train data loaded")
-    val_data, val_labels = data_loader(val_data_path, train_config.LABEL_MAP, limit=limit)
+    val_data, val_labels = data_loader(val_data_path, train_config.LABEL_MAP, limit=limit, shuffle=True)
     logger.info("Validation data loaded")
 
     # Data augmentation done on cpu.
