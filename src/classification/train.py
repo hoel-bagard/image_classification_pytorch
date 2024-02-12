@@ -100,15 +100,20 @@ def main() -> None:  # noqa: C901, PLR0915
         albumentations.Compose(
             [
                 albumentations.HorizontalFlip(p=0.5),
-                albumentations.VerticalFlip(p=0.5),
-                albumentations.RandomRotate90(),
-                albumentations.ShiftScaleRotate(),
+                # albumentations.VerticalFlip(p=0.5),
+                # albumentations.RandomRotate90(),
+                # albumentations.ShiftScaleRotate(),
                 # albumentations.CLAHE(),
                 # albumentations.AdvancedBlur(),
-                # albumentations.GaussNoise(),
-                albumentations.RandomBrightnessContrast(brightness_limit=0.3, contrast_limit=0.3, p=0.5),
-                albumentations.HueSaturationValue(hue_shift_limit=30, sat_shift_limit=45, val_shift_limit=30, p=0.5),
-                albumentations.ImageCompression(),
+                albumentations.Sharpen(p=0.1),
+                albumentations.ImageCompression(p=0.1),
+                albumentations.GaussNoise(var_limit=(10, 50), p=0.1),
+                albumentations.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, p=0.4),
+                albumentations.HueSaturationValue(hue_shift_limit=20, sat_shift_limit=30, val_shift_limit=20, p=0.2),
+                albumentations.CoarseDropout(
+                    max_holes=6, max_height=10, max_width=10,
+                    min_holes=3, min_height=2, min_width=2, p=0.4,
+                ),
             ]
         )
     )
