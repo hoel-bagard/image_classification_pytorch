@@ -6,7 +6,8 @@ from typing import Any, TYPE_CHECKING
 import timm
 import torch
 
-from classification.networks import CNN, SmallDarknet
+from classification.networks.cnn import CNN
+from classification.networks.small_darknet import SmallDarknet
 
 if TYPE_CHECKING:
     from pathlib import Path
