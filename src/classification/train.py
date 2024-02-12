@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import random
 import sys
 import time
 import traceback
@@ -14,6 +15,7 @@ import albumentations
 import cv2
 import torch
 from hbtools import create_logger
+import numpy as np
 from torch import nn
 from torch.optim.lr_scheduler import CosineAnnealingLR
 
@@ -83,9 +85,15 @@ def main() -> None:  # noqa: C901, PLR0915
     # Makes training quite a bit faster
     torch.backends.cudnn.benchmark = True
 
+    # Set random
+    torch.manual_seed(42)
+    random.seed(0)
+    np.random.seed(0)
+    numpy_rng = np.random.default_rng(42)
+
     train_data, train_labels = data_loader(train_data_path, train_config.LABEL_MAP, limit=limit)
     logger.info("Train data loaded")
-    val_data, val_labels = data_loader(val_data_path, train_config.LABEL_MAP, limit=limit, shuffle=True)
+    val_data, val_labels = data_loader(val_data_path, train_config.LABEL_MAP, limit=limit, shuffle_rng=numpy_rng)
     logger.info("Validation data loaded")
 
     # Data augmentation done on cpu.
