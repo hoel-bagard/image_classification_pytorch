@@ -77,6 +77,9 @@ class SmallDarknet(nn.Module):
     def get_weight_and_grads(self) -> OrderedDict[str, tuple[torch.Tensor, torch.Tensor]]:
         weight_grads: OrderedDict[str, tuple[torch.Tensor, torch.Tensor]] = OrderedDict()
         for ind, block in enumerate(self.feature_extractor):
-            weight_grads[f"block_{ind}"] = block.conv.conv.weight, block.conv.conv.weight.grad  # pyright: ignore
+            weight_grads[f"block_{ind}"] = block.conv.conv.weight, block.conv.conv.weight.grad
+
+        if self.dense.weight.grad is None:
+            raise ValueError("No gradients available for the dense layer.")
         weight_grads["dense"] = self.dense.weight, self.dense.weight.grad
         return weight_grads
