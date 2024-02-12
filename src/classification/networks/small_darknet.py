@@ -80,6 +80,7 @@ class SmallDarknet(nn.Module):
             weight_grads[f"block_{ind}"] = block.conv.conv.weight, block.conv.conv.weight.grad
 
         if self.dense.weight.grad is None:
-            raise ValueError("No gradients available for the dense layer.")
+            msg = "No gradients available for the dense layer."
+            raise ValueError(msg)
         weight_grads["dense"] = self.dense.weight, self.dense.weight.grad
         return weight_grads

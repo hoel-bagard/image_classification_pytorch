@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 import typing
-from collections.abc import Callable, Iterable
 from pathlib import Path
 from typing import overload
 
@@ -9,6 +10,9 @@ import numpy.typing as npt
 
 from classification.torch_utils.utils.misc import clean_print
 from classification.utils.type_aliases import ImgArray, ImgArrayT, ImgRaw
+
+if typing.TYPE_CHECKING:
+    from collections.abc import Callable, Iterable
 
 
 def default_loader(
@@ -92,7 +96,7 @@ def default_load_data(
 
 
 if __name__ == "__main__":
-    def _test_fn():
+    def _test_fn() -> None:
         from argparse import ArgumentParser
 
         from classification.torch_utils.utils.imgs_misc import show_img

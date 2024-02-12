@@ -1,10 +1,10 @@
 """Data augmentation module using albumentations."""
+from __future__ import annotations
+
 import typing
-from collections.abc import Iterable
 from functools import singledispatch
 from typing import Callable
 
-import albumentations
 import numpy as np
 import numpy.typing as npt
 import torch
@@ -19,6 +19,11 @@ from classification.utils.type_aliases import (
     LabelDtype,
     StandardizedImgDType,
 )
+
+if typing.TYPE_CHECKING:
+    from collections.abc import Iterable
+
+    import albumentations
 
 
 def albumentation_img_wrapper(transform: albumentations.Compose) -> Callable[[ImgArray], ImgArray]:
@@ -92,8 +97,10 @@ def destandardize_img(
     std_tensor = torch.Tensor(img_std).to(device)
 
     @singledispatch
-    def destandardize_fn(imgs):
-        raise NotImplementedError(f"Wrong data type: {type(imgs)}")
+    def destandardize_fn(imgs) -> typing.NoReturn:
+        # TODO: 3.11 | Use typing.Never if switching to 3.11
+        msg = f"Wrong data type: {type(imgs)}"
+        raise NotImplementedError(msg)
 
     @destandardize_fn.register
     def destandardize_numpy(imgs: np.ndarray) -> ImgRaw:  # pyright: ignore[reportMissingTypeArgument]

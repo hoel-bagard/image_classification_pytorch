@@ -1,18 +1,22 @@
-from pathlib import Path
-from typing import Callable, Optional
+from __future__ import annotations
+
+from typing import Callable, TYPE_CHECKING
 
 import numpy as np
 import numpy.typing as npt
 
 from classification.torch_utils.utils.misc import clean_print
 
+if TYPE_CHECKING:
+    from pathlib import Path
+
 
 def name_loader(
     data_path: Path,
     label_map: dict[int, str],
-    limit: int = None,
+    limit: int | None = None,
     load_data: bool = False,
-    data_preprocessing_fn: Optional[Callable[[Path], np.ndarray]] = None,
+    data_preprocessing_fn: Callable[[Path], np.ndarray] | None = None,
     return_img_paths: bool = False,
     shuffle: bool = False,
 ) -> (tuple[npt.NDArray[np.uint8], npt.NDArray[Path], list[Path]]
@@ -39,7 +43,7 @@ def name_loader(
     labels, data = [], []
     for key in range(len(label_map)):
         exts = [".jpg", ".png"]
-        image_paths = list([p for p in data_path.rglob(f"{label_map[key]}*") if p.suffix in exts])
+        image_paths = [p for p in data_path.rglob(f"{label_map[key]}*") if p.suffix in exts]
         if return_img_paths:
             all_paths.extend(image_paths if not limit else image_paths[:limit])
 

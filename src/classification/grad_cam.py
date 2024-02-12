@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from argparse import ArgumentParser
 from pathlib import Path
 
@@ -6,7 +8,7 @@ import numpy as np
 import torch
 
 import classification.data.data_transformations as transforms
-from classification.configs import RecordConfig, TrainConfig
+from classification.configs import TrainConfig
 from classification.data.dataset_loaders import dog_vs_cat_loader as data_loader
 from classification.data.defeault_loader import default_load_data
 from classification.networks.build_network import build_model
@@ -23,7 +25,6 @@ def main() -> None:
     classes_names_path: Path | None = args.classes_names_path
     classes_names: list[str] | None = args.classes_names
 
-    record_config = RecordConfig()
     if classes_names_path is not None:
         train_config = TrainConfig.from_classes_path(classes_names_path)
     elif classes_names is not None:

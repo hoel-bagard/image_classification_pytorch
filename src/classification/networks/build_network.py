@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 class ModelHelper(str, Enum):
     """Helper enum given a list of available models (more timm models can be added).
 
-    TODO: Use StrEnum if python version requirements becomes >=3.11
+    TODO: 3.11 | Use StrEnum if python version requirements becomes >=3.11
     """
 
     SmallDarknet = "small_darknet"
