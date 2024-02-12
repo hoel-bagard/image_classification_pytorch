@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 @dataclass(frozen=True, slots=True)
 class TrainConfig:
     # Training parameters
-    BATCH_SIZE: int = 32
+    BATCH_SIZE: int = 128
     MAX_EPOCHS: int = 500
     START_LR: float = 1e-3
     END_LR: float = 5e-6
