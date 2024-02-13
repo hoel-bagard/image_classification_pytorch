@@ -4,7 +4,7 @@ from pathlib import Path
 
 @dataclass(frozen=True, slots=True)
 class RecordConfig:
-    _training_name = "imagenette_resnet32_no_pretrain"  # temp variable used for convenience.
+    _training_name = "imagenette_resnet32"  # temp variable used for convenience.
 
     # Recording part
     RECORD_START = 0  # Checkpoints and TensorBoard are not recorded before this epoch.
