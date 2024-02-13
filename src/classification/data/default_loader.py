@@ -91,10 +91,10 @@ def default_load_data(
             img = preprocessing_pipeline(img)
         return img
     else:
-        imgs = np.asarray(
+        imgs = np.asarray([
             default_load_data(image_path, preprocessing_pipeline)
             for image_path in data
-        )
+        ])
         return imgs
 
 
