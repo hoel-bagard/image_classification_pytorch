@@ -231,6 +231,7 @@ def main() -> None:  # noqa: C901, PLR0915
                         tensorboard.write_weights_grad(epoch)
                     with torch.no_grad():
                         validation_start_time = time.perf_counter()
+                        model.eval()
                         val_epoch_loss = typing.cast(float, trainer.val_epoch())
 
                         if tensorboard is not None and metrics is not None:
@@ -248,6 +249,7 @@ def main() -> None:  # noqa: C901, PLR0915
                             val_acc = metrics.get_avg_acc()
 
                             logger.info(f"Train accuracy: {train_acc:.3f}  -  Validation accuracy: {val_acc:.3f}")
+                        model.train()
 
                         logger.info(
                             f"Validation loss: {val_epoch_loss:.5e}  -  "
