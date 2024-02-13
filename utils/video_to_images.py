@@ -8,10 +8,10 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import cv2
-from numpy import generic
 
 if TYPE_CHECKING:
     import numpy.typing as npt
+    from numpy import generic
 
 
 def imwrite(output_path: Path, frame: npt.NDArray[generic], resize_ratio: float = 1) -> None:

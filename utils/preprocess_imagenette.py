@@ -2,6 +2,8 @@
 
 See https://github.com/fastai/imagenette for more information on imagenette.
 """
+from __future__ import annotations
+
 import argparse
 import shutil
 from pathlib import Path
