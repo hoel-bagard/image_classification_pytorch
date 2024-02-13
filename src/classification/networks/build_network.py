@@ -43,7 +43,8 @@ def build_model(
     *,
     use_timm_pretrain: bool = True,
     eval_mode: bool = False,
-    **kwargs: Any,  # TODO: Have a typed dict
+    # TODO:  Really do it, spent 2 hours on it because eval vs eval_mode wasn't caught...
+    **kwargs: Any,  # TODO: Have a typed dict.
 ) -> torch.nn.Module:
     """Instantiate the given model.
 
