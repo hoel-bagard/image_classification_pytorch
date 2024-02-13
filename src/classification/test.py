@@ -15,10 +15,10 @@ import numpy as np
 import torch
 from hbtools import create_logger
 
-from classification.data.default_loader import default_loader as data_loader
 import classification.data.data_transformations as transforms
 from classification.configs import LOGGER_NAME, TrainConfig
 from classification.data.default_loader import default_load_data
+from classification.data.default_loader import default_loader as data_loader
 from classification.networks.build_network import build_model
 from classification.torch_utils.utils.draw import draw_pred_img
 from classification.torch_utils.utils.misc import clean_print, get_dataclass_as_dict
@@ -42,6 +42,7 @@ def main() -> None:
     parser.add_argument("--show", "--s", action="store_true", help="Show the images where the network failed.")
     args = parser.parse_args()
 
+    model_path: Path = args.model_path
     test_data_path: Path = args.test_data_path
     limit: int = args.limit
     classes_names_path: Path | None = args.classes_names_path
@@ -69,8 +70,8 @@ def main() -> None:
     # Creates and load the model
     model = build_model(
         train_config.MODEL,
-        model_path=args.model_path,
-        eval=True,
+        model_path=model_path,
+        eval_mode=True,
         **dict(get_dataclass_as_dict(train_config)),
     )
     logger.info("Weights loaded")
@@ -83,20 +84,22 @@ def main() -> None:
         Callable[[ImgRaw], ImgStandardized],
         partial(cv2.resize, dsize=train_config.IMAGE_SIZES, interpolation=cv2.INTER_LINEAR)
     )
+    load_data_fn = partial(default_load_data, preprocessing_pipeline=resize_fn)
     standardize_fn = transforms.albumentation_batch_wrapper(
         albumentations.Normalize(mean=train_config.IMG_MEAN, std=train_config.IMG_STD, p=1.0),
     )  # TODO: Do the normalization on GPU.
     to_tensor_fn = transforms.to_tensor()
 
     results: list[int] = []  # Variable used to keep track of the classification results
-    for i, (img_path, label) in enumerate(zip(test_imgs_paths, test_labels, strict=True)):
+    for i, (img_path, label) in enumerate(zip(test_imgs_paths, test_labels, strict=True), start=1):
         clean_print(f"Processing image {img_path}    ({i} / {nb_imgs})", end="\r" if i != nb_imgs else "\n")
-        img = default_load_data(img_path, preprocessing_pipeline=resize_fn)
+        img = load_data_fn(img_path)
         standardized_img, label_batched = standardize_fn(np.expand_dims(img, 0), np.asarray([label]))
         img_tensor, label_tensor = to_tensor_fn(standardized_img, label_batched)
         with torch.no_grad():
             output = model(img_tensor)
             output = torch.nn.functional.softmax(output, dim=-1)
+
             prediction = torch.argmax(output)
             pred_correct = label == prediction
             if pred_correct:
@@ -115,7 +118,7 @@ def main() -> None:
                         break
 
     total_time = time.perf_counter() - inference_start_time
-    logger.info("\nFinished running inference on the test dataset.")
+    logger.info("Finished running inference on the test dataset.")
     logger.info(f"Total inference time was {total_time:.3f}s, which averages to {total_time/len(results):.5f}s per image")
     logger.info(f"Precision: {np.mean(results)}")
 
