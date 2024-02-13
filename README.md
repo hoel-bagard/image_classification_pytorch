@@ -152,3 +152,13 @@ classification-test \
     --classes_names_path data/imagenette2/classes.names \
     --limit 100
 ```
+
+### Gradcam
+
+```console
+classification-gradcam \
+    checkpoints/imagenette_resnet32/train_50.pt \
+    data/imagenette2/val \
+    --classes_names_path data/imagenette2/classes.names \
+    --limit 10
+```
