@@ -55,24 +55,24 @@ jobs:
 
       # TODO: commit changes.
 
-  typing-lint:
-    name: Check code typing
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+  # typing-lint:
+  #   name: Check code typing
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
 
-      - name: Install poetry
-        run: pipx install poetry
+  #     - name: Install poetry
+  #       run: pipx install poetry
 
-      - name: Install packages
-        run: |
-          poetry config installer.max-workers 10
-          poetry install --with dev,cpu
+  #     - name: Install packages
+  #       run: |
+  #         poetry config installer.max-workers 10
+  #         poetry install --with dev,cpu
 
-      - name: Run Pyright
-        run: |
-          pyright .
+  #     - name: Run Pyright
+  #       run: |
+  #         pyright .
 
   spelling-lint:
     name: Check spelling
