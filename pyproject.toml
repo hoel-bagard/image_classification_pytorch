@@ -41,7 +41,7 @@ torchvision = {version = "^0.17.0", source = "torch-cu121", markers = "extra=='c
 [tool.poetry.group.dev]
 optional = true
 [tool.poetry.group.dev.dependencies]
-ruff = "^0.2.1"
+ruff = "^0.2.2"
 pyright = "^1.1.350"
 pre-commit = "^3.6.0"
 flake8-pyproject = "^1.2.3"
@@ -76,6 +76,7 @@ line-length = 120
 exclude = [".venv", "src/classification/torch_utils"]
 
 [tool.ruff.lint]
+preview = true
 select = ["ALL"]
 ignore = [
   "ANN101",     # Missing type annotation for `self` in method

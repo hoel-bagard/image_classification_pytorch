@@ -43,7 +43,7 @@ jobs:
 
       - name: Run ruff check
         run: |
-          poetry run ruff check . --fix
+          poetry run ruff check  --output-format=github . --fix
 
       - name: Run ruff format
         run: |
@@ -53,7 +53,9 @@ jobs:
         run: |
           poetry run flake8 .
 
-      # TODO: commit changes.
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_mssage: Apply ruff fixes and formatting.
 
   # typing-lint:
   #   name: Check code typing
