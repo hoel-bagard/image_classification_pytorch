@@ -30,11 +30,13 @@ grad-cam = "^1.5.0"
 optional = true
 [tool.poetry.group.cpu.dependencies]
 torch = {version = "^2.1.2", source = "torch-cpu", markers = "extra!='cuda'" }
+torchvision = {version = "^0.17.0", source = "torch-cpu", markers = "extra!='cuda'" }
 
 [tool.poetry.group.gpu]
 optional = true
 [tool.poetry.group.gpu.dependencies]
 torch = {version = "^2.1.2", source = "torch-cu121", markers = "extra=='cuda'"}
+torchvision = {version = "^0.17.0", source = "torch-cu121", markers = "extra=='cuda'" }
 
 [tool.poetry.group.dev]
 optional = true
@@ -45,6 +47,7 @@ pre-commit = "^3.6.0"
 flake8-pyproject = "^1.2.3"
 matplotlib-stubs = "^0.2.0"
 ipython = "^8.21.0"
+codespell = "^2.2.6"
 
 [tool.poetry.group.test]
 optional = true
