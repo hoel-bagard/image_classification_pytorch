@@ -35,7 +35,6 @@ class ModelHelper(str, Enum):
         return self.value
 
 
-
 def build_model(
     model_name: ModelHelper,
     nb_classes: int,

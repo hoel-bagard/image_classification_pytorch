@@ -25,7 +25,7 @@ from classification.torch_utils.utils.misc import clean_print, get_dataclass_as_
 from classification.utils.type_aliases import ImgRaw, ImgStandardized
 
 
-def main() -> None:
+def main() -> None:  # noqa: PLR0915
     parser = ArgumentParser()
     parser.add_argument("model_path", type=Path, help="Path to the checkpoint to use.")
     parser.add_argument("test_data_path", type=Path, help="Path to the test dataset.")
@@ -54,9 +54,8 @@ def main() -> None:
     # Set random
     torch.manual_seed(42)
     random.seed(0)
-    np.random.seed(0)
+    np.random.seed(0)  # noqa: NPY002
 
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     logger = create_logger(LOGGER_NAME, verbose_level=verbose_level)
 
     if classes_names_path is not None:
@@ -82,7 +81,7 @@ def main() -> None:
 
     resize_fn = typing.cast(
         Callable[[ImgRaw], ImgStandardized],
-        partial(cv2.resize, dsize=train_config.IMAGE_SIZES, interpolation=cv2.INTER_LINEAR)
+        partial(cv2.resize, dsize=train_config.IMAGE_SIZES, interpolation=cv2.INTER_LINEAR),
     )
     load_data_fn = partial(default_load_data, preprocessing_pipeline=resize_fn)
     standardize_fn = transforms.albumentation_batch_wrapper(
@@ -108,7 +107,9 @@ def main() -> None:
                 results.append(0)
 
             if args.show and not pred_correct:
-                out_img = draw_pred_img(img_tensor, output, label_tensor, train_config.LABEL_MAP, size=train_config.IMAGE_SIZES)
+                out_img = draw_pred_img(
+                    img_tensor, output, label_tensor, train_config.LABEL_MAP, size=train_config.IMAGE_SIZES
+                )
                 out_img = cv2.cvtColor(out_img[0], cv2.COLOR_RGB2BGR)
                 while True:
                     cv2.imshow("Image", out_img)
@@ -119,7 +120,9 @@ def main() -> None:
 
     total_time = time.perf_counter() - inference_start_time
     logger.info("Finished running inference on the test dataset.")
-    logger.info(f"Total inference time was {total_time:.3f}s, which averages to {total_time/len(results):.5f}s per image")
+    logger.info(
+        f"Total inference time was {total_time:.3f}s, which averages to {total_time/len(results):.5f}s per image"
+    )
     logger.info(f"Precision: {np.mean(results)}")
 
 

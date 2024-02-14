@@ -88,7 +88,7 @@ def main() -> None:  # noqa: C901, PLR0915
     # Set random
     torch.manual_seed(42)
     random.seed(0)
-    np.random.seed(0)
+    np.random.seed(0)  # noqa: NPY002
     numpy_rng = np.random.default_rng(42)
 
     train_data, train_labels = data_loader(train_data_path, train_config.LABEL_MAP, limit=limit)
@@ -112,8 +112,13 @@ def main() -> None:  # noqa: C901, PLR0915
                 albumentations.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, p=0.4),
                 albumentations.HueSaturationValue(hue_shift_limit=20, sat_shift_limit=30, val_shift_limit=20, p=0.2),
                 albumentations.CoarseDropout(
-                    max_holes=6, max_height=10, max_width=10,
-                    min_holes=3, min_height=2, min_width=2, p=0.4,
+                    max_holes=6,
+                    max_height=10,
+                    max_width=10,
+                    min_holes=3,
+                    min_height=2,
+                    min_width=2,
+                    p=0.4,
                 ),
             ]
         )
@@ -121,7 +126,7 @@ def main() -> None:  # noqa: C901, PLR0915
 
     resize_fn = typing.cast(
         Callable[[ImgRaw], ImgStandardized],
-        partial(cv2.resize, dsize=train_config.IMAGE_SIZES, interpolation=cv2.INTER_LINEAR)
+        partial(cv2.resize, dsize=train_config.IMAGE_SIZES, interpolation=cv2.INTER_LINEAR),
     )
     denormalize_imgs_fn = transforms.destandardize_img(train_config.IMG_MEAN, train_config.IMG_STD)
     load_data_fn = partial(default_load_data, preprocessing_pipeline=resize_fn)

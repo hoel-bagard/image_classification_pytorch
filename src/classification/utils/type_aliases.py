@@ -5,7 +5,7 @@ import numpy.typing as npt
 import torch
 
 LabelDtype: TypeAlias = np.uint32
-LabelArray: TypeAlias =  npt.NDArray[LabelDtype]
+LabelArray: TypeAlias = npt.NDArray[LabelDtype]
 LabelArrayOrTensor: TypeAlias = LabelArray | torch.Tensor
 StandardizedImgDType: TypeAlias = np.float64
 ImgDType: TypeAlias = StandardizedImgDType | np.uint8

@@ -26,20 +26,25 @@ if typing.TYPE_CHECKING:
     import albumentations
 
 
-def albumentation_img_wrapper(transform: albumentations.Compose | albumentations.ImageOnlyTransform) -> Callable[[ImgArray], ImgArray]:
+def albumentation_img_wrapper(
+    transform: albumentations.Compose | albumentations.ImageOnlyTransform,
+) -> Callable[[ImgArray], ImgArray]:
     """Return a function that applies the albumentations transforms to an image.
 
     This is done to make the function more general, since albumentation is keyword argument only.
     """
+
     def albumentation_transform_fn(img: ImgArray) -> ImgArray:
         return transform(image=img)["image"]
+
     return albumentation_transform_fn
 
 
 def albumentation_batch_wrapper(
-    transform: albumentations.Compose | albumentations.ImageOnlyTransform) -> Callable[[ImgArray, LabelArray],
-                                                                                       tuple[ImgArray, LabelArray]]:
+    transform: albumentations.Compose | albumentations.ImageOnlyTransform,
+) -> Callable[[ImgArray, LabelArray], tuple[ImgArray, LabelArray]]:
     """Return a function that applies the albumentations transforms to a batch."""
+
     def albumentation_transform_fn(imgs: ImgArray, labels: LabelArray) -> tuple[ImgArray, LabelArray]:
         """Apply transformations on a batch of data."""
         out_sizes = transform(image=imgs[0])["image"].shape
@@ -48,18 +53,21 @@ def albumentation_batch_wrapper(
             transformed = transform(image=img)
             out_imgs[i] = transformed["image"]
         return out_imgs, labels
+
     return albumentation_transform_fn
 
 
 def compose_transformations(
-    transformations: Iterable[Callable[[ImgArray, LabelArray], tuple[ImgArray, LabelArray]]]
+    transformations: Iterable[Callable[[ImgArray, LabelArray], tuple[ImgArray, LabelArray]]],
 ) -> Callable[[ImgArray, LabelArray], tuple[ImgArray, LabelArray]]:
     """Return a function that applies all the given transformations."""
+
     def compose_transformations_fn(imgs: ImgArray, labels: LabelArray) -> tuple[ImgArray, LabelArray]:
         """Apply transformations on a batch of data."""
         for fn in transformations:
             imgs, labels = fn(imgs, labels)
         return imgs, labels
+
     return compose_transformations_fn
 
 
@@ -74,6 +82,7 @@ def to_tensor() -> Callable[[ImgArray, npt.NDArray[LabelDtype]], tuple[torch.Ten
 
         imgs = imgs.transpose((0, 3, 1, 2))
         return torch.from_numpy(imgs).float().to(device), torch.from_numpy(labels).to(device)
+
     return to_tensor_fn
 
 

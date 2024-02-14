@@ -21,8 +21,10 @@ def name_loader(
     data_preprocessing_fn: Callable[[Path], ImgRaw] | None = None,
     return_img_paths: bool = False,
     shuffle_rng: np.random.Generator | None = None,
-) -> (tuple[npt.NDArray[np.uint8], npt.NDArray[np.object_], list[Path]]
-      | tuple[npt.NDArray[np.uint8], npt.NDArray[np.object_]]):
+) -> (
+    tuple[npt.NDArray[np.uint8], npt.NDArray[np.object_], list[Path]]
+    | tuple[npt.NDArray[np.uint8], npt.NDArray[np.object_]]
+):
     """Load datasets where the class is in the name of the file.
 
     Args:
@@ -62,7 +64,7 @@ def name_loader(
     if shuffle_rng is not None:
         index_list = np.arange(len(labels))
         shuffle_rng.shuffle(index_list)
-        data, labels, = data[index_list], labels[index_list]
+        data, labels = data[index_list], labels[index_list]
         if return_img_paths:
             all_paths = all_paths[index_list]
 

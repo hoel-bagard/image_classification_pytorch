@@ -12,7 +12,7 @@ from pathlib import Path
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Script to slightly change the imagenette dataset's structure.",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument("data_path", type=Path, help="Path to the folder with the imagenette data.")
     args = parser.parse_args()
@@ -29,7 +29,7 @@ def main() -> None:
         "n03417042": "garbage truck",
         "n03425413": "gas pump",
         "n03445777": "golf ball",
-        "n03888257": "parachute"
+        "n03888257": "parachute",
     }
 
     val_dataset = data_path / "val"

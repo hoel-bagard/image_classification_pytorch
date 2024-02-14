@@ -21,7 +21,7 @@ def default_loader(
     limit: int | None = None,
     shuffle_rng: np.random.Generator | None = None,
     *,
-    verbose: bool = True
+    verbose: bool = True,
 ) -> tuple[npt.NDArray[np.object_], LabelArray]:
     """Load datasets where the class is given by the parent folder.
 
@@ -58,7 +58,7 @@ def default_loader(
     if shuffle_rng is not None:
         index_list = np.arange(len(labels), dtype=np.int64)
         shuffle_rng.shuffle(index_list)
-        data, labels, = data[index_list], labels[index_list]
+        data, labels = data[index_list], labels[index_list]
 
     return data, labels
 
@@ -67,9 +67,11 @@ def default_loader(
 def default_load_data(data: Path | Iterable[Path], preprocessing_pipeline: None = None) -> ImgRaw:
     ...
 
+
 @overload
 def default_load_data(data: Path | Iterable[Path], preprocessing_pipeline: Callable[[ImgRaw], ImgArrayT]) -> ImgArrayT:
     ...
+
 
 def default_load_data(
     data: Path | Iterable[Path],
@@ -91,20 +93,23 @@ def default_load_data(
             img = preprocessing_pipeline(img)
         return img
     else:
-        imgs = np.asarray([
-            default_load_data(image_path, preprocessing_pipeline)
-            for image_path in data
-        ])
+        imgs = np.asarray([default_load_data(image_path, preprocessing_pipeline) for image_path in data])
         return imgs
 
 
 if __name__ == "__main__":
+
     def _test_fn() -> None:
         from argparse import ArgumentParser
 
         from classification.torch_utils.utils.imgs_misc import show_img
-        parser = ArgumentParser(description=("Script to test the loading function. "
-                                             "Run with 'python -m classification.dataset.default_loader <path>'"))
+
+        parser = ArgumentParser(
+            description=(
+                "Script to test the loading function. "
+                "Run with 'python -m classification.dataset.default_loader <path>'"
+            )
+        )
         parser.add_argument("data_path", type=Path, help="Path to a classification dataset (Train or Validation).")
         args = parser.parse_args()
 
