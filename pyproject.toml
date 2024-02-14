@@ -91,17 +91,17 @@ ignore = [
   "FBT003",     # Boolean positional value in function call
   "FIX002",     # Line contains TODO, consider resolving the issue
   "G004",       # Logging statement uses f-string
-  "T201",       # `print` found
-   "TD",        # TODO rules (missing author, missing link)
-  "ISC001",     # conflict with formatter
   "INP001",     # File is part of an implicit namespace package. Add an `__init__.py`.
-  "RET504",     # Unnecessary assignment before `return` statement
-  "RET505",     # Unnecessary `else` after `return` statement
-  "S301",       # `pickle` and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue
-  "PLW2901",    # `for` loop variable `img` overwritten by assignment target
-  "RET508",     # Unnecessary `elif` after `break` statement
+  "ISC001",     # conflict with formatter
   "PLC0414",    # Import alias does not rename original package
   "PLR2004",    # Magic value used in comparison, consider replacing `2` with a constant variable
+  "PLW2901",    # `for` loop variable `img` overwritten by assignment target
+  "RET504",     # Unnecessary assignment before `return` statement
+  "RET505",     # Unnecessary `else` after `return` statement
+  "RET508",     # Unnecessary `elif` after `break` statement
+  "S301",       # `pickle` and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue
+  "T201",       # `print` found
+  "TD",        # TODO rules (missing author, missing link)
 ]
 
 [tool.ruff.lint.per-file-ignores]
