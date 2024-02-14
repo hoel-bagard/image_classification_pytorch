@@ -157,4 +157,5 @@ reportMatchNotExhaustive = "warning"
 
 [tool.flake8]
 max-line-length = 120
-exclude = ["env", "venv", ".venv", ".env", "checkpoints"]
+exclude = ["env", "venv", ".venv", ".env", "checkpoints", "src/classification/torch_utils"]
+ignore = ["F401", "W503"]
