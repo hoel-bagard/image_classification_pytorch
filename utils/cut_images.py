@@ -33,7 +33,7 @@ def main() -> None:
                     y = height - tile_height
                 if x + tile_width > width:
                     x = width - tile_width
-                tile = img[y : y + tile_height, x : x + tile_width]
+                tile = img[y: y + tile_height, x: x + tile_width]
 
                 new_tile_name = file_path.stem + "_" + str(tile_index).zfill(5) + file_path.suffix
                 tile_path = output_path / new_tile_name

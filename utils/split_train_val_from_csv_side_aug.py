@@ -31,7 +31,7 @@ def worker(args: tuple) -> None:
         # Expects the image to be already split in a vertical fashion (from the mosaic script)
         # Long live single use scripts!
         if side == "right":
-            original_img_part = img[img.shape[0] // 2 :, :]
+            original_img_part = img[img.shape[0] // 2:, :]
         elif side == "left":
             original_img_part = img[: img.shape[0] // 2, :]
 
@@ -46,7 +46,7 @@ def worker(args: tuple) -> None:
                 augmentation_img_part = img[: img.shape[0] // 2, :]
                 final_img = cv2.vconcat((augmentation_img_part, original_img_part))
             else:
-                augmentation_img_part = img[img.shape[0] // 2 :, :]
+                augmentation_img_part = img[img.shape[0] // 2:, :]
                 final_img = cv2.vconcat((original_img_part, augmentation_img_part))
 
             dest_path = (train_path / file_path.relative_to(data_path)).parent / (

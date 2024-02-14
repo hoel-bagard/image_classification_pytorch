@@ -108,7 +108,7 @@ def destandardize_img(
     std_tensor = torch.Tensor(img_std).to(device)
 
     @singledispatch
-    def destandardize_fn(imgs) -> typing.NoReturn:  #   noqa: ANN001 pyright: ignore
+    def destandardize_fn(imgs) -> typing.NoReturn:  # noqa: ANN001 pyright: ignore
         # TODO: 3.11 | Use typing.Never if switching to 3.11
         msg = f"Wrong data type: {type(imgs)}"
         raise NotImplementedError(msg)

@@ -55,7 +55,7 @@ def mosaic_worker(args: tuple[Path, Path, tuple[int, int, int, int], bool]) -> P
 
     for tile_idx in range(ratio):
         i, j = (tile_idx // nb_tiles_side) * height, (tile_idx % nb_tiles_side) * height
-        mosaic_img[i : i + height, j : j + height] = img[:, tile_idx * height : (tile_idx + 1) * height]
+        mosaic_img[i: i + height, j: j + height] = img[:, tile_idx * height: (tile_idx + 1) * height]
 
     output_file_path.parent.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(output_file_path), mosaic_img)
