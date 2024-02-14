@@ -43,15 +43,15 @@ jobs:
 
       - name: Run ruff check
         run: |
-          ruff check . --fix
+          poetry run ruff check . --fix
 
       - name: Run ruff format
         run: |
-          ruff format .
+          poetry run ruff format .
 
       - name: Run flake8
         run: |
-          flake8 .
+          poetry run flake8 .
 
       # TODO: commit changes.
 
@@ -72,7 +72,7 @@ jobs:
 
   #     - name: Run Pyright
   #       run: |
-  #         pyright .
+  #         poetry run pyright .
 
   spelling-lint:
     name: Check spelling
@@ -91,4 +91,4 @@ jobs:
 
       - name: Run codespell
         run: |
-          codespell src README.md utils
+          poetry run codespell src README.md utils
