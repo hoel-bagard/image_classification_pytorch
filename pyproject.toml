@@ -22,7 +22,7 @@ albumentations = "^1.3.1"
 einops = "^0.7.0"
 tensorboard = "^2.15.1"
 timm = "^0.9.12"
-hbtools = "^0.4.0"
+hbtools = {extras = ["opencv", "terminal"], version = "^0.4.0"}
 matplotlib = "^3.8.2"
 grad-cam = "^1.5.0"
 
