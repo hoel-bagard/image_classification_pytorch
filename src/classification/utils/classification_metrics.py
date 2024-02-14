@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 
 class ClassificationMetrics(Metrics):
-    """Class computing usefull metrics for classification like tasks."""
+    """Class computing useful metrics for classification like tasks."""
 
     def __init__(
         self,

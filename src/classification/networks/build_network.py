@@ -48,7 +48,7 @@ def build_model(
     """Instantiate the given model.
 
     Args:
-        model_name: Class of the model to instanciates
+        model_name: Class of the model to instantiates
         nb_classes: Number of classes in the dataset
         model_path: If given, then the weights will be loaded from that checkpoint
         use_timm_pretrain: If using a timm model, whether to use a pretrain or not.

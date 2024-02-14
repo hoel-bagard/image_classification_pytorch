@@ -96,7 +96,7 @@ def main() -> None:
         ]
 
     train_list = [entry for entry in spec_list if entry[1]]
-    # Took elements at random at first but that was extremely ineficient, hence the lists
+    # Took elements at random at first but that was extremely inefficient, hence the lists
     train_list_left_ok = [entry for entry in train_list if entry[2] == "ok" and entry[3] == "left"]
     train_list_right_ok = [entry for entry in train_list if entry[2] == "ok" and entry[3] == "right"]
     train_lists = (train_list_left_ok, train_list_right_ok)

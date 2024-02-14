@@ -92,7 +92,7 @@ def destandardize_img(
 ) -> Callable[[ImgArrayOrTensor, ImgArrayOrTensor], ImgRaw]:
     """Create a function to undo the standardization process on a batch of images.
 
-    Notes: The singe dispatch thing is because I was bored and mypy was complaining when using an if isinstance().
+    Notes: The single dispatch thing is because I was bored and mypy was complaining when using an if isinstance().
 
     Args:
         img_mean: The mean values that were used to standardize the image.
