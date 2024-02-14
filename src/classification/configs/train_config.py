@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from typing import NamedTuple, TYPE_CHECKING
 
 from typing_extensions import Self
 
@@ -11,6 +11,11 @@ from classification.networks import ModelHelper
 if TYPE_CHECKING:
     from collections.abc import Iterable
     from pathlib import Path
+
+
+class _ImageSizes(NamedTuple):
+    height: int
+    width: int
 
 
 @dataclass(frozen=True, slots=True)
@@ -23,7 +28,8 @@ class TrainConfig:
     WEIGHT_DECAY: float = 1e-2  # Weight decay for the optimizer
 
     # Data processing
-    IMAGE_SIZES: tuple[int, int] = (224, 224)  # All images will be resized to this size
+    # All images will be resized to this size
+    IMAGE_SIZES: _ImageSizes = field(default_factory=lambda: _ImageSizes(224, 224))
     # The mean and std used to normalize the dataset (the default values for the images are the ImageNet ones).
     IMG_MEAN: tuple[float, float, float] = (0.485, 0.456, 0.406)
     IMG_STD: tuple[float, float, float] = (0.229, 0.224, 0.225)
