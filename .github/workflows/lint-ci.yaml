@@ -1,0 +1,107 @@
+name: Linting CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ master ]
+    paths:
+      - "src/**.py"
+      - .github/workflows/lint-ci.yaml
+      - pyproject.toml
+      - poetry.lock
+  pull_request:
+    paths:
+      - "src/**.py"
+      - .github/workflows/lint-ci.yaml
+      - pyproject.toml
+      - poetry.lock
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  style-lint:
+    name: Check code formatting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install poetry
+        run: pipx install poetry
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "poetry"
+
+      - name: Install packages
+        run: |
+          poetry config installer.max-workers 10
+          poetry install --with dev
+
+      - name: Run ruff format
+        run: |
+          poetry run ruff format .
+
+      # Check after format since format breaks E203.
+      - name: Run ruff check
+        run: |
+          poetry run ruff check  --output-format=github . --fix
+
+      - name: Run flake8
+        run: |
+          poetry run flake8 .
+
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_mssage: Apply ruff fixes and formatting.
+
+  # typing-lint:
+  #   name: Check code typing
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+
+  #     - name: Install poetry
+  #       run: pipx install poetry
+
+  #     - uses: actions/setup-python@v5
+  #       with:
+  #         python-version: "3.11"
+  #         cache: "poetry"
+
+  #     - name: Install packages
+  #       run: |
+  #         poetry config installer.max-workers 10
+  #         poetry install --with dev,cpu
+
+  #     - name: Run Pyright
+  #       run: |
+  #         poetry run pyright .
+
+  spelling-lint:
+    name: Check spelling
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install poetry
+        run: pipx install poetry
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "poetry"
+
+      - name: Install packages
+        run: |
+          poetry config installer.max-workers 10
+          poetry install --with dev
+
+      - name: Run codespell
+        run: |
+          poetry run codespell src README.md utils

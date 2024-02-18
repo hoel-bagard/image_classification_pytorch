@@ -1,38 +1,54 @@
 # Image Classification using PyTorch
+
 ## Installation
-
-### Requirements/dependencies
+### Requirements
 - Python >=3.10
-- PyTorch (preferably with GPU)
-- Packages from the `requirements.txt` file
+- Poetry
 
-<details>
-<summary>Example (virtualenv/pip)</summary>
-Assuming you're on a linux PC/server with Python>=3.10 and PyTorch already installed, you can use those commands:
-
-```
-virtualenv --system-site-packages venv
-source venv/bin/activate
-pip install -r requirements.txt
-```
-</details>
-
-### Clone the repository
-```
-git clone git@github.com:hoel-bagard/image_classification_pytorch.git --recurse-submodules
+### Install
+If simply using the package on cpu:
+```console
+poetry install --with cpu
 ```
 
+If developing you can add any of the following options:
+```console
+poetry install --with dev,test,gpu
+```
+
+Then use `poetry shell` to enter the virtualenv.
+
+## Data
 ### Get some data and format it:
 
-You need to split the images between two folders: "Train" and "Validation" (the names are hard coded).
-You then need to create a `classes.names` file next to the Train and Validation folders, with the names of the classes (one per line).
+You need to split the images into a validation and a train folders.
+For each class, place all the images in a folder with the class's name.
+You then need to create a `classes.names` file next to the train and validation folders, with the names of the classes (one per line).
 
 <details>
-  <summary>CIFAR-10 example</summary>
+  <summary>Structure example</summary>
+cifar-10/
+├── Train/
+│   ├── airplaine
+│   ├── automobile
+│   ├── bird
+│   ├── cat
+│   └── ...
+├── Validation/
+│   ├── airplaine
+│   ├── automobile
+│   ├── bird
+│   ├── cat
+│   └── ...
+└── classes.names
+</details>
+
+<details>
+  <summary>CIFAR-10 instructions</summary>
 
 The commands below will download, extract and format the cifar 10 dataset into the `./data/cifar_10_images` folder.
 
-```
+```console
 wget https://www.cs.toronto.edu/\~kriz/cifar-10-python.tar.gz -P data
 tar -xvf data/cifar-10-python.tar.gz -C data
 python utils/cifar_10.py data/cifar-10-batches-py
@@ -54,6 +70,18 @@ You'll need to modify a few values in `config/model_config.py` in the next step 
 ```
 </details>
 
+<details>
+  <summary>Imagenette instructions</summary>
+
+The commands below will download, extract and format the cifar 10 dataset into the `./data/cifar_10_images` folder.
+
+```console
+wget https://s3.amazonaws.com/fast-ai-imageclas/imagenette2.tgz -P data
+tar -xvf data/imagenette2.tgz -C data
+python utils/preprocess_imagenette.py data/imagenette2
+rm data/imagenette2.tgz
+```
+</details>
 
 ## Config files
 In the config folder of this repo you will find two config template files. You need to copy them and remove the "_template" part like this:
@@ -62,37 +90,75 @@ cp config/data_config_template.py config/data_config.py
 cp config/model_config_template.py config/model_config.py
 ```
 
-### DataConfig
-Contains most of the parameters regarding the data. Most of the values in the template can be kept as they are. The 3 paths usually need to be modified for each training (`DATA_PATH`, `CHECKPOINT_DIR` & `TB_DIR`). 
+### RecordConfig
+Contains config for recording TensorBoard and checkpoints. You probably just want to modify `_training_name`.
 
-### ModelConfig
+### TrainConfig
 Contains the parameters that influence training. Most default values should work okayish, but you'll need to modify a few:
-- `MAX_EPOCHS`: usually around 400 or 600 epochs is enough, you will need to train at least once to get an idea for your particular dataset.
+- `MAX_EPOCHS`: usually around 400 epochs is enough, you will need to train at least once to get an idea for your particular dataset.
 - `IMG_MEAN` and `IMG_STD`: The defaults are the imagenet ones. You can keep them as long as they are not too different from the actual ones (especially if using a pretrained model).
 
+<details>
+  <summary>Imagenette example</summary>
+The default, gitted config should give decent-ish (~85% val acc) result.
+</details>
+
+
+<details>
+  <summary>Cifar-10 example</summary>
+If training on Cifar-10, you'll need to modify the model in the config `src/classfication/configs/train_config.py` since cifar10's images are small.
+You'll also need to remove/modify the resize hardcoded in `src/classfication/train.py`.
+```python
+    MODEL: ModelHelper = ModelHelper.SmallDarknet
+    CHANNELS: list[int] = field(default_factory=lambda: [3, 16, 32, 16])
+    SIZES: list[int | tuple[int, int]] = field(default_factory=lambda: [3, 3, 3])   # Kernel sizes
+    STRIDES: list[int | tuple[int, int]] = field(default_factory=lambda: [2, 2, 2])
+    PADDINGS: list[int | tuple[int, int]] = field(default_factory=lambda: [1, 1, 1])
+    BLOCKS: list[int] = field(default_factory=lambda: [1, 2, 1])
+```
+</details>
+
 ## Train
-Once you have the environment all set up and your two config files ready, training an AI is straightforward. Just run the following command: 
+Once you have the environment all set up and your two config files ready, training an AI is straightforward.
+```console
+classification-train \
+    --train_data_path <path to train dataset> \
+    --val_data_path <path to val dataset> \
+    --classes_names_path <path to classes.names file>
 ```
-CUDA_VISIBLE_DEVICES=0 python train.py
+
+<details>
+  <summary>Imagenette example</summary>
+
+```console
+classification-train \
+    --train_data_path data/imagenette2/train/ \
+    --val_data_path data/imagenette2/val/ \
+    --classes_names_path data/imagenette2/classes.names
 ```
+
+</details>
 
 ### Results
 
-TODO: TB screenshots
+The resulting checkpoints can be found in `CHECKPOINTS_DIR` (see the RecordConfig).
+The resulting checkpoints can be found in `TB_DIR` (see the RecordConfig).
 
 ## Inference
-
-TODO
-
-### Misc
-#### Formating
-The code is trying to follow diverse PEPs conventions (notably PEP8). To have a similar dev environment you can install the following packages (pacman is for arch-based linux distros):
-
-```
-sudo pacman -S flake8 python-flake8-docstrings
-pip install pep8-naming flake8-import-order
+```console
+classification-test \
+    checkpoints/imagenette_resnet32/train_50.pt \
+    data/imagenette2/val \
+    --classes_names_path data/imagenette2/classes.names \
+    --limit 100
 ```
 
-#### Typing
-Typing is done using Pyright.\
-The type stubs for OpenCV are taken from [this repo](https://github.com/microsoft/python-type-stubs/tree/main/cv2).
+### Gradcam
+
+```console
+classification-gradcam \
+    checkpoints/imagenette_resnet32/train_50.pt \
+    data/imagenette2/val \
+    --classes_names_path data/imagenette2/classes.names \
+    --limit 10
+```

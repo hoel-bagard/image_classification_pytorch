@@ -1,0 +1,167 @@
+[project]
+name = "classification"
+
+[tool.poetry]
+name = "classification"
+version = "0.2.0"
+description = "PyTorch Image Classification"
+authors = ["Bagard Hoel"]
+readme = "README.md"
+
+[tool.poetry.scripts]
+classification-train = "classification.train:main"
+classification-test = "classification.test:main"
+classification-gradcam = "classification.grad_cam:main"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.13"
+numpy = "^1.26.4"
+pydantic = "^2.6.1"
+opencv-python = "^4.9.0.80"
+albumentations = "^1.3.1"
+einops = "^0.7.0"
+tensorboard = "^2.15.1"
+timm = "^0.9.12"
+hbtools = {extras = ["opencv", "terminal"], version = "^0.4.0"}
+matplotlib = "^3.8.2"
+grad-cam = "^1.5.0"
+
+[tool.poetry.group.cpu]
+optional = true
+[tool.poetry.group.cpu.dependencies]
+torch = {version = "^2.1.2", source = "torch-cpu", markers = "extra!='cuda'" }
+torchvision = {version = "^0.17.0", source = "torch-cpu", markers = "extra!='cuda'" }
+
+[tool.poetry.group.gpu]
+optional = true
+[tool.poetry.group.gpu.dependencies]
+torch = {version = "^2.1.2", source = "torch-cu121", markers = "extra=='cuda'"}
+torchvision = {version = "^0.17.0", source = "torch-cu121", markers = "extra=='cuda'" }
+
+[tool.poetry.group.dev]
+optional = true
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.2.2"
+pyright = "^1.1.350"
+pre-commit = "^3.6.0"
+flake8-pyproject = "^1.2.3"
+matplotlib-stubs = "^0.2.0"
+ipython = "^8.21.0"
+codespell = "^2.2.6"
+
+[tool.poetry.group.test]
+optional = true
+[tool.poetry.group.test.dependencies]
+pytest = "^8.0.0"
+
+[[tool.poetry.source]]
+name = "torch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+priority = "explicit"
+
+[[tool.poetry.source]]
+name = "torch-cu121"
+url = "https://download.pytorch.org/whl/cu121"
+priority = "explicit"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+addopts = ["--import-mode=importlib",]
+
+[tool.ruff]
+line-length = 120
+exclude = [".venv", "src/classification/torch_utils"]
+
+[tool.ruff.lint]
+preview = true
+select = ["ALL"]
+ignore = [
+  "ANN101",     # Missing type annotation for `self` in method
+  "ANN102",     # Missing type annotation for `cls` in classmethod
+  "ANN401",     # Dynamically typed expressions (typing.Any) are disallowed in `**kwargs`
+  "COM812",     # conflict with formatter
+  "CPY",        # Copyright rules
+  "D1",         # Missing docstring
+  "D203",       # one-blank-line-before-class (incompatible with D211)
+  "D213",       # multi-line-summary-second-line (incompatible with D212)
+  "D407",       # Missing dashed underline after section ("Args")
+  "D413",       # Missing blank line after last section ("Args")
+  "ERA001",     # Found commented-out code
+  "FBT003",     # Boolean positional value in function call
+  "FIX002",     # Line contains TODO, consider resolving the issue
+  "G004",       # Logging statement uses f-string
+  "INP001",     # File is part of an implicit namespace package. Add an `__init__.py`.
+  "ISC001",     # conflict with formatter
+  "PLC0414",    # Import alias does not rename original package
+  "PLC0415",    # `import` should be at the top-level of a file
+  "PLR0914",    # Too many local variables
+  "PLR1702",    # Too many nested blocks TODO: consider resolving.
+  "PLR2004",    # Magic value used in comparison, consider replacing `2` with a constant variable
+  "PLW2901",    # `for` loop variable `img` overwritten by assignment target
+  "RET504",     # Unnecessary assignment before `return` statement
+  "RET505",     # Unnecessary `else` after `return` statement
+  "RET508",     # Unnecessary `elif` after `break` statement
+  "S301",       # `pickle` and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue
+  "S403",       # `pickle`, `cPickle`, `dill`, and `shelve` modules are possibly insecure
+  "T201",       # `print` found
+  "TD",         # TODO rules (missing author, missing link)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]
+
+[tool.ruff.lint.isort]
+order-by-type = false
+known-first-party = ["classification"]
+
+[tool.ruff.lint.pylint]
+max-args = 15
+max-statements = 60
+
+[tool.pyright]
+include = ["src/classification"]
+exclude = ["checkpoints", "data", "outputs", ".venv"]
+ignore = ["**/__init__.py", "src/classification/torch_utils"]
+venvPath = "."
+venv = ".venv"
+pythonVersion = "3.10"
+pythonPlatform = "Linux"
+
+strictListInference = true
+strictDictionaryInference = true
+strictSetInference = true
+reportMissingModuleSource = false
+reportMissingImports = true
+reportMissingTypeStubs = false
+reportUnusedImport = true
+reportUnusedClass = "warning"
+reportUnusedFunction = "warning"
+reportUnusedVariable = "warning"
+reportDuplicateImport = "warning"
+reportUntypedNamedTuple = "warning"
+reportUntypedFunctionDecorator = "warning"
+reportUntypedClassDecorator = "warning"
+reportMissingSuperCall = false
+reportUnknownArgumentType = "warning"
+reportUnknownLambdaType = "warning"
+reportUnknownVariableType = "warning"
+reportUnknownMemberType = false
+reportMissingParameterType = "warning"
+reportMissingTypeArgument = "warning"
+reportCallInDefaultInitializer = false
+reportUnnecessaryIsInstance = "warning"
+reportUnnecessaryCast = "warning"
+reportUnnecessaryComparison = "warning"
+reportImplicitStringConcatenation = false
+reportUnusedCallResult = false
+reportUnusedExpression = "warning"
+reportUnnecessaryTypeIgnoreComment = "warning"
+reportMatchNotExhaustive = "warning"
+
+[tool.flake8]
+max-line-length = 120
+exclude = ["env", "venv", ".venv", ".env", "checkpoints", "src/classification/torch_utils"]
+ignore = ["E203", "F401", "W503"]  # E203 since ruff differs from pycodestyle.

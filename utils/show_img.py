@@ -14,7 +14,7 @@ def rotate_image(img: np.ndarray, angle: float) -> np.ndarray:
     return rotated_img
 
 
-def main():
+def main() -> None:
     parser = ArgumentParser("Just shows the images of a dataset.")
     parser.add_argument("data_path", type=Path, help="Path to the dataset")
     parser.add_argument("--crop", "--c", type=int, nargs=4, help="If cropping the images, (left, right, top, bottom)")
@@ -22,12 +22,12 @@ def main():
     args = parser.parse_args()
 
     exts = [".jpg", ".png"]
-    file_list = list([p for p in args.data_path.rglob('*') if p.suffix in exts])
+    file_list = [p for p in args.data_path.rglob("*") if p.suffix in exts]
     nb_imgs = len(file_list)
 
     for i, img_path in enumerate(file_list):
         msg = f"Showing image: ({i}/{nb_imgs})"
-        print(msg + ' ' * (shutil.get_terminal_size(fallback=(156, 38)).columns - len(msg)), end='\r', flush=True)
+        print(msg + " " * (shutil.get_terminal_size(fallback=(156, 38)).columns - len(msg)), end="\r", flush=True)
 
         img = cv2.imread(str(img_path))
 
