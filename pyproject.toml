@@ -83,6 +83,7 @@ ignore = [
   "ANN102",     # Missing type annotation for `cls` in classmethod
   "ANN401",     # Dynamically typed expressions (typing.Any) are disallowed in `**kwargs`
   "COM812",     # conflict with formatter
+  "CPY",        # Copyright rules
   "D1",         # Missing docstring
   "D203",       # one-blank-line-before-class (incompatible with D211)
   "D213",       # multi-line-summary-second-line (incompatible with D212)
@@ -95,14 +96,18 @@ ignore = [
   "INP001",     # File is part of an implicit namespace package. Add an `__init__.py`.
   "ISC001",     # conflict with formatter
   "PLC0414",    # Import alias does not rename original package
+  "PLC0415",    # `import` should be at the top-level of a file
+  "PLR0914",    # Too many local variables
+  "PLR1702",    # Too many nested blocks TODO: consider resolving.
   "PLR2004",    # Magic value used in comparison, consider replacing `2` with a constant variable
   "PLW2901",    # `for` loop variable `img` overwritten by assignment target
   "RET504",     # Unnecessary assignment before `return` statement
   "RET505",     # Unnecessary `else` after `return` statement
   "RET508",     # Unnecessary `elif` after `break` statement
   "S301",       # `pickle` and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue
+  "S403",       # `pickle`, `cPickle`, `dill`, and `shelve` modules are possibly insecure
   "T201",       # `print` found
-  "TD",        # TODO rules (missing author, missing link)
+  "TD",         # TODO rules (missing author, missing link)
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -159,4 +164,4 @@ reportMatchNotExhaustive = "warning"
 [tool.flake8]
 max-line-length = 120
 exclude = ["env", "venv", ".venv", ".env", "checkpoints", "src/classification/torch_utils"]
-ignore = ["F401", "W503"]
+ignore = ["E203", "F401", "W503"]  # E203 since ruff differs from pycodestyle.

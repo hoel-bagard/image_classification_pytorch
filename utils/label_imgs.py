@@ -26,7 +26,7 @@ def main() -> None:
     file_list = sorted(data_path.rglob("*.png"))
     nb_imgs = len(file_list)
     for i, file_path in enumerate(file_list):
-        msg = f"Processing image {file_path.name} ({i+1}/{nb_imgs})"
+        msg = f"Processing image {file_path.name} ({i + 1}/{nb_imgs})"
         print(msg + " " * (shutil.get_terminal_size(fallback=(156, 38)).columns - len(msg)), end="\r")
         img = cv2.imread(str(file_path))
 

@@ -121,7 +121,7 @@ def main() -> None:  # noqa: PLR0915
     total_time = time.perf_counter() - inference_start_time
     logger.info("Finished running inference on the test dataset.")
     logger.info(
-        f"Total inference time was {total_time:.3f}s, which averages to {total_time/len(results):.5f}s per image"
+        f"Total inference time was {total_time:.3f}s, which averages to {total_time / len(results):.5f}s per image"
     )
     logger.info(f"Precision: {np.mean(results)}")
 

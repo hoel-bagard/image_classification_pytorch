@@ -21,7 +21,7 @@ def main() -> None:
     file_list = list(data_path.rglob("*.png"))
     nb_imgs = len(file_list)
     for i, file_path in enumerate(file_list):
-        msg = f"Processing image {file_path.name} ({i+1}/{nb_imgs})"
+        msg = f"Processing image {file_path.name} ({i + 1}/{nb_imgs})"
         print(msg + " " * (get_terminal_size(fallback=(156, 38)).columns - len(msg)), end="\r")
         img = cv2.imread(str(file_path))
         height, width, _ = img.shape
@@ -33,7 +33,7 @@ def main() -> None:
                     y = height - tile_height
                 if x + tile_width > width:
                     x = width - tile_width
-                tile = img[y: y + tile_height, x: x + tile_width]
+                tile = img[y : y + tile_height, x : x + tile_width]
 
                 new_tile_name = file_path.stem + "_" + str(tile_index).zfill(5) + file_path.suffix
                 tile_path = output_path / new_tile_name

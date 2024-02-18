@@ -41,13 +41,14 @@ jobs:
           poetry config installer.max-workers 10
           poetry install --with dev
 
-      - name: Run ruff check
-        run: |
-          poetry run ruff check  --output-format=github . --fix
-
       - name: Run ruff format
         run: |
           poetry run ruff format .
+
+      # Check after format since format breaks E203.
+      - name: Run ruff check
+        run: |
+          poetry run ruff check  --output-format=github . --fix
 
       - name: Run flake8
         run: |

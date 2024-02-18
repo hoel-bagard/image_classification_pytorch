@@ -20,7 +20,7 @@ def worker(args: tuple) -> None:
     """
     entry, train_lists, data_path, train_path, val_path = args
     train_list_left_ok, train_list_right_ok = train_lists
-    file_path, is_train, cls, side = entry
+    file_path, is_train, _cls, side = entry
     rng = np.random.default_rng(42)
 
     # Do some data augmentation by mixing training images

@@ -159,7 +159,7 @@ def main() -> None:  # noqa: C901, PLR0915
         print("Building model. . .", end="\r")
         model = build_model(train_config.MODEL, **dict(get_dataclass_as_dict(train_config)))
 
-        logger.info(f"{'-'*24} Starting train {'-'*24}")
+        logger.info(f"{'-' * 24} Starting train {'-' * 24}")
         logger.info("From command : %s", " ".join(sys.argv))
         logger.info(f"Input shape: {train_dataloader.data_shape}")
         logger.info("")
