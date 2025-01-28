@@ -1,17 +1,22 @@
 # Image Classification using PyTorch
 
 ## Installation
+
 ### Requirements
+
 - Python >=3.10
 - Poetry
 
 ### Install
+
 If simply using the package on cpu:
+
 ```console
 poetry install --with cpu
 ```
 
 If developing you can add any of the following options:
+
 ```console
 poetry install --with dev,test,gpu
 ```
@@ -19,6 +24,7 @@ poetry install --with dev,test,gpu
 Then use `poetry shell` to enter the virtualenv.
 
 ## Data
+
 ### Get some data and format it:
 
 You need to split the images into a validation and a train folders.
@@ -58,6 +64,7 @@ rm -r data/cifar-10-batches-py/
 
 Note:
 You'll need to modify a few values in `config/model_config.py` in the next step since cifar10's images are small.
+
 ```python
     CROP_IMAGE_SIZES: tuple[int, int] = (32, 32)  # Center crop
     RESIZE_IMAGE_SIZES: tuple[int, int] = (32, 32)  # All images will be resized to this size
@@ -68,6 +75,7 @@ You'll need to modify a few values in `config/model_config.py` in the next step 
     PADDINGS: list[int | tuple[int, int]] = field(default_factory=lambda: [1, 1, 1])
     BLOCKS: list[int] = field(default_factory=lambda: [1, 2, 1])
 ```
+
 </details>
 
 <details>
@@ -81,20 +89,26 @@ tar -xvf data/imagenette2.tgz -C data
 python utils/preprocess_imagenette.py data/imagenette2
 rm data/imagenette2.tgz
 ```
+
 </details>
 
 ## Config files
-In the config folder of this repo you will find two config template files. You need to copy them and remove the "_template" part like this:
+
+In the config folder of this repo you will find two config template files. You need to copy them and remove the "\_template" part like this:
+
 ```
 cp config/data_config_template.py config/data_config.py
 cp config/model_config_template.py config/model_config.py
 ```
 
 ### RecordConfig
+
 Contains config for recording TensorBoard and checkpoints. You probably just want to modify `_training_name`.
 
 ### TrainConfig
+
 Contains the parameters that influence training. Most default values should work okayish, but you'll need to modify a few:
+
 - `MAX_EPOCHS`: usually around 400 epochs is enough, you will need to train at least once to get an idea for your particular dataset.
 - `IMG_MEAN` and `IMG_STD`: The defaults are the imagenet ones. You can keep them as long as they are not too different from the actual ones (especially if using a pretrained model).
 
@@ -102,7 +116,6 @@ Contains the parameters that influence training. Most default values should work
   <summary>Imagenette example</summary>
 The default, gitted config should give decent-ish (~85% val acc) result.
 </details>
-
 
 <details>
   <summary>Cifar-10 example</summary>
@@ -119,7 +132,9 @@ You'll also need to remove/modify the resize hardcoded in `src/classfication/tra
 </details>
 
 ## Train
+
 Once you have the environment all set up and your two config files ready, training an AI is straightforward.
+
 ```console
 classification-train \
     --train_data_path <path to train dataset> \
@@ -145,6 +160,7 @@ The resulting checkpoints can be found in `CHECKPOINTS_DIR` (see the RecordConfi
 The resulting checkpoints can be found in `TB_DIR` (see the RecordConfig).
 
 ## Inference
+
 ```console
 classification-test \
     checkpoints/imagenette_resnet32/train_50.pt \
